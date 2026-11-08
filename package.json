@@ -1,0 +1,19 @@
+{
+  "name": "cadence",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Collaborative sprint retrospectives, review checklists, and roadmap scoring.",
+  "workspaces": [
+    "packages/core",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @cadence/web",
+    "build": "npm run build -w @cadence/web",
+    "test": "npm run test -w @cadence/core && npm run test -w @cadence/web",
+    "start": "npm run start -w @cadence/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

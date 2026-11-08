@@ -1,0 +1,13 @@
+node_modules
+.next
+dist
+coverage
+.expo
+apps/web/data
+**/data/*.json
+apps/mobile/.expo
+apps/mobile/dist-ios
+apps/mobile/dist-web
+*.log
+.DS_Store
+tsconfig.tsbuildinfo
