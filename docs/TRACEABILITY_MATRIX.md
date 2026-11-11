@@ -88,7 +88,8 @@
 | FR-P5 | Polling sync | US-5.4 | `use-room.ts` | Manual | Implemented |
 | NFR-1 | Vitest domain coverage | US-5.3 | `*.test.ts` | CI/`npm test` | Implemented |
 | NFR-2 | Body size cap | — | `http.ts` | Manual | Implemented |
-| NFR-3 | Single-writer store | — | `store.ts` | Documented + lock logic | Implemented |
+| NFR-3 | Durable shared store | — | `store.ts`, `persistence.ts` | File lock / Redis NX + tests | Implemented |
+| NFR-Hobby | Vercel Hobby deploy | — | `apps/web/vercel.json`, DEPLOYMENT.md | Build + Redis env | Implemented |
 | NFR-4 | A11y basics | US-5.1 | skip link, focus-visible | Manual | Implemented |
 | NFR-5 | Domain error UX | — | `CadenceError` mapping | Tests throw codes | Implemented |
 | NFR-6 | No secrets in repo | — | `.gitignore` data path | Review | Implemented |

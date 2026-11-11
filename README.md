@@ -119,9 +119,9 @@ Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API.md]
 
 ## Trust model
 
-The room code is the only key. There are no accounts. Run TeamCompass on a **trusted network**. Rooms are stored in `apps/web/data/rooms.json` on **one** server process. Two server processes would not safely share a room.
+The room code is the only key. There are no accounts. Run TeamCompass on a **trusted network** (or accept that a public Hobby URL is code-gated only). Locally, rooms live in `apps/web/data/rooms.json` on **one** Node process. On **Vercel Hobby**, rooms use **Upstash Redis** so Functions can share state.
 
-Full limitations: [docs/GUARDRAILS.md](docs/GUARDRAILS.md)
+Full limitations: [docs/GUARDRAILS.md](docs/GUARDRAILS.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 ---
 
@@ -132,7 +132,7 @@ Full limitations: [docs/GUARDRAILS.md](docs/GUARDRAILS.md)
 | Domain | TypeScript `@cadence/core`, Vitest |
 | Web | Next.js 15, React 19, Instrument Sans, CSS tokens |
 | Mobile | Expo ~58, React Native, AsyncStorage |
-| Storage | JSON file + in-process queue + file lock |
+| Storage | Local JSON file **or** Upstash Redis (Vercel) + queue/lock |
 
 Details: [docs/TECH_STACK.md](docs/TECH_STACK.md)
 
@@ -167,7 +167,18 @@ pm-collaboration/
 | [docs/CHANGELOG.md](docs/CHANGELOG.md) | Historical development log |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design |
 | [docs/TECH_STACK.md](docs/TECH_STACK.md) | Packages & environments |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Vercel Hobby + Upstash + mobile URL |
 | [docs/API.md](docs/API.md) | HTTP & ops catalog |
+
+---
+
+## Deploy (Vercel Hobby)
+
+1. Import the repo in Vercel; set **Root Directory** to `apps/web`.  
+2. Add **Upstash Redis** (Marketplace) so `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` are set.  
+3. Deploy; point the Expo app at the production HTTPS origin.
+
+Details: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · env template: [`.env.example`](.env.example)
 
 ---
 
@@ -175,7 +186,7 @@ pm-collaboration/
 
 - 40 people · 180 retro notes · 80 actions · 40 initiatives · 100 feedback notes  
 - Room code = access control  
-- One Node process owns the data file  
+- Local file store: one Node writer; Hobby: Redis document store  
 - Last write wins on the same field  
 
 ---
@@ -184,6 +195,7 @@ pm-collaboration/
 
 ```bash
 npm test   # @cadence/core + @cadence/web vitest suites
+npm run build
 ```
 
 Traceability of coverage: [docs/TRACEABILITY_MATRIX.md](docs/TRACEABILITY_MATRIX.md)

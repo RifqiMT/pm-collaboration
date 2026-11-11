@@ -12,19 +12,20 @@ flowchart TB
     WebUI[Web UI Next.js]
     Mobile[Expo Mobile]
   end
-  subgraph server [Web server process]
+  subgraph server [Web API]
     API[Room HTTP API]
     Core["@cadence/core"]
-    Store[JSON file store]
+    Store[Store adapter]
   end
   WebUI -->|poll + ops| API
   Mobile -->|poll + ops| API
   API --> Core
   API --> Store
-  Store --> Disk[(apps/web/data/rooms.json)]
+  Store --> Disk[(file: rooms.json local)]
+  Store --> Redis[(Upstash Redis Hobby prod)]
 ```
 
-TeamCompass is a **monorepo** with a shared domain library and two clients that speak the same HTTP room API. There is no separate backend service and no database server.
+TeamCompass is a **monorepo** with a shared domain library and two clients that speak the same HTTP room API. There is no separate backend service; persistence is a document store (local JSON file or Upstash Redis on Vercel).
 
 ---
 
@@ -76,21 +77,23 @@ Not used: WebSockets, CRDTs, OT, or offline queues beyond optimistic local text 
 | --- | --- |
 | Brainstorm notes | Other authors’ `body` / identity hidden in `RoomView` until Discuss |
 | Discuss onward | Notes revealed per phase rules |
-| Server operator | Can read `rooms.json` on disk — trust the host environment |
+| Server operator | Can read file store or Redis document — trust the host environment |
 | Transport | No end-to-end encryption; use trusted network |
 
 ---
 
 ## 6. Persistence
 
-`apps/web/src/server/store.ts`:
+`apps/web/src/server/store.ts` + `persistence.ts`:
 
-- Single file `apps/web/data/rooms.json`  
+- **Backends:** `file` (local default) or `redis` (auto when Upstash env is set; required on Vercel)  
+- Document shape unchanged: `{ rooms: Record<code, Room> }`  
 - In-process serialization queue  
-- File lock; stale lock recovery (~5s); busy error after ~4s wait  
+- Distributed-ish lock: file lock locally, Redis `SET NX` + TTL on Hobby  
+- Stale lock recovery (~5s); busy error after ~4s wait  
 - Room codes: 6 chars from alphabet excluding ambiguous `I`, `O`, `0`, `1`  
 
-**Implication:** one Node process per data file. Horizontal scaling requires a different store.
+**Implication:** file backend needs one writer process. Redis backend is required for Vercel Functions. See [DEPLOYMENT.md](./DEPLOYMENT.md).
 
 ---
 

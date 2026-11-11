@@ -94,7 +94,7 @@ Primary users are agile product and engineering teams running time-boxed rituals
 
 | Surface | Role |
 | --- | --- |
-| Web (`apps/web`) | Full UI, App Router pages, room API, JSON file store |
+| Web (`apps/web`) | Full UI, App Router pages, room API, file/Redis store |
 | Mobile (`apps/mobile`) | Expo client for home / create / room for all three rituals |
 | Core (`packages/core`) | Types, ops, privacy presentation, scoring, content, export |
 
@@ -159,7 +159,7 @@ Full definitions live in [VARIABLES.md](./VARIABLES.md).
 | Topic | Guideline |
 | --- | --- |
 | Stack | Next.js 15 + React 19 web; Expo ~58 mobile; TypeScript core; Vitest |
-| Storage | Single `apps/web/data/rooms.json` + in-process queue + file lock |
+| Storage | Local `rooms.json` or Upstash Redis document + queue/lock ([DEPLOYMENT.md](./DEPLOYMENT.md)) |
 | Sync | HTTP polling, not WebSockets |
 | Auth | None beyond room code |
 | Scaling | One Node process owns the file; do not run two writers against one store |

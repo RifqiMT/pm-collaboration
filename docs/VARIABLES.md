@@ -13,7 +13,8 @@
 2. Use **Friendly name** in product conversations and UI copy reviews.  
 3. Use **Formula / rule** when changing scoring, limits, or sync.  
 4. Use **Location** to jump to implementation.  
-5. See **§10 Relationship chart** for how variables connect in flows.
+5. See **§10 Relationship chart** for how variables connect in flows.  
+6. Deploy/store env vars are in **§11** (Hobby / Upstash).
 
 ---
 
@@ -312,7 +313,20 @@ sequenceDiagram
 
 ---
 
-## 11. Maintenance
+## 11. Deployment / store environment variables
+
+| Variable name | Friendly name | Definition | Formula / rule | Location | Example |
+| --- | --- | --- | --- | --- | --- |
+| `CADENCE_STORE` | Store backend override | Forces file or Redis persistence | `file` \| `redis`; omit → auto | `persistence.ts` `resolveStoreBackend` | `redis` |
+| `CADENCE_DATA_DIR` | Local data directory | Directory for `rooms.json` / lock | Defaults to `process.cwd()/data` | `persistence.ts` | `/tmp/cadence-data` |
+| `UPSTASH_REDIS_REST_URL` | Upstash REST URL | Redis HTTP endpoint for Hobby | Required with token when backend is redis | Vercel env; Marketplace | `https://….upstash.io` |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash REST token | Auth for Redis REST | Required with URL when backend is redis | Vercel env; Marketplace | (secret) |
+| `cadence:rooms` | Redis rooms key | Document key for `{ rooms }` JSON | Whole-DB document | `persistence.ts` | Redis JSON value |
+| `cadence:rooms:lock` | Redis lock key | Mutual exclusion while mutating | `SET NX` + ~5s TTL | `persistence.ts` | lock token string |
+
+---
+
+## 12. Maintenance
 
 When adding a variable:
 

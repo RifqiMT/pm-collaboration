@@ -13,7 +13,7 @@
 | UI library | React **19.x** | Web + mobile |
 | Mobile | Expo **~58**, React Native **0.88** | `@cadence/mobile` |
 | Domain | `@cadence/core` pure TS | Vitest unit tests |
-| Storage | JSON file on disk | Single process |
+| Storage | JSON file (local) / Upstash Redis (Vercel Hobby) | Auto-select via env |
 | Font (web) | Instrument Sans (Google via `next/font`) | `--font-sans` |
 | Node | **≥ 20** | Root engines |
 | Package manager | npm workspaces | Mobile separate install |
@@ -43,7 +43,8 @@ Root package name remains `cadence@0.1.0` while product brand is **TeamCompass**
 | next ^15.5.4 | App + API routes |
 | react / react-dom ^19.1.1 | UI |
 | @cadence/core * | Domain |
-| vitest ^3.2 | Helper tests |
+| @upstash/redis | Durable room store on Vercel |
+| vitest ^3.2 | Helper + store tests |
 
 ### `@cadence/mobile` `1.0.0`
 
@@ -82,7 +83,8 @@ npx expo start
 | Mobile simulator (same machine) | `http://localhost:3000` |
 | Android emulator → host | Often `http://10.0.2.2:3000` |
 | Physical device | Host LAN IP, e.g. `http://192.168.1.20:3000` |
-| Production-like | Single Node `next start` process; backup `rooms.json` if needed |
+| Production-like (local) | Single Node `next start`; backup `rooms.json` if needed |
+| Production (Vercel Hobby) | Functions + Upstash Redis; Root Directory `apps/web` — see [DEPLOYMENT.md](./DEPLOYMENT.md) |
 
 ---
 
@@ -102,9 +104,11 @@ npx expo start
 
 ## 6. Data & ops
 
-- Persistence path: `apps/web/data/rooms.json` (gitignored via `apps/web/data`)  
-- No Redis, Postgres, or Blob store in current MVP  
+- Local persistence: `apps/web/data/rooms.json` (gitignored; override with `CADENCE_DATA_DIR`)  
+- Vercel Hobby: Upstash Redis keys `cadence:rooms` / `cadence:rooms:lock` via `UPSTASH_REDIS_REST_*`  
+- Optional force: `CADENCE_STORE=file|redis`  
 - No auth provider (Clerk, Auth0, etc.)  
+- Env template: [`.env.example`](../.env.example) · deploy guide: [DEPLOYMENT.md](./DEPLOYMENT.md)  
 
 ---
 
@@ -125,7 +129,7 @@ Recommended before merge: `npm test` and a two-browser smoke of create → join 
 1. Put shared rules in `@cadence/core`, never duplicate formulas in UI.  
 2. Keep API routes thin: parse → store → core → present.  
 3. Prefer desired-state ops over toggles.  
-4. Do not add a second writer process against the same JSON file.  
+4. Local file backend: one writer process. Vercel: require Upstash Redis (see DEPLOYMENT.md).  
 5. Document new `LIMITS` and formulas in [VARIABLES.md](./VARIABLES.md).  
 6. Preserve brainstorm privacy in `presentRoom` when changing card views.  
 

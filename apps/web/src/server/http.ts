@@ -16,10 +16,24 @@ export function options() {
   return new NextResponse(null, { status: 204, headers });
 }
 
+function asCadenceError(error: unknown): CadenceError | null {
+  if (error instanceof CadenceError) return error;
+  // Bundlers can duplicate the class across packages; duck-type for prod reliability.
+  if (
+    error instanceof Error &&
+    error.name === "CadenceError" &&
+    typeof (error as { code?: unknown }).code === "string"
+  ) {
+    return error as CadenceError;
+  }
+  return null;
+}
+
 export function fail(error: unknown, context: Record<string, string>) {
-  if (error instanceof CadenceError) {
-    const status = error.code === "missing" ? 404 : 400;
-    return json({ error: error.message, code: error.code }, status);
+  const cadence = asCadenceError(error);
+  if (cadence) {
+    const status = cadence.code === "missing" ? 404 : cadence.code === "store" ? 503 : 400;
+    return json({ error: cadence.message, code: cadence.code }, status);
   }
   console.error("[cadence] request failed", {
     ...context,

@@ -154,7 +154,7 @@ Traceability to stories and code: [TRACEABILITY_MATRIX.md](./TRACEABILITY_MATRIX
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Room code leakage | Unauthorized join | Trusted network; short-lived ritual rooms; communicate trust model |
-| Single JSON file | Data loss / no HA | Document single-process rule; backup file if needed |
+| File store / Hobby Redis | Data loss / free-tier limits | Local: one writer; Vercel: Upstash Redis — see DEPLOYMENT.md |
 | Polling lag | Feels “not live” | 1.5s visible poll; version ignore for stale |
 | Package name ≠ brand | Confusion | Document Cadence namespace vs TeamCompass brand |
 | Mobile API URL misconfig | Cannot join | Clear home-screen server field + README examples |

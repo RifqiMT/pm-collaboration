@@ -8,9 +8,16 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 
 ## [Unreleased]
 
+### Added — Engineering
+
+- Vercel Hobby-ready web deploy: `apps/web/vercel.json` monorepo install/build, `.env.example`.  
+- Room store backends: local JSON file (dev) and **Upstash Redis** (production Functions) via `apps/web/src/server/persistence.ts`.  
+- Store vitest coverage for backend selection and file create/join/op durability.
+
 ### Documentation
 
 - Added enterprise documentation suite under `docs/` (index, PRODUCT, PRD, personas, user stories, variables with relationship charts, metrics/OKRs, design guidelines, traceability matrix, guardrails, architecture, tech stack, API).  
+- Added [DEPLOYMENT.md](./DEPLOYMENT.md) for Hobby + Upstash + mobile API URL.  
 - Expanded root `README.md` to professional product standard with deep links.  
 - Clarified brand **TeamCompass** vs engineering namespace `@cadence/*`.
 

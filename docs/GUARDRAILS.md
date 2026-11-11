@@ -15,7 +15,7 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-SEC-1 Room code access** | The six-character code is the only access control | Do not market as enterprise ACL/SSO product |
 | **G-SEC-2 No accounts** | No authentication, authorization roles, or audit identity beyond local person ids | Host privileges are not cryptographically bound to a human |
 | **G-SEC-3 Trusted network** | Designed for LAN/VPN/team-owned hosts | Do not expose casually on the public internet without additional controls |
-| **G-SEC-4 Operator visibility** | Server operator can read `rooms.json` | Brainstorm privacy is peer-to-peer within the room model, not operator-proof |
+| **G-SEC-4 Operator visibility** | Operator can read file store or Redis document | Brainstorm privacy is peer-to-peer within the room model, not operator-proof |
 | **G-SEC-5 Open CORS** | API allows `*` | Convenient for mobile; inappropriate as sole public API hardening |
 | **G-SEC-6 No E2E encryption** | Traffic and storage are plaintext to the server | Use TLS at the reverse-proxy layer if deployed beyond localhost |
 
@@ -38,9 +38,9 @@ Violating a hard guardrail without an approved architecture change is a product 
 
 | Guardrail | Limitation | Do / Don’t |
 | --- | --- | --- |
-| **G-DATA-1 Single JSON file** | `apps/web/data/rooms.json` | Do not run two Node writers against one file |
-| **G-DATA-2 In-process queue + lock** | Soft concurrency only | Do not assume horizontal pod autoscaling works |
-| **G-DATA-3 No durable multi-AZ DB** | File can be lost with disk | Do not promise enterprise durability without a store migration |
+| **G-DATA-1 Document store** | File JSON locally; Upstash Redis document on Vercel | Do not run two Node writers against one file backend; use Redis on serverless |
+| **G-DATA-2 In-process queue + lock** | Soft concurrency (file lock / Redis NX) | Do not assume CRDT or strong multi-region consistency |
+| **G-DATA-3 Hobby durability** | Redis free-tier limits; file can be lost with disk | Do not promise enterprise multi-AZ durability without paid ops |
 | **G-DATA-4 Hard caps** | See `LIMITS` | Do not raise caps casually without memory/perf review |
 | **G-DATA-5 Last write wins** | Concurrent edits on same field | Do not promise CRDT-grade merge |
 | **G-DATA-6 Body size ~100KB** | Request cap | Do not accept unbounded drawings/payloads |
@@ -90,6 +90,7 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-PLAT-3 Brand vs package name** | UI TeamCompass / packages `@cadence` | Avoid renaming packages casually mid-release |
 | **G-PLAT-4 Node ≥ 20** | Engines field | Don’t target older Node without testing |
 | **G-PLAT-5 Light theme only** | No dark tokens shipped | Don’t half-implement dark mode |
+| **G-PLAT-6 Vercel Hobby** | Personal/non-commercial fair use; Redis required for rooms | Do not deploy file-only store to Functions |
 
 ---
 
@@ -120,7 +121,7 @@ Aligned with org Performance Guardrail: no silent regressions on critical paths 
 
 These are **not** current features; they are the sanctioned ways out of hard limits:
 
-1. Replace JSON file with a real database + single-writer or transactional store  
+1. Move beyond single Redis document to per-room keys / SQL + stronger transactions (Hobby path already uses Upstash)  
 2. Add optional room passphrase or expiring codes  
 3. Add SSE/WebSocket fan-out while keeping core ops identical  
 4. Add auth if moving to multi-tenant SaaS (changes trust model entirely)  
