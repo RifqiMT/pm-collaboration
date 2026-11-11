@@ -2,6 +2,8 @@
 
 import {
   discussionGroups,
+  retrospectiveCsv,
+  retrospectiveExport,
   RETRO_TEMPLATES,
   type ActionItem,
   type DiscussionGroup,
@@ -109,6 +111,7 @@ export function RetroBoard({
   const showVote = retro.phase === "vote";
   const showBoard = showNotes || showVote;
   const showActions = retro.phase === "act";
+  const showSummary = retro.phase === "summary";
   const visibleNotes = (columnId: string) => retro.cards.filter((card) => card.columnId === columnId && !card.hidden);
   const notePeak = Math.max(1, ...retro.columns.map((column) => visibleNotes(column.id).length));
 
@@ -157,10 +160,16 @@ export function RetroBoard({
                 </span>
                 <span className="phase-label">
                   <span className="phase-name">{item.label}</span>
-                  <span className={running ? "phase-clock on" : "phase-clock"} aria-label={`${item.label} stopwatch`}>
-                    <StopwatchIcon />
-                    <span>{formatElapsed(elapsed)}</span>
-                  </span>
+                  {item.id === "summary" ? null : (
+                    <span
+                      className={running ? "phase-clock on" : "phase-clock"}
+                      title="Stopwatch"
+                      aria-label={`${item.label} stopwatch, counting up`}
+                    >
+                      <StopwatchIcon />
+                      <span>{formatElapsed(elapsed)}</span>
+                    </span>
+                  )}
                 </span>
               </button>
             );
@@ -181,7 +190,7 @@ export function RetroBoard({
           </div>
         </div>
 
-        {retro.phase === "icebreak" ? null : (
+        {retro.phase === "icebreak" || retro.phase === "summary" ? null : (
           <div className="phase-tools" aria-label="Session tools">
             {showNotes ? (
               <span className="tool-chip muted">Only you can see your notes until Discuss</span>
@@ -457,6 +466,8 @@ export function RetroBoard({
         </>
       ) : null}
 
+      {showSummary ? <SummaryPanel room={room} /> : null}
+
       {showActions ? (
         <ActionsPanel
           actions={retro.actions}
@@ -627,6 +638,122 @@ function DiscussWalk({
         </div>
       )}
     </div>
+  );
+}
+
+function SummaryPanel({ room }: { room: RoomView }) {
+  const data = retrospectiveExport(room);
+  const retro = room.retro;
+  if (!data || !retro) return null;
+  const dots = data.notes.reduce((sum, note) => sum + note.votes, 0);
+  const open = data.actions.filter((action) => !action.done).length;
+
+  function download() {
+    try {
+      const csv = retrospectiveCsv(room);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `teamcompass-${room.code}-retrospective.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("[cadence] csv download failed", {
+        message: error instanceof Error ? error.message : "unknown",
+      });
+    }
+  }
+
+  return (
+    <section className="summary-board" aria-label="Summary">
+      <div className="summary-toolbar">
+        <div className="summary-stats">
+          <p>
+            <strong>{data.notes.length}</strong>
+            <span>{data.notes.length === 1 ? "Note" : "Notes"}</span>
+          </p>
+          <p>
+            <strong>{dots}</strong>
+            <span>{dots === 1 ? "Dot" : "Dots"}</span>
+          </p>
+          <p>
+            <strong>{data.actions.length}</strong>
+            <span>{open === 0 ? "Actions" : `${open} open`}</span>
+          </p>
+          <p>
+            <strong>{data.people.length}</strong>
+            <span>{data.people.length === 1 ? "Person" : "People"}</span>
+          </p>
+        </div>
+        <button type="button" className="btn primary" onClick={download}>
+          Download CSV
+        </button>
+      </div>
+
+      <div className="summary-columns">
+        {retro.columns.map((column) => {
+          const notes = data.notes.filter((note) => note.column === column.title);
+          return (
+            <section key={column.id} className="summary-column">
+              <h3>
+                <RetroGlyph templateId={retro.templateId} columnId={column.id} />
+                {column.title}
+              </h3>
+              {notes.length === 0 ? <p className="muted">No notes in this column.</p> : null}
+              <ul>
+                {notes.map((note) => (
+                  <li key={`${note.createdAt}-${note.body}`}>
+                    <p>{note.body}</p>
+                    <small>
+                      {note.author}
+                      {" · "}
+                      {note.votes} {note.votes === 1 ? "dot" : "dots"}
+                      {note.voters.length > 0 ? ` · ${note.voters.join(", ")}` : ""}
+                    </small>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
+
+      <section className="summary-block">
+        <h3>Actions</h3>
+        {data.actions.length === 0 ? <p className="muted">No actions were recorded.</p> : null}
+        <ul>
+          {data.actions.map((action) => (
+            <li key={`${action.body}-${action.owner}`}>
+              <p>
+                {action.done ? "Done" : "Open"} · {action.body}
+              </p>
+              <small>
+                {action.owner}
+                {action.source ? ` · From “${action.source}”` : ""}
+              </small>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="summary-block">
+        <h3>{data.answers[0] ? `${data.answers[0].game}` : "Icebreaker"}</h3>
+        {data.answers.length === 0 ? <p className="muted">No icebreaker answers were shared.</p> : null}
+        <ul>
+          {data.answers.map((answer) => (
+            <li key={`${answer.author}-${answer.round}-${answer.createdAt}`}>
+              <p>{answer.body}</p>
+              <small>
+                {answer.question} · {answer.author}
+              </small>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </section>
   );
 }
 
@@ -1086,7 +1213,7 @@ function PhaseTimer({
           <TimerIcon />
         </span>
         <div className="phase-timer-copy">
-          <span className="phase-timer-label">{remaining == null ? "Timer" : remaining <= 0 ? "Done" : "Left"}</span>
+          <span className="phase-timer-label">Timer</span>
           <strong>{remaining == null ? "Off" : formatClock(remaining)}</strong>
           <span className="phase-timer-status">{status}</span>
         </div>
@@ -1167,13 +1294,13 @@ function TimerIcon() {
   return (
     <svg viewBox="0 0 16 16" aria-hidden="true" className="phase-timer-glyph">
       <path
-        d="M6.2 1.4h3.6M8 1.4v1.5M8 14.2a5.4 5.4 0 1 0 0-10.8 5.4 5.4 0 0 0 0 10.8Z"
+        d="M4.2 1.8h7.6M4.2 14.2h7.6M5 2.2c.2 2.1 1.3 3.3 3 5.8-1.7 2.5-2.8 3.7-3 5.8M11 2.2c-.2 2.1-1.3 3.3-3 5.8 1.7 2.5 2.8 3.7 3 5.8"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.4"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <path d="M8 6.2v3.1l2 1.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

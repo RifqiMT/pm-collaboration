@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const detail: Record<RoomKind, string> = {
-  retro: "An icebreaker, private notes, a discussion, a dot vote, and actions with owners.",
+  retro: "An icebreaker, private notes, a discussion, a dot vote, actions with owners, and a summary you can download.",
   review: "A shared checklist, live feedback, and one decision: ship, iterate, or hold.",
   roadmap: "Score each bet next to the business outcome, then read the complexity.",
 };
@@ -19,7 +19,7 @@ export function HomeScreen() {
   return (
     <main className="home" id="main">
       <header className="topbar">
-        <span className="wordmark">Cadence</span>
+        <span className="wordmark">TeamCompass</span>
         <form
           className="join"
           onSubmit={(event) => {
@@ -53,7 +53,8 @@ export function HomeScreen() {
         <p className="eyebrow">Sprint rooms</p>
         <h1>Retros, reviews, and roadmaps on one board.</h1>
         <p className="lede">
-          Share a six-character code. Everyone sees the same notes, the same checklist, and the same score. No accounts.
+          Helps teams align on direction, review progress, and decide what comes next. Share a six-character code.
+          Everyone sees the same notes, the same checklist, and the same score. No accounts.
         </p>
       </section>
       {error ? <p role="alert">{error}</p> : null}

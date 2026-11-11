@@ -36,7 +36,7 @@ export type RetroTemplateId =
   | "sherlock"
   | "squid-game";
 
-export type RetroPhase = "icebreak" | "brainstorm" | "vote" | "discuss" | "act";
+export type RetroPhase = "icebreak" | "brainstorm" | "vote" | "discuss" | "act" | "summary";
 
 /** How Discuss walks the room. Notes stay in their status columns either way. */
 export type DiscussionBy = "status" | "author";
@@ -126,6 +126,12 @@ export interface IcebreakerAnswer {
   displayOrder?: number[];
 }
 
+export interface IcebreakerPair {
+  question: string;
+  left: string;
+  right: string;
+}
+
 export interface RetroState {
   templateId: RetroTemplateId;
   phase: RetroPhase;
@@ -148,6 +154,8 @@ export interface RetroState {
   discussedGroupKey: string | null;
   icebreaker: IcebreakerId;
   icebreakerRound: number;
+  /** Host-written This or That pairs. Null uses the built-in pairs. */
+  icebreakerPairs: IcebreakerPair[] | null;
   icebreakerAnswers: IcebreakerAnswer[];
 }
 
@@ -286,7 +294,8 @@ export type Op =
   | { type: "retro.vote"; cardId: string; voting: boolean }
   | { type: "retro.setPhase"; phase: RetroPhase }
   | { type: "retro.setIcebreaker"; game: IcebreakerId }
-  | { type: "retro.answerIcebreaker"; body: string }
+  | { type: "retro.setIcebreakerPairs"; pairs: IcebreakerPair[] }
+  | { type: "retro.answerIcebreaker"; body: string; round?: number }
   | { type: "retro.guessIcebreaker"; targetId: string; index: number }
   | { type: "retro.revealIcebreaker" }
   | { type: "retro.nextIcebreakerRound"; step: number }
@@ -348,6 +357,9 @@ export const LIMITS = {
   cards: 180,
   actions: 80,
   icebreakerAnswers: 240,
+  icebreakerPairs: 8,
+  icebreakerQuestion: 90,
+  icebreakerSide: 40,
   icebreakerWord: 24,
   icebreakerShout: 140,
   icebreakerLine: 180,

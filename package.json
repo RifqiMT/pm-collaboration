@@ -2,7 +2,7 @@
   "name": "cadence",
   "private": true,
   "version": "0.1.0",
-  "description": "Collaborative sprint retrospectives, review checklists, and roadmap scoring.",
+  "description": "Helps teams align on direction, review progress, and decide what comes next.",
   "workspaces": [
     "packages/core",
     "apps/web"

@@ -1,98 +1,184 @@
-# Cadence
+# TeamCompass — Product Documentation
 
-Cadence is the shared room a product team uses for the retrospective, the sprint review, and roadmap scoring. People join with a code. Everyone edits one board. The phone app and the web app talk to the same room.
+**Status:** Current as of repository state 2026-11-11  
+**Brand:** TeamCompass (UI, metadata, marketing copy)  
+**Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
+**Note:** On case-insensitive filesystems this path is also `docs/product.md`. There is a single product document—this one.
 
-## Rituals
+---
 
-### Retrospective
+## 1. Product overview
 
-The host moves the room through five sections. Each section shows only its own work.
+TeamCompass is a **shared collaboration room** for three sprint rituals:
 
-1. **Icebreaker.** A short warm-up game. Notes, dots, and actions stay out of this section.
-2. **Notes.** People write into a classic template, such as start/stop/continue, 4Ls, mad/sad/glad, sailboat, rose/bud/thorn, went well/didn’t/puzzles, drop/add/keep/improve, or starfish. Pop-culture templates use the same kind of columns: Star Wars, superhero, arcade, premiere, quest, race weekend, Pokémon, heist, noir, concert, wizarding, streaming, Marvel, DC, Harry Potter, Breaking Bad, Criminal Minds, NCIS, One Piece, Naruto, Bleach, Lord of the Rings, Stranger Things, Avatar, Sherlock, and Squid Game. Every shape is one retrospective. The columns connect as decisions about this sprint and the next one: what to keep, what to stop, and what to try, with the longer shapes adding the in-between choices. Each column’s hint says which decision it is. Every column carries one graphic for that template, in the column header. The graphic grows as notes collect there. A note can be edited, moved, or removed here. You see only your own notes. Other people’s notes stay hidden until Discuss.
-3. **Discuss.** Notes are revealed. The host chooses a status walk or an author walk. A status walk takes one column at a time. An author walk takes one person at a time, and that person’s notes stay grouped by status. The board columns remain the status categories. There is no voting and no action list in this section.
-4. **Vote.** Each person places one dot on a limited number of notes. The default is three. The dot budget is set here. Lowering that limit removes the extra dots. Notes cannot be edited while voting.
-5. **Actions.** An action has text, an owner, and a done check. It can be written fresh or started from a note. The columns and the vote buttons are not on this screen.
+1. **Retrospective** — warm up, write privately, discuss, vote, own actions, export a summary  
+2. **Sprint review** — walk a shared readiness checklist, collect feedback, record one release decision  
+3. **Roadmap** — score initiatives with RICE, ICE, or value÷complexity, with complexity as a first-class lens  
 
-Each section has its own timer (3, 5, or 8 minutes) and its own stopwatch. Only the host can change the section.
+People join with a **six-character room code**. There are **no accounts**. Everyone who has the code edits the same board. The **web app** is the full room experience and hosts the API. The **phone app** (Expo) joins the same rooms over the same HTTP API and shared domain package.
 
-### Sprint review
+### Positioning statement
 
-The checklist is the bar for “we are ready to show this.” Sections cover the increment, the story of the sprint, evidence, and closing the loop. Required items are marked. Checking an item records who checked it, so two people can both sign the same line.
+> TeamCompass helps teams align on direction, review progress, and decide what comes next—on one board, with one code, without accounts.
 
-Beside the list:
+### Product benefits
 
-- the sprint goal
-- live feedback marked praise, change, or question
-- one release decision: **ship**, **iterate**, or **hold**, plus notes
+| Benefit | What the product delivers |
+| --- | --- |
+| Fast room start | Create a ritual room in seconds; share a short code |
+| Psychological safety in retros | Notes stay private on the server during brainstorm |
+| Facilitation control | Host gates phase, icebreaker, discussion walk, and timers |
+| Decision clarity | Review ends in ship / iterate / hold with notes |
+| Honest roadmap math | Score and complexity sit on the same card; quadrants explain trade-offs |
+| Cross-device parity | Web and mobile share `@cadence/core` rules and the same room document |
+| Exportable outcomes | Retro summary downloads as CSV including timing and icebreaker data |
 
-### Roadmap
+---
 
-Each initiative has a business outcome, an assumption, an owner, a horizon (now / next / later), a score, and a complexity reading.
+## 2. Who it is for
 
-Complexity is the average of three 1–5 ratings:
+Primary users are agile product and engineering teams running time-boxed rituals. See [personas](./personas/) for Facilitator Maya, Contributor Jordan, and Stakeholder Priya.
 
-- technical difficulty
-- dependency load
-- uncertainty
+---
 
-High complexity starts at 3.5. A strong score with high complexity is a big bet. A strong score with lower complexity is something to do first. A weak score with high complexity should be parked until the outcome is sharper.
+## 3. Features
 
-The chart plots score against complexity. The vertical dashed line is high complexity at 3.5, and the horizontal dashed line is the median score used for the quadrants. The list is the accessible version of the same comparison.
+### 3.1 Rooms and presence
 
-## Scoring variables
+- Create a room by ritual kind (`retro` | `review` | `roadmap`), optional title, host name, and (for retros) template  
+- Optional **demo** seed content for exploration  
+- Join by six-character code and display name  
+- Local identity persisted in browser `localStorage` / mobile AsyncStorage (`person_…` id + name)  
+- Presence: a participant is **active** if `lastSeen` is within **20 seconds** (`ACTIVE_MS`)  
+- Host is the room creator (`hostId`); host-only operations are enforced in core  
+- Hard cap: **40** participants per room  
 
-### RICE
+### 3.2 Retrospective
 
-Formula: `(Reach × Impact × Confidence) / Effort`
+**Phases (host-gated):** Icebreaker → Notes (brainstorm) → Discuss → Vote → Actions → Summary  
 
-| Variable | Range | Meaning |
-| --- | --- | --- |
-| Reach | 0–1,000,000 people or accounts | Who feels this in the quarter |
-| Impact | 0.25, 0.5, 1, 2, 3 | Minimal, low, medium, high, massive. This is the Intercom scale. |
-| Confidence | 0–1 | How sure the team is that the outcome will happen. Below 0.6, Cadence calls the confidence thin. |
-| Effort | 0.25–240 person-months | Team time. The floor stops a tiny effort from exploding the score. |
+| Capability | Detail |
+| --- | --- |
+| Templates | 8 classic + 26 pop-culture shapes (34 total) from `RETRO_TEMPLATES` |
+| Icebreaker | 18 games; host picks game; This or That supports host-written pairs (1–8) |
+| Private notes | During brainstorm, `presentRoom` strips others’ note bodies before leaving the server |
+| Discuss walks | Status walk (column) or author walk; board columns remain status categories |
+| Dot voting | Default **3** votes per person (host sets **1–10**); lowering budget drops excess newest dots |
+| Actions | Body, owner, done flag; can be created from a note |
+| Timers | Per-section countdown; UI presets **3 / 5 / 8** minutes; server allows 30–3600 seconds |
+| Stopwatch | Accrues while a section is open; Summary has no timer/stopwatch UI |
+| Column glyphs | Header graphics grow as notes collect in that column |
+| Summary + CSV | Collects notes, votes, actions, icebreaker answers, and section timing; downloadable CSV |
 
-Example: reach 400, impact 2, confidence 0.8, effort 2 → `(400 × 2 × 0.8) / 2 = 320`.
+### 3.3 Sprint review
 
-### ICE
+- Shared checklist seeded into four sections (increment, story, evidence, closing the loop)  
+- Required items; multi-signer `doneBy` (idempotent desired-state checks)  
+- Per-item evidence notes; custom items per section (cap **30** / section)  
+- Sprint goal  
+- Live feedback: praise / change / question  
+- One release decision: **ship**, **iterate**, or **hold**, plus decision notes  
+- Progress derived from required items checked  
 
-Formula: `Impact × Confidence × Ease`
+### 3.4 Roadmap
 
-Each input is an integer from 1 to 10. Ease is how little friction there is to ship.
+- Framework switch: **RICE**, **ICE**, **value / complexity**  
+- Initiatives with outcome, assumption, scores, complexity (technical / dependency / uncertainty), horizon (now / next / later), owner  
+- Complexity index = average of the three 1–5 ratings (2 decimals)  
+- Chart: score vs complexity; vertical guide at **HIGH_COMPLEXITY = 3.5**; horizontal guide at **median score**  
+- Quadrants: do-first, big-bet, fill-in, reconsider  
+- Insights (e.g. thin confidence when RICE confidence &lt; 0.6)  
+- Ranked list with relative bar  
 
-### Value / complexity
+### 3.5 Platforms
 
-Formula: `Business value / complexity index`
+| Surface | Role |
+| --- | --- |
+| Web (`apps/web`) | Full UI, App Router pages, room API, JSON file store |
+| Mobile (`apps/mobile`) | Expo client for home / create / room for all three rituals |
+| Core (`packages/core`) | Types, ops, privacy presentation, scoring, content, export |
 
-Business value is 1–10. The complexity index is the average above. This view is for the conversation “is the outcome worth the difficulty,” without pretending effort and complexity are the same number.
+---
 
-## Collaboration
+## 4. Product logics (business rules)
+
+1. **Room code is the access key.** Anyone with the code and a name can join and edit (subject to host gates and phase rules).  
+2. **One room document, versioned.** Each successful op bumps `version`. Clients poll (~1.5s visible / ~8s hidden) and ignore stale snapshots.  
+3. **Desired-state votes and checks.** Sending “voting: true” or “done: true” is idempotent; a double tap does not toggle away the first intent.  
+4. **Brainstorm privacy is server-side.** Hiding notes only in the browser is not considered private.  
+5. **Host authority.** Only the host changes phase, icebreaker selection/pairs/rounds, and discussion walk mode.  
+6. **Last write wins** on the same field when two people edit concurrently.  
+7. **Text fields commit on blur or Enter** (single-line); failed saves restore previous text.  
+8. **Scoring math lives in core** so web and mobile cannot diverge on formulas.  
+9. **Hard limits** protect the single-process JSON store (see §7 and [GUARDRAILS](./GUARDRAILS.md)).  
+
+Collaboration flow:
 
 ```mermaid
 flowchart LR
-  create[Create a room] --> code[Share the 6-character code]
+  create[Create a room] --> code[Share 6-character code]
   code --> join[Each person joins with a name]
   join --> edit[Edits are operations on one room]
-  edit --> poll[Other clients refresh about every 1.5 seconds]
+  edit --> poll[Clients refresh ~1.5s / ~8s hidden]
 ```
 
-An edit is an operation: add a note, set a check, patch an initiative. The server applies it if the person has joined, bumps a version, and returns the room. Clients ignore a refresh that is older than the room they already show. Votes and checks send the desired state, so a double tap does not undo the first tap. This browser keeps the person who created or joined a room, and the next room you create uses that same person.
+---
 
-During a private brainstorm, the server removes other people’s note text before the response leaves. Hiding notes only in the browser would not be private.
+## 5. Scoring summary
 
-Text fields keep what you are typing until you leave the field, or press Enter on a single line, then save. A failed save puts the previous text back. A newer update from someone else replaces the field when you are not editing it.
+Full definitions live in [VARIABLES.md](./VARIABLES.md).
 
-## Stack
+| Framework | Formula |
+| --- | --- |
+| RICE | `(Reach × Impact × Confidence) / Effort` |
+| ICE | `Impact × Confidence × Ease` (each 1–10) |
+| Value / complexity | `Business value / complexity index` |
 
-- Web: Next.js, React, the room API
-- Phone: Expo, React Native, the same API
-- Shared rules: `packages/core`, tested with Vitest
-- Storage: one JSON file on the web server, written by a single in-process queue
+**Complexity index:**  
+`round(((technical + dependency + uncertainty) / 3) × 100) / 100` with each input 1–5.
 
-## Limits
+**Quadrants:** strong = score ≥ median; heavy = complexity ≥ 3.5.
 
-- 40 people in a room, 180 retro notes, 80 actions, 40 initiatives, 100 feedback notes
-- The room code is the only access control
-- One Node process owns the file. Do not run two servers against one data file
-- Last write wins when two people edit the same sentence
+**RICE example:** reach 400, impact 2, confidence 0.8, effort 2 → `(400 × 2 × 0.8) / 2 = 320`.
+
+---
+
+## 6. Business guidelines
+
+- Position TeamCompass for **trusted-network** use (office LAN, VPN, team-owned server)—not as a multi-tenant SaaS with account security.  
+- Do not market “private notes” without clarifying **server-enforced** brainstorm privacy and that the operator of the server can read stored JSON.  
+- Prefer **facilitation clarity** over feature sprawl: each retro section shows only that section’s work.  
+- Keep scoring frameworks **industry-familiar** (Intercom RICE, ICE, value/complexity) and document insight thresholds.  
+- Treat **demo rooms** as marketing/onboarding aids, not production meeting records.  
+- Mobile must always point at a reachable web API base URL; do not imply offline-first multiplayer.  
+
+---
+
+## 7. Technical guidelines (product-facing)
+
+| Topic | Guideline |
+| --- | --- |
+| Stack | Next.js 15 + React 19 web; Expo ~58 mobile; TypeScript core; Vitest |
+| Storage | Single `apps/web/data/rooms.json` + in-process queue + file lock |
+| Sync | HTTP polling, not WebSockets |
+| Auth | None beyond room code |
+| Scaling | One Node process owns the file; do not run two writers against one store |
+| Limits | 40 people, 180 cards, 80 actions, 40 initiatives, 100 feedback notes, etc. |
+| CORS | Open (`*`) for local/LAN mobile access |
+| Errors | Domain `CadenceError` with machine `code` (e.g. `host`, `phase`, `private`, `votes`) |
+
+---
+
+## 8. Tech stack snapshot
+
+See [TECH_STACK.md](./TECH_STACK.md) for versions and scripts.
+
+- **Web:** Next.js App Router, Instrument Sans, CSS design tokens  
+- **Mobile:** Expo / React Native, shared colors in `src/ui.js`  
+- **Core:** Pure TypeScript domain library  
+
+---
+
+## 9. Related documents
+
+- [PRD](./PRD.md) · [Architecture](./ARCHITECTURE.md) · [API](./API.md) · [Variables](./VARIABLES.md) · [Guardrails](./GUARDRAILS.md) · [Design](./DESIGN_GUIDELINES.md) · [Changelog](./CHANGELOG.md) · [Index](./00-INDEX.md)

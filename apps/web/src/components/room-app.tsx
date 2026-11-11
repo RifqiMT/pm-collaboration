@@ -87,7 +87,7 @@ export function RoomApp({ code }: { code: string }) {
       <header className="room-bar">
         <div className="room-id">
           <Link href="/" className="wordmark">
-            Cadence
+            TeamCompass
           </Link>
           <div className="room-heading">
             <p className="eyebrow">{ritual?.name}</p>
@@ -156,7 +156,7 @@ function NameGate({ code, onReady }: { code: string; onReady: (identity: Identit
   return (
     <main className="gate" id="main">
       <Link href="/" className="wordmark">
-        Cadence
+        TeamCompass
       </Link>
       <p className="eyebrow">Room {code}</p>
       <h1>What should the team call you?</h1>

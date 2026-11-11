@@ -6,8 +6,8 @@ import "./globals.css";
 const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Cadence",
-  description: "Collaborate on sprint retrospectives, review checklists, and roadmap scores.",
+  title: "TeamCompass",
+  description: "Helps teams align on direction, review progress, and decide what comes next.",
 };
 
 export const viewport: Viewport = {

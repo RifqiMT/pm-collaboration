@@ -5,6 +5,9 @@ import {
   createReviewState,
   icebreakerById,
   icebreakerChoices,
+  pairQuestion,
+  storedThisOrThatPairs,
+  thisOrThatGame,
   truthDisplayOrder,
   type IcebreakerGame,
 } from "./content";
@@ -29,6 +32,7 @@ import {
   type FeedbackKind,
   type FrameworkId,
   type Horizon,
+  type IcebreakerPair,
   type ImpactLevel,
   type Initiative,
   type InitiativePatch,
@@ -48,7 +52,7 @@ import {
   type RoomView,
 } from "./types";
 
-const PHASES: RetroPhase[] = ["icebreak", "brainstorm", "discuss", "vote", "act"];
+const PHASES: RetroPhase[] = ["icebreak", "brainstorm", "discuss", "vote", "act", "summary"];
 const DISCUSSION_BY: DiscussionBy[] = ["status", "author"];
 const ICEBREAKER_IDS = ICEBREAKERS.map((game) => game.id);
 const FRAMEWORKS: FrameworkId[] = ["rice", "ice", "value-complexity"];
@@ -183,6 +187,7 @@ export function applyOp(room: Room, op: Op, actorId: string, now: string): Room 
     case "retro.assignAction":
     case "retro.deleteAction":
     case "retro.setIcebreaker":
+    case "retro.setIcebreakerPairs":
     case "retro.answerIcebreaker":
     case "retro.guessIcebreaker":
     case "retro.revealIcebreaker":
@@ -342,8 +347,14 @@ export function parseOp(input: unknown): Op {
       return { type, phase: expectEnum(record.phase, PHASES, "Phase") };
     case "retro.setIcebreaker":
       return { type, game: expectEnum(record.game, ICEBREAKER_IDS, "Icebreaker") };
+    case "retro.setIcebreakerPairs":
+      return { type, pairs: parsePairs(record.pairs) };
     case "retro.answerIcebreaker":
-      return { type, body: String(record.body ?? "") };
+      return {
+        type,
+        body: String(record.body ?? ""),
+        ...(typeof record.round === "number" ? { round: record.round } : {}),
+      };
     case "retro.guessIcebreaker":
       return {
         type,
@@ -525,10 +536,30 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       retro.icebreaker = op.game;
       return true;
     }
+    case "retro.setIcebreakerPairs": {
+      requirePhase(retro, "icebreak", "The icebreaker is only open during the warm-up.");
+      if (actorId !== hostOf(room)) {
+        throw new CadenceError("Only the host can change the pairs.", "host");
+      }
+      const pairs = cleanPairs(op.pairs);
+      const current = thisOrThatGame(retro.icebreakerPairs);
+      const same =
+        current.questions?.length === pairs.length &&
+        pairs.every(
+          (pair, index) =>
+            pair.question === current.questions?.[index] &&
+            pair.left === current.rounds?.[index]?.[0] &&
+            pair.right === current.rounds?.[index]?.[1],
+        );
+      if (same) return false;
+      retro.icebreakerPairs = pairs;
+      reconcilePairAnswers(retro, pairs);
+      return true;
+    }
     case "retro.answerIcebreaker": {
       requirePhase(retro, "icebreak", "The icebreaker is only open during the warm-up.");
-      const game = icebreakerById(retro.icebreaker);
-      const round = game.rounds ? retro.icebreakerRound : 0;
+      const game = playingIcebreaker(retro);
+      const round = pairRound(game, retro.icebreakerRound, op.round);
       const accepted = normalizeIcebreaker(game, round, op.body);
       const existing = retro.icebreakerAnswers.find(
         (answer) => answer.game === game.id && answer.round === round && answer.authorId === actorId,
@@ -569,14 +600,22 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       const index = clampInt(op.index, 0, 2, "Guess");
       const guesses = answer.guesses ?? [];
       const mine = guesses.find((guess) => guess.authorId === actorId);
+      let changed = false;
       if (mine) {
         if (mine.index === index) return false;
         mine.index = index;
-        return true;
+        changed = true;
+      } else {
+        guesses.push({ authorId: actorId, index });
+        answer.guesses = guesses;
+        changed = true;
       }
-      guesses.push({ authorId: actorId, index });
-      answer.guesses = guesses;
-      return true;
+      const eligible = room.participants.filter((person) => person.id !== answer.authorId);
+      if (eligible.length > 0 && eligible.every((person) => guesses.some((guess) => guess.authorId === person.id))) {
+        answer.revealed = true;
+        changed = true;
+      }
+      return changed;
     }
     case "retro.revealIcebreaker": {
       requirePhase(retro, "icebreak", "The icebreaker is only open during the warm-up.");
@@ -593,7 +632,7 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       if (actorId !== hostOf(room)) {
         throw new CadenceError("Only the host can choose the icebreaker.", "host");
       }
-      const game = icebreakerById(retro.icebreaker);
+      const game = playingIcebreaker(retro);
       const rounds = game.rounds?.length ?? 0;
       if (rounds < 2 || (op.step !== 1 && op.step !== -1)) return false;
       const nextRound = retro.icebreakerRound + op.step;
@@ -898,16 +937,29 @@ function presentRetro(retro: RetroState, actorId: string | null, names: Map<stri
     if (!fresh) return column;
     return { ...column, title: fresh.title, hint: fresh.hint, tone: fresh.tone };
   });
-  return { ...presented, cards, icebreakerAnswers: presentAnswers(presented.icebreakerAnswers, actorId) };
+  return { ...presented, cards, icebreakerAnswers: presentAnswers(presented, actorId) };
 }
 
-function presentAnswers(answers: RetroState["icebreakerAnswers"], actorId: string | null) {
-  return answers.map((answer) => {
+function presentAnswers(retro: RetroState, actorId: string | null) {
+  const answers = retro.icebreakerAnswers;
+  const pairs = thisOrThatGame(retro.icebreakerPairs).rounds?.length ?? 0;
+  const mine = new Set(
+    answers.filter((answer) => answer.game === "this-or-that" && answer.authorId === actorId).map((answer) => answer.round),
+  );
+  const finishedPairs =
+    retro.phase === "summary" ||
+    (actorId != null && pairs > 0 && Array.from({ length: pairs }, (_, index) => mine.has(index)).every(Boolean));
+  return answers.flatMap((answer) => {
+    if (answer.game === "this-or-that" && answer.authorId !== actorId && !finishedPairs) return [];
     const copy = { ...answer, guesses: answer.guesses?.map((guess) => ({ ...guess })) };
     if (answer.game === "two-truths") {
       if (!answer.revealed) {
-        if (answer.authorId !== actorId) delete copy.lie;
-        copy.guesses = (copy.guesses ?? []).filter((guess) => guess.authorId === actorId);
+        if (answer.authorId !== actorId) {
+          delete copy.lie;
+          // Guests only see their own pick until the lie is revealed (or everyone has guessed).
+          copy.guesses = (copy.guesses ?? []).filter((guess) => guess.authorId === actorId);
+        }
+        // The author keeps every guess so they can watch progress before revealing.
       }
       // Everyone except the author sees a private order, so the lie is not given away by position.
       if (answer.authorId !== actorId) {
@@ -916,8 +968,18 @@ function presentAnswers(answers: RetroState["icebreakerAnswers"], actorId: strin
         copy.displayOrder = [0, 1, 2];
       }
     }
-    return copy;
+    return [copy];
   });
+}
+
+function pairRound(game: IcebreakerGame, shared: number, requested: number | undefined): number {
+  if (game.mode !== "pairs") return game.rounds ? shared : 0;
+  const count = game.rounds?.length ?? 0;
+  if (requested == null) return Math.min(Math.max(shared, 0), Math.max(0, count - 1));
+  if (!Number.isInteger(requested) || requested < 0 || requested >= count) {
+    throw new CadenceError("That pair is not in this game.", "round");
+  }
+  return requested;
 }
 
 function splitDash(value: string): [string, string] {
@@ -1047,11 +1109,59 @@ export function sectionStopwatchMs(
   return accrued + Math.max(0, nowMs - started);
 }
 
+function playingIcebreaker(retro: RetroState): IcebreakerGame {
+  const game = icebreakerById(retro.icebreaker);
+  if (game.id !== "this-or-that") return game;
+  return thisOrThatGame(retro.icebreakerPairs);
+}
+
+function parsePairs(value: unknown): IcebreakerPair[] {
+  if (!Array.isArray(value)) throw new CadenceError("Pairs need to be a list.", "type");
+  return value.map((item) => {
+    if (!item || typeof item !== "object") {
+      throw new CadenceError("Each pair needs two sides.", "type");
+    }
+    const record = item as Record<string, unknown>;
+    return {
+      question: String(record.question ?? ""),
+      left: String(record.left ?? ""),
+      right: String(record.right ?? ""),
+    };
+  });
+}
+
+function cleanPairs(pairs: IcebreakerPair[]): IcebreakerPair[] {
+  if (pairs.length < 1) throw new CadenceError("Keep at least one pair.", "limit");
+  if (pairs.length > LIMITS.icebreakerPairs) throw new CadenceError("Eight pairs is the limit.", "limit");
+  return pairs.map((pair) => {
+    const left = cleanLine(pair.left, LIMITS.icebreakerSide, "Side");
+    const right = cleanLine(pair.right, LIMITS.icebreakerSide, "Side");
+    if (left.toLowerCase() === right.toLowerCase()) {
+      throw new CadenceError("The two sides need different names.", "choice");
+    }
+    const question = cleanLine(pairQuestion(left, right), LIMITS.icebreakerQuestion, "Question");
+    return { question, left, right };
+  });
+}
+
+function reconcilePairAnswers(retro: RetroState, pairs: IcebreakerPair[]): void {
+  retro.icebreakerAnswers = retro.icebreakerAnswers.filter((answer) => {
+    if (answer.game !== "this-or-that") return true;
+    const pair = pairs[answer.round];
+    if (!pair) return false;
+    const head = answer.body.split(/\s+[—–-]\s+/)[0] ?? answer.body;
+    return head === pair.left || head === pair.right;
+  });
+  if (retro.icebreakerRound >= pairs.length) retro.icebreakerRound = Math.max(0, pairs.length - 1);
+}
+
 function withIcebreaker(retro: RetroState): RetroState {
   const known = ICEBREAKERS.some((game) => game.id === retro.icebreaker);
   const game = icebreakerById(known ? retro.icebreaker : "one-word");
+  const pairs = storedThisOrThatPairs(retro.icebreakerPairs);
+  const playing = game.id === "this-or-that" ? thisOrThatGame(pairs) : game;
   const round = Number.isInteger(retro.icebreakerRound) && retro.icebreakerRound >= 0 ? retro.icebreakerRound : 0;
-  const last = (game.rounds?.length ?? 1) - 1;
+  const last = (playing.rounds?.length ?? 1) - 1;
   const timers = withTimers(retro);
   const stopwatches = withStopwatches(retro);
   return {
@@ -1059,7 +1169,8 @@ function withIcebreaker(retro: RetroState): RetroState {
     ...timers,
     ...stopwatches,
     icebreaker: game.id,
-    icebreakerRound: game.rounds ? Math.min(round, last) : round,
+    icebreakerPairs: pairs,
+    icebreakerRound: playing.rounds ? Math.min(round, last) : round,
     icebreakerAnswers: Array.isArray(retro.icebreakerAnswers) ? retro.icebreakerAnswers : [],
     discussionBy: retro.discussionBy === "author" ? "author" : "status",
     discussedGroupKey: typeof retro.discussedGroupKey === "string" ? retro.discussedGroupKey : null,
@@ -1131,6 +1242,7 @@ function ensureTimers(retro: RetroState): void {
 function ensureIcebreaker(retro: RetroState): void {
   const next = withIcebreaker(retro);
   retro.icebreaker = next.icebreaker;
+  retro.icebreakerPairs = next.icebreakerPairs;
   retro.icebreakerRound = next.icebreakerRound;
   retro.icebreakerAnswers = next.icebreakerAnswers;
   retro.discussionBy = next.discussionBy;
@@ -1158,6 +1270,7 @@ function blankRetro(templateId: RetroTemplateId, now: string): RetroState {
     discussedGroupKey: null,
     icebreaker: "one-word",
     icebreakerRound: 0,
+    icebreakerPairs: null,
     icebreakerAnswers: [],
   };
 }

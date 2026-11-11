@@ -89,7 +89,7 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
       console.error("[cadence] create failed", {
         message: createError instanceof Error ? createError.message : "unknown",
       });
-      setError("Could not reach Cadence. Try again.");
+      setError("Could not reach TeamCompass. Try again.");
     } finally {
       setPending(false);
     }
@@ -99,7 +99,7 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
     <main className={`setup kind-${kind}`} id="main">
       <header className="setup-bar">
         <Link href="/" className="wordmark">
-          Cadence
+          TeamCompass
         </Link>
         <Link href="/" className="btn ghost tiny">
           Back

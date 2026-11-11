@@ -1,4 +1,4 @@
-import type { ColumnTone, IcebreakerId, RetroColumn, RetroTemplateId, ReviewState, RoomKind } from "./types";
+import { LIMITS, type ColumnTone, type IcebreakerPair, type IcebreakerId, type RetroColumn, type RetroTemplateId, type ReviewState, type RoomKind } from "./types";
 
 export interface RitualCopy {
   kind: RoomKind;
@@ -12,7 +12,7 @@ export const RITUALS: RitualCopy[] = [
     kind: "retro",
     name: "Retrospective",
     promise: "Surface what the sprint felt like, then leave with owners.",
-    steps: ["Icebreaker", "Private notes", "Discuss", "Dot vote", "Actions"],
+    steps: ["Icebreaker", "Private notes", "Discuss", "Dot vote", "Actions", "Summary"],
   },
   {
     kind: "review",
@@ -101,7 +101,7 @@ export const ICEBREAKERS: readonly IcebreakerGame[] = [
     id: "this-or-that",
     name: "This or That",
     blurb: "A few rapid-fire pairs.",
-    how: "Run a few rapid-fire choices. People pick a side.",
+    how: "Pick a side on every pair. Everyone's answers show once you have chosen them all.",
     prompt: "Pick a side.",
     group: "check-in",
     mode: "pairs",
@@ -110,7 +110,7 @@ export const ICEBREAKERS: readonly IcebreakerGame[] = [
       ["Coffee", "Tea"],
       ["Quiet workspace", "Background music"],
     ],
-    questions: ["Morning or evening?", "Coffee or tea?", "Quiet workspace or background music?"],
+    questions: ["Morning or Evening?", "Coffee or Tea?", "Quiet workspace or Background music?"],
   },
   {
     id: "word-association",
@@ -251,6 +251,55 @@ export function icebreakerById(id: string): IcebreakerGame {
 export function icebreakerChoices(game: IcebreakerGame, round: number): readonly string[] {
   if (game.rounds) return game.rounds[Math.min(Math.max(round, 0), game.rounds.length - 1)] ?? [];
   return game.choices ?? [];
+}
+
+export function pairQuestion(left: string, right: string): string {
+  const a = left.replace(/\s+/g, " ").trim();
+  const b = right.replace(/\s+/g, " ").trim();
+  if (!a || !b) return "";
+  return `${a} or ${b}?`;
+}
+
+function defaultThisOrThatPairs(): IcebreakerPair[] {
+  const game = icebreakerById("this-or-that");
+  return (game.rounds ?? []).map((round) => ({
+    question: pairQuestion(round[0], round[1]),
+    left: round[0],
+    right: round[1],
+  }));
+}
+
+export function storedThisOrThatPairs(value: unknown): IcebreakerPair[] | null {
+  if (!Array.isArray(value)) return null;
+  const pairs: IcebreakerPair[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    if (typeof record.left !== "string" || typeof record.right !== "string") continue;
+    const left = record.left.replace(/\s+/g, " ").trim();
+    const right = record.right.replace(/\s+/g, " ").trim();
+    if (!left || !right || left.toLowerCase() === right.toLowerCase()) continue;
+    if (left.length > LIMITS.icebreakerSide || right.length > LIMITS.icebreakerSide) continue;
+    const question = pairQuestion(left, right);
+    if (question.length > LIMITS.icebreakerQuestion) continue;
+    pairs.push({ question, left, right });
+    if (pairs.length >= LIMITS.icebreakerPairs) break;
+  }
+  return pairs.length > 0 ? pairs : null;
+}
+
+export function resolvedThisOrThatPairs(value: unknown): IcebreakerPair[] {
+  return storedThisOrThatPairs(value) ?? defaultThisOrThatPairs();
+}
+
+export function thisOrThatGame(value: unknown): IcebreakerGame {
+  const game = icebreakerById("this-or-that");
+  const pairs = resolvedThisOrThatPairs(value);
+  return {
+    ...game,
+    rounds: pairs.map((pair) => [pair.left, pair.right] as [string, string]),
+    questions: pairs.map((pair) => pair.question),
+  };
 }
 
 const MEDIA_FILE = /\.(gif|png|jpe?g|webp|avif|bmp|gifv|mp4|webm)(?:$|[?#])/i;

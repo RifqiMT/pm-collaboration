@@ -11,6 +11,12 @@ export const RETRO_PHASES: { id: RetroPhase; label: string; short: string; hint:
   },
   { id: "vote", label: "Vote", short: "Vote", hint: "Spend your dots on the notes that matter most." },
   { id: "act", label: "Actions", short: "Act", hint: "Leave with an owner, not a pile of observations." },
+  {
+    id: "summary",
+    label: "Summary",
+    short: "Close",
+    hint: "Read the retrospective, then download every note, vote, action, and icebreaker answer.",
+  },
 ];
 
 export function notesEditable(phase: RetroPhase): boolean {

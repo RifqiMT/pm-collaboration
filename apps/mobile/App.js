@@ -8,6 +8,9 @@ import {
   icebreakerById,
   icebreakerChoices,
   icebreakerHead,
+  pairQuestion,
+  resolvedThisOrThatPairs,
+  thisOrThatGame,
   previewMediaCandidates,
   columnMark,
   RETRO_TEMPLATES,
@@ -16,11 +19,13 @@ import {
   discussionGroups,
   formatScore,
   scoreRoadmap,
+  retrospectiveCsv,
+  retrospectiveExport,
   votesLeft,
 } from "@cadence/core";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Image, Pressable, ScrollView, Share, Text, TextInput, View } from "react-native";
 import { createPersonId, request, trimServer } from "./src/api";
 import { colors, styles } from "./src/ui";
 
@@ -73,7 +78,7 @@ export default function App() {
   if (!ready) {
     return (
       <View style={styles.screen}>
-        <Text style={[styles.body, styles.lede]}>Opening Cadence…</Text>
+        <Text style={[styles.body, styles.lede]}>Opening TeamCompass…</Text>
       </View>
     );
   }
@@ -122,8 +127,8 @@ function Home({ server, onServer, onCreate, onOpen }) {
   return (
     <ScrollView contentContainerStyle={styles.body}>
       <Text style={styles.kicker}>Sprint collaboration</Text>
-      <Text style={styles.title}>Cadence</Text>
-      <Text style={styles.lede}>Retrospectives, sprint reviews, and roadmap scores in one shared room.</Text>
+      <Text style={styles.title}>TeamCompass</Text>
+      <Text style={styles.lede}>Helps teams align on direction, review progress, and decide what comes next.</Text>
       <View style={styles.card}>
         <Text style={styles.label}>Server</Text>
         <TextInput
@@ -411,6 +416,7 @@ function Retro({ room, actorId, send }) {
   const discussing = retro.phase === "discuss";
   const voting = retro.phase === "vote";
   const acting = retro.phase === "act";
+  const summarizing = retro.phase === "summary";
   const showBoard = writing || discussing || voting;
   const notes = [...retro.cards].filter((card) => !card.hidden).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const discussionBy = retro.discussionBy === "author" ? "author" : "status";
@@ -425,6 +431,7 @@ function Retro({ room, actorId, send }) {
           ["discuss", "Discuss"],
           ["vote", "Vote"],
           ["act", "Actions"],
+          ["summary", "Summary"],
         ].map(([phase, label]) => (
           <Pressable
             key={phase}
@@ -572,6 +579,7 @@ function Retro({ room, actorId, send }) {
             );
           })
         : null}
+      {summarizing ? <SummaryMobile room={room} /> : null}
       {acting ? (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Actions</Text>
@@ -622,8 +630,88 @@ function Retro({ room, actorId, send }) {
   );
 }
 
+function SummaryMobile({ room }) {
+  const data = retrospectiveExport(room);
+  const retro = room.retro;
+  if (!data || !retro) return null;
+  const dots = data.notes.reduce((sum, note) => sum + note.votes, 0);
+  const open = data.actions.filter((action) => !action.done).length;
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Summary</Text>
+        <Text style={styles.meta}>
+          {data.notes.length} notes · {dots} dots · {data.actions.length} actions
+          {open > 0 ? ` · ${open} open` : ""} · {data.people.length} people
+        </Text>
+        <Pressable
+          style={styles.button}
+          onPress={async () => {
+            try {
+              await Share.share({ title: `TeamCompass ${room.code}`, message: retrospectiveCsv(room) });
+            } catch (error) {
+              console.error("[cadence] csv share failed", {
+                message: error instanceof Error ? error.message : "unknown",
+              });
+            }
+          }}
+        >
+          <Text style={styles.buttonText}>Download CSV</Text>
+        </Pressable>
+      </View>
+      {retro.columns.map((column) => {
+        const notes = data.notes.filter((note) => note.column === column.title);
+        return (
+          <View key={column.id} style={styles.card}>
+            <Text style={styles.cardTitle}>
+              {columnMark(retro.templateId, column.id)} {column.title}
+            </Text>
+            {notes.length === 0 ? <Text style={styles.meta}>No notes in this column.</Text> : null}
+            {notes.map((note) => (
+              <View key={`${note.createdAt}-${note.body}`}>
+                <Text>{note.body}</Text>
+                <Text style={styles.meta}>
+                  {note.author} · {note.votes} {note.votes === 1 ? "dot" : "dots"}
+                  {note.voters.length > 0 ? ` · ${note.voters.join(", ")}` : ""}
+                </Text>
+              </View>
+            ))}
+          </View>
+        );
+      })}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Actions</Text>
+        {data.actions.length === 0 ? <Text style={styles.meta}>No actions were recorded.</Text> : null}
+        {data.actions.map((action) => (
+          <View key={`${action.body}-${action.owner}`}>
+            <Text>
+              {action.done ? "Done" : "Open"} · {action.body}
+            </Text>
+            <Text style={styles.meta}>
+              {action.owner}
+              {action.source ? ` · From ${action.source}` : ""}
+            </Text>
+          </View>
+        ))}
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>{data.answers[0]?.game ?? "Icebreaker"}</Text>
+        {data.answers.length === 0 ? <Text style={styles.meta}>No icebreaker answers were shared.</Text> : null}
+        {data.answers.map((answer) => (
+          <View key={`${answer.author}-${answer.round}-${answer.createdAt}`}>
+            <Text>{answer.body}</Text>
+            <Text style={styles.meta}>
+              {answer.question} · {answer.author}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function IcebreakerMobile({ retro, room, actorId, host, send }) {
-  const game = icebreakerById(retro.icebreaker);
+  const game = retro.icebreaker === "this-or-that" ? thisOrThatGame(retro.icebreakerPairs) : icebreakerById(retro.icebreaker);
   const round = game.rounds ? retro.icebreakerRound : 0;
   const answers = (retro.icebreakerAnswers ?? [])
     .filter((answer) => answer.game === game.id && answer.round === round)
@@ -662,26 +750,23 @@ function IcebreakerMobile({ retro, room, actorId, host, send }) {
         </View>
       ))}
       {host ? null : <Text style={styles.meta}>Only the host can choose the icebreaker.</Text>}
-      <Text style={styles.lede}>{prompt}</Text>
-      <Text style={styles.meta}>{game.how}</Text>
-      {game.rounds ? (
-        <View style={styles.row}>
-          <Pressable style={styles.ghost} disabled={!host || round <= 0} onPress={() => send({ type: "retro.nextIcebreakerRound", step: -1 })}>
-            <Text style={styles.ghostText}>Previous</Text>
-          </Pressable>
-          <Text style={styles.meta}>
-            Pair {round + 1} of {game.rounds.length}
-          </Text>
-          <Pressable
-            style={styles.ghost}
-            disabled={!host || round >= game.rounds.length - 1}
-            onPress={() => send({ type: "retro.nextIcebreakerRound", step: 1 })}
-          >
-            <Text style={styles.ghostText}>Next</Text>
-          </Pressable>
-        </View>
-      ) : null}
-      <IcePlay game={game} round={round} answers={answers} mine={mine} actorId={actorId} nameOf={nameOf} send={send} />
+      {game.id === "this-or-that" ? (
+        <ThisOrThatMobile
+          game={game}
+          answers={(retro.icebreakerAnswers ?? []).filter((answer) => answer.game === "this-or-that")}
+          actorId={actorId}
+          nameOf={nameOf}
+          send={send}
+          host={host}
+          pairs={resolvedThisOrThatPairs(retro.icebreakerPairs)}
+        />
+      ) : (
+        <>
+          <Text style={styles.lede}>{prompt}</Text>
+          <Text style={styles.meta}>{game.how}</Text>
+          <IcePlay game={game} round={round} answers={answers} mine={mine} actorId={actorId} nameOf={nameOf} send={send} />
+        </>
+      )}
       {host ? (
         <Pressable style={styles.button} onPress={() => send({ type: "retro.setPhase", phase: "brainstorm" })}>
           <Text style={styles.buttonText}>Start the retrospective</Text>
@@ -689,6 +774,167 @@ function IcebreakerMobile({ retro, room, actorId, host, send }) {
       ) : (
         <Text style={styles.meta}>The host starts the retrospective.</Text>
       )}
+    </View>
+  );
+}
+
+function openingPair(total, answered) {
+  const have = new Set(answered);
+  for (let index = 0; index < total; index += 1) {
+    if (!have.has(index)) return index;
+  }
+  return total;
+}
+
+function ThisOrThatMobile({ game, answers, actorId, nameOf, send, host, pairs }) {
+  const rounds = game.rounds ?? [];
+  const total = rounds.length;
+  const mine = answers.filter((answer) => answer.authorId === actorId);
+  const [step, setStep] = useState(() => openingPair(total, mine.map((answer) => answer.round)));
+  useEffect(() => {
+    setStep((current) => Math.min(current, total));
+  }, [total]);
+  const complete = openingPair(total, mine.map((answer) => answer.round)) >= total;
+  const showingResults = step >= total;
+  const prompt = showingResults ? "How the room answered" : (game.questions?.[step] ?? game.prompt);
+  const mineHere = mine.find((answer) => answer.round === step);
+
+  async function choose(choice) {
+    const ok = await send({ type: "retro.answerIcebreaker", body: choice, round: step });
+    if (!ok) return;
+    const have = new Set(mine.map((answer) => answer.round));
+    have.add(step);
+    setStep(step < total - 1 ? step + 1 : have.size >= total ? total : step);
+  }
+
+  return (
+    <View style={{ gap: 8 }}>
+      <Text style={styles.lede}>{prompt}</Text>
+      <Text style={styles.meta}>{showingResults ? "Every pair, and who picked each side." : game.how}</Text>
+      {showingResults ? (
+        <View style={{ gap: 10 }}>
+          {rounds.map((sides, index) => {
+            const roundAnswers = answers.filter((answer) => answer.round === index);
+            const own = mine.find((answer) => answer.round === index);
+            return (
+              <View key={index} style={{ gap: 6 }}>
+                <Text style={styles.label}>{game.questions?.[index] ?? `Pair ${index + 1}`}</Text>
+                {sides.map((side) => {
+                  const people = roundAnswers.filter((answer) => icebreakerHead(answer.body).head === side);
+                  const chosen = own ? icebreakerHead(own.body).head === side : false;
+                  return (
+                    <View key={side} style={[styles.chip, chosen ? styles.chipOn : null]}>
+                      <Text style={chosen ? styles.chipTextOn : styles.chipText}>
+                        {side} · {people.length} {people.length === 1 ? "person" : "people"}
+                        {people.length > 0 ? ` · ${people.map((answer) => nameOf(answer.authorId)).join(", ")}` : ""}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            );
+          })}
+          <Pressable style={styles.ghost} onPress={() => setStep(0)}>
+            <Text style={styles.ghostText}>Change my answers</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <View style={{ gap: 8 }}>
+          <View style={styles.row}>
+            <Pressable style={styles.ghost} disabled={step <= 0} onPress={() => setStep((current) => Math.max(0, current - 1))}>
+              <Text style={styles.ghostText}>Previous</Text>
+            </Pressable>
+            <Text style={styles.meta}>
+              Pair {step + 1} of {total}
+            </Text>
+            <Pressable
+              style={styles.ghost}
+              disabled={step >= total - 1 && !complete}
+              onPress={() => setStep((current) => (current >= total - 1 ? total : current + 1))}
+            >
+              <Text style={styles.ghostText}>{step >= total - 1 ? "See results" : "Next"}</Text>
+            </Pressable>
+          </View>
+          <View style={styles.row}>
+            {(rounds[step] ?? []).map((choice) => {
+              const chosen = mineHere ? icebreakerHead(mineHere.body).head === choice : false;
+              return (
+                <Pressable key={choice} style={[styles.chip, chosen ? styles.chipOn : null]} onPress={() => void choose(choice)}>
+                  <Text style={chosen ? styles.chipTextOn : styles.chipText}>{choice}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      )}
+      {host ? <PairEditorMobile pairs={pairs} send={send} /> : null}
+    </View>
+  );
+}
+
+function PairEditorMobile({ pairs, send }) {
+  const [draft, setDraft] = useState(pairs);
+  const [note, setNote] = useState("");
+  const saved = JSON.stringify(pairs);
+  useEffect(() => {
+    setDraft(JSON.parse(saved));
+  }, [saved]);
+
+  function update(index, field, value) {
+    setDraft((current) => current.map((pair, item) => (item === index ? { ...pair, [field]: value } : pair)));
+    setNote("");
+  }
+
+  async function save() {
+    for (const pair of draft) {
+      if (!pair.left.trim() || !pair.right.trim()) {
+        setNote("Each pair needs two sides.");
+        return;
+      }
+      if (pair.left.trim().toLowerCase() === pair.right.trim().toLowerCase()) {
+        setNote("The two sides need different names.");
+        return;
+      }
+    }
+    await send({
+      type: "retro.setIcebreakerPairs",
+      pairs: draft.map((pair) => ({ ...pair, question: pairQuestion(pair.left, pair.right) })),
+    });
+  }
+
+  const dirty = JSON.stringify(draft) !== saved;
+  return (
+    <View style={{ gap: 8 }}>
+      <Text style={styles.cardTitle}>Customize the pairs</Text>
+      <Text style={styles.meta}>Name the two sides. The question is written from them.</Text>
+      {draft.map((pair, index) => {
+        const question = pairQuestion(pair.left, pair.right);
+        return (
+        <View key={index} style={{ gap: 6 }}>
+          <Text style={styles.cardTitle}>{question || `Pair ${index + 1}`}</Text>
+          <TextInput style={styles.input} value={pair.left} maxLength={40} placeholder="Side A" onChangeText={(value) => update(index, "left", value)} />
+          <TextInput style={styles.input} value={pair.right} maxLength={40} placeholder="Side B" onChangeText={(value) => update(index, "right", value)} />
+          <Pressable
+            style={styles.ghost}
+            disabled={draft.length <= 1}
+            onPress={() => setDraft((current) => current.filter((_, item) => item !== index))}
+          >
+            <Text style={styles.ghostText}>Remove pair</Text>
+          </Pressable>
+        </View>
+        );
+      })}
+      <Pressable
+        style={styles.ghost}
+        disabled={draft.length >= 8}
+        onPress={() => setDraft((current) => [...current, { question: "", left: "", right: "" }])}
+      >
+        <Text style={styles.ghostText}>Add a pair</Text>
+      </Pressable>
+      <Pressable style={styles.button} disabled={!dirty} onPress={() => void save()}>
+        <Text style={styles.buttonText}>Save pairs</Text>
+      </Pressable>
+      {note ? <Text style={styles.meta}>{note}</Text> : null}
     </View>
   );
 }

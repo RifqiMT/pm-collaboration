@@ -26,13 +26,14 @@ const baseCard = {
 } satisfies RetroCardView;
 
 describe("retro-ui helpers", () => {
-  it("exposes five ritual phases in order", () => {
+  it("exposes the ritual phases in order", () => {
     expect(RETRO_PHASES.map((phase) => phase.id)).toEqual([
       "icebreak",
       "brainstorm",
       "discuss",
       "vote",
       "act",
+      "summary",
     ]);
   });
 
@@ -41,6 +42,7 @@ describe("retro-ui helpers", () => {
     expect(notesEditable("vote")).toBe(false);
     expect(notesEditable("discuss")).toBe(false);
     expect(notesEditable("act")).toBe(false);
+    expect(notesEditable("summary")).toBe(false);
     expect(notesEditable("icebreak")).toBe(false);
   });
 
@@ -49,6 +51,7 @@ describe("retro-ui helpers", () => {
     expect(votingOpen("discuss")).toBe(false);
     expect(votingOpen("brainstorm")).toBe(false);
     expect(votingOpen("act")).toBe(false);
+    expect(votingOpen("summary")).toBe(false);
     expect(votingOpen("icebreak")).toBe(false);
   });
 
@@ -68,8 +71,9 @@ describe("retro-ui helpers", () => {
 
   it("computes phase progress across the ritual", () => {
     expect(phaseProgress("icebreak")).toBe(0);
-    expect(phaseProgress("act")).toBe(1);
-    expect(phaseProgress("discuss")).toBe(0.5);
+    expect(phaseProgress("summary")).toBe(1);
+    expect(phaseProgress("discuss")).toBe(0.4);
+    expect(phaseProgress("act")).toBe(0.8);
   });
 
   it("labels authors with anonymity and ownership", () => {

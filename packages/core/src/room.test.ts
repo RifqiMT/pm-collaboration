@@ -333,17 +333,116 @@ describe("retrospective", () => {
     room = applyOp(room, { type: "retro.guessIcebreaker", targetId: answer?.id ?? "", index: 2 }, "person_alexdemo01", NOW);
     const guestView = presentRoom(room, "person_alexdemo01", NOW).retro?.icebreakerAnswers.find((item) => item.game === "two-truths");
     const hostView = presentRoom(room, HOST, NOW).retro?.icebreakerAnswers.find((item) => item.game === "two-truths");
-    expect(guestView?.lie).toBeUndefined();
+    // Only one guest is in the room, so their guess auto-reveals the lie and every pick.
+    expect(guestView?.lie).toBe(2);
+    expect(guestView?.revealed).toBe(true);
+    expect(guestView?.guesses).toEqual([{ authorId: "person_alexdemo01", index: 2 }]);
     expect(hostView?.lie).toBe(2);
     expect(hostView?.displayOrder).toEqual([0, 1, 2]);
     expect(guestView?.displayOrder).toEqual(truthDisplayOrder(`${answer?.id}:person_alexdemo01`));
     expect(guestView?.displayOrder?.slice().sort()).toEqual([0, 1, 2]);
-    room = applyOp(room, { type: "retro.revealIcebreaker" }, HOST, NOW);
     expect(presentRoom(room, "person_alexdemo01", NOW).retro?.icebreakerAnswers.find((item) => item.game === "two-truths")?.lie).toBe(2);
 
     room = applyOp(room, { type: "retro.setIcebreaker", game: "draw" }, HOST, NOW);
     room = applyOp(room, { type: "retro.answerIcebreaker", body: "d:10,10 20,20" }, HOST, NOW);
     expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "a sketch" }, HOST, NOW)).toThrow(/draw/i);
+  });
+
+  it("lets the host rewrite This or That pairs", () => {
+    let room = retroRoom();
+    room = joinRoom(room, { id: "person_alexdemo01", name: "Alex Rivera" }, NOW).room;
+    room = applyOp(room, { type: "retro.setIcebreaker", game: "this-or-that" }, HOST, NOW);
+    expect(() =>
+      applyOp(
+        room,
+        { type: "retro.setIcebreakerPairs", pairs: [{ question: "Ship or slip?", left: "Ship", right: "Slip" }] },
+        "person_alexdemo01",
+        NOW,
+      ),
+    ).toThrow(/host/);
+    expect(() => applyOp(room, { type: "retro.setIcebreakerPairs", pairs: [] }, HOST, NOW)).toThrow(/at least one/);
+    expect(() =>
+      applyOp(room, { type: "retro.setIcebreakerPairs", pairs: [{ question: "Same?", left: "A", right: "a" }] }, HOST, NOW),
+    ).toThrow(/different/);
+
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Morning" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.nextIcebreakerRound", step: 1 }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Tea" }, "person_alexdemo01", NOW);
+    room = applyOp(
+      room,
+      {
+        type: "retro.setIcebreakerPairs",
+        pairs: [
+          { question: "Ignore this", left: "Ship", right: "Slip" },
+          { question: "Ignore this too", left: "Coffee", right: "Tea" },
+        ],
+      },
+      HOST,
+      NOW,
+    );
+    expect(room.retro?.icebreakerPairs?.map((pair) => pair.question)).toEqual(["Ship or Slip?", "Coffee or Tea?"]);
+    expect(room.retro?.icebreakerRound).toBe(1);
+    expect(room.retro?.icebreakerAnswers.filter((item) => item.game === "this-or-that").map((item) => item.body)).toEqual(["Tea"]);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "Morning" }, HOST, NOW)).toThrow(/choices/);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Coffee" }, HOST, NOW);
+    expect(room.retro?.icebreakerAnswers.some((item) => item.round === 1 && item.body === "Coffee")).toBe(true);
+
+    room = applyOp(room, { type: "retro.setIcebreaker", game: "one-word" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.setIcebreaker", game: "this-or-that" }, HOST, NOW);
+    expect(room.retro?.icebreakerPairs?.[0]?.left).toBe("Ship");
+
+    room = applyOp(
+      room,
+      { type: "retro.setIcebreakerPairs", pairs: [{ question: "Ship or slip?", left: "Ship", right: "Slip" }] },
+      HOST,
+      NOW,
+    );
+    expect(room.retro?.icebreakerRound).toBe(0);
+    expect(room.retro?.icebreakerAnswers.filter((item) => item.game === "this-or-that")).toHaveLength(0);
+    expect(applyOp(room, { type: "retro.nextIcebreakerRound", step: 1 }, HOST, NOW).retro?.icebreakerRound).toBe(0);
+
+    room = applyOp(room, { type: "retro.setPhase", phase: "brainstorm" }, HOST, NOW);
+    expect(() =>
+      applyOp(room, { type: "retro.setIcebreakerPairs", pairs: [{ question: "Later?", left: "Yes", right: "No" }] }, HOST, NOW),
+    ).toThrow(/warm-up/);
+
+    const aged = structuredClone(retroRoom());
+    if (aged.retro) {
+      aged.retro.icebreaker = "this-or-that";
+      delete (aged.retro as { icebreakerPairs?: unknown }).icebreakerPairs;
+    }
+    expect(presentRoom(aged, HOST, NOW).retro?.icebreakerPairs).toBeNull();
+    expect(applyOp(aged, { type: "retro.answerIcebreaker", body: "Morning" }, HOST, NOW).retro?.icebreakerAnswers[0]?.body).toBe(
+      "Morning",
+    );
+  });
+
+  it("lets each person answer every pair before other answers appear", () => {
+    let room = retroRoom();
+    const guest = "person_alexdemo01";
+    room = joinRoom(room, { id: guest, name: "Alex Rivera" }, NOW).room;
+    room = applyOp(room, { type: "retro.setIcebreaker", game: "this-or-that" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Morning", round: 0 }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Tea", round: 1 }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Quiet workspace", round: 2 }, HOST, NOW);
+    expect(room.retro?.icebreakerRound).toBe(0);
+    expect(room.retro?.icebreakerAnswers.map((answer) => [answer.round, answer.body])).toEqual([
+      [0, "Morning"],
+      [1, "Tea"],
+      [2, "Quiet workspace"],
+    ]);
+
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Evening", round: 0 }, guest, NOW);
+    const guestEarly = presentRoom(room, guest, NOW).retro?.icebreakerAnswers.filter((answer) => answer.game === "this-or-that") ?? [];
+    expect(guestEarly.map((answer) => answer.authorId)).toEqual([guest]);
+    const hostEarly = presentRoom(room, HOST, NOW).retro?.icebreakerAnswers.filter((answer) => answer.game === "this-or-that") ?? [];
+    expect(hostEarly.some((answer) => answer.authorId === guest && answer.body === "Evening")).toBe(true);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "Morning", round: 9 }, guest, NOW)).toThrow(/pair/);
+
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Coffee", round: 1 }, guest, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Background music", round: 2 }, guest, NOW);
+    const guestDone = presentRoom(room, guest, NOW).retro?.icebreakerAnswers.filter((answer) => answer.game === "this-or-that") ?? [];
+    expect(guestDone).toHaveLength(6);
   });
 
   it("lets only the host move between sections", () => {
