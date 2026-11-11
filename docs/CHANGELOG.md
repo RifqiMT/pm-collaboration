@@ -10,8 +10,9 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 
 ### Added — Engineering
 
-- Vercel Hobby-ready web deploy: `apps/web/vercel.json` monorepo install/build, `.env.example`.  
-- Room store backends: local JSON file (dev) and **Upstash Redis** (production Functions) via `apps/web/src/server/persistence.ts`.  
+- Preferred deploy: **single-process file store** via `Dockerfile`, `render.yaml`, `fly.toml` (no Redis).  
+- Optional Vercel path remains: `apps/web/vercel.json` + Upstash Redis when Functions are used.  
+- Room store backends: local JSON file (default) and optional Redis via `persistence.ts`.  
 - Store vitest coverage for backend selection and file create/join/op durability.
 
 ### Documentation

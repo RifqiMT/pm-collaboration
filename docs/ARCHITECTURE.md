@@ -21,11 +21,11 @@ flowchart TB
   Mobile -->|poll + ops| API
   API --> Core
   API --> Store
-  Store --> Disk[(file: rooms.json local)]
-  Store --> Redis[(Upstash Redis Hobby prod)]
+  Store --> Disk[(file: rooms.json on one Node host)]
+  Store -.-> Redis[(optional Redis — Vercel only)]
 ```
 
-TeamCompass is a **monorepo** with a shared domain library and two clients that speak the same HTTP room API. There is no separate backend service; persistence is a document store (local JSON file or Upstash Redis on Vercel).
+TeamCompass is a **monorepo** with a shared domain library and two clients that speak the same HTTP room API. Preferred persistence is a **local JSON file on one Node/Docker process**. Redis is an optional escape hatch for Vercel Functions only.
 
 ---
 
@@ -93,7 +93,7 @@ Not used: WebSockets, CRDTs, OT, or offline queues beyond optimistic local text 
 - Stale lock recovery (~5s); busy error after ~4s wait  
 - Room codes: 6 chars from alphabet excluding ambiguous `I`, `O`, `0`, `1`  
 
-**Implication:** file backend needs one writer process. Redis backend is required for Vercel Functions. See [DEPLOYMENT.md](./DEPLOYMENT.md).
+**Implication:** file backend needs one writer process (Docker/Render/Fly/VPS). Do not use Vercel Functions with the file backend. See [DEPLOYMENT.md](./DEPLOYMENT.md).
 
 ---
 

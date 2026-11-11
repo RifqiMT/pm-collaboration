@@ -1,0 +1,18 @@
+# Render Blueprint — single Node web service with local JSON room store.
+# Dashboard: New → Blueprint → this repo. Free plan has no persistent disk;
+# rooms survive while the instance is up and may reset on redeploy/restart.
+services:
+  - type: web
+    name: teamcompass
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: CADENCE_STORE
+        value: file
+      - key: CADENCE_DATA_DIR
+        value: /data
+      - key: NODE_ENV
+        value: production

@@ -90,7 +90,8 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-PLAT-3 Brand vs package name** | UI TeamCompass / packages `@cadence` | Avoid renaming packages casually mid-release |
 | **G-PLAT-4 Node ≥ 20** | Engines field | Don’t target older Node without testing |
 | **G-PLAT-5 Light theme only** | No dark tokens shipped | Don’t half-implement dark mode |
-| **G-PLAT-6 Vercel Hobby** | Personal/non-commercial fair use; Redis required for rooms | Do not deploy file-only store to Functions |
+| **G-PLAT-6 Prefer single-process host** | File store needs one Node writer + disk | Prefer Docker/Render/Fly/VPS; do not use Vercel Functions for file-only store |
+| **G-PLAT-7 Vercel optional** | Functions need Redis if used | Redis is optional escape hatch only — not the preferred path |
 
 ---
 

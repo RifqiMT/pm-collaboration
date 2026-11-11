@@ -1,107 +1,123 @@
-# TeamCompass — Deployment (Vercel Hobby)
+# TeamCompass — Deployment (single-process file store)
 
-**Audience:** Operators deploying `@cadence/web`  
-**Plan target:** Vercel **Hobby** (free)  
+**Audience:** Operators hosting `@cadence/web`  
+**Preferred model:** One Node process + local `rooms.json` (no Redis)  
 **Last updated:** 2026-11-11  
 
-Mobile (`@cadence/mobile`) is Expo and is **not** deployed to Vercel. Point the phone app at the production web URL after deploy.
+Mobile (`@cadence/mobile`) stays on Expo. Point the phone at your web origin after deploy.
 
 ---
 
-## 1. What deploys
+## 1. Why not Vercel (without Redis)
+
+TeamCompass was built for **one writer** and a local JSON file (`CADENCE_DATA_DIR/rooms.json`).
+
+**Vercel Functions** have no durable shared disk. Without Upstash Redis, create-room fails in production. If you want **local-only storage**, do **not** use Vercel as the API host—use a single long-running Node/Docker host instead.
+
+| Host | Local file store | Notes |
+| --- | --- | --- |
+| **Local / LAN** | Yes | `npm run dev` / `npm run start` |
+| **Render / Fly / Railway / VPS (Docker)** | Yes | Preferred public host for Option A |
+| **Vercel Hobby** | No | Needs Redis — see §7 (optional) |
+
+---
+
+## 2. What deploys
 
 | App | Host | Notes |
 | --- | --- | --- |
-| `@cadence/web` | Vercel Hobby | Next.js UI + room API |
-| `@cadence/mobile` | Expo / device | Set server base URL to the Vercel production origin |
-| `@cadence/core` | Bundled into web | Transpiled via `next.config.ts` |
+| `@cadence/web` | Single Node/Docker process | UI + room API + file store |
+| `@cadence/mobile` | Expo / device | Set server base URL to the HTTPS origin |
+| `@cadence/core` | Bundled into web | `transpilePackages` |
 
 ---
 
-## 2. Why Redis is required on Vercel
-
-Local `apps/web/data/rooms.json` works for a single Node process. Vercel Functions have an ephemeral, mostly read-only filesystem and scale across instances, so the file store **cannot** be the production backend.
-
-On Hobby, TeamCompass uses **Upstash Redis** (Marketplace free tier) when:
-
-- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set, or  
-- `CADENCE_STORE=redis` (then both Upstash vars are required)
-
-Local `npm run dev` keeps the **file** backend unless you set Upstash env vars.
-
----
-
-## 3. One-time setup
-
-1. Push this monorepo to GitHub (or deploy with Vercel CLI).  
-2. In [Vercel](https://vercel.com): **Add New Project** → import the repo.  
-3. Project settings:
-   - **Root Directory:** `apps/web`  
-   - **Framework Preset:** Next.js (from `apps/web/vercel.json`)  
-   - **Install / Build:** already set in `apps/web/vercel.json` to run from the monorepo root workspaces  
-   - **Node.js:** ≥ 20  
-4. **Storage / Integrations:** add **Upstash Redis** to the project (Marketplace). Confirm env vars appear for Production + Preview:
-   - `UPSTASH_REDIS_REST_URL`
-   - `UPSTASH_REDIS_REST_TOKEN`
-5. Deploy. Open the production URL, create a room, join from a second browser.
-
-CLI alternative (after `vercel link` from repo root with root directory `apps/web`):
-
-```bash
-vercel integration add upstash   # if available in your CLI / dashboard flow
-vercel env pull apps/web/.env.local --yes
-vercel --prod
-```
-
-Do not commit `.env.local` or Redis tokens.
-
----
-
-## 4. Environment variables
+## 3. Environment (file store)
 
 See [`.env.example`](../.env.example).
 
-| Variable | Required on Hobby | Purpose |
+| Variable | Recommended | Purpose |
 | --- | --- | --- |
-| `UPSTASH_REDIS_REST_URL` | Yes (prod) | Redis REST endpoint |
-| `UPSTASH_REDIS_REST_TOKEN` | Yes (prod) | Redis REST token |
-| `CADENCE_STORE` | No | Force `file` or `redis` |
-| `CADENCE_DATA_DIR` | No | Override local JSON directory |
+| `CADENCE_STORE` | `file` | Force JSON file backend |
+| `CADENCE_DATA_DIR` | `/data` (containers) | Directory for `rooms.json` + lock |
+| `PORT` | `3000` or platform `$PORT` | HTTP listen port |
+| `HOSTNAME` | `0.0.0.0` (containers) | Bind all interfaces |
+
+Do **not** set `UPSTASH_*` for this path.
 
 ---
 
-## 5. Hobby plan constraints (operator checklist)
+## 4. Docker (recommended)
 
-- Fair use: Hobby is for **personal / non-commercial** use.  
-- No durable local disk — Redis is mandatory for rooms.  
-- Function duration / invocations / bandwidth are capped; polling (~1.5s) is intentional and counts toward invocations.  
-- Runtime logs retained briefly on Hobby.  
-- Trust model still applies: room code is the only key; CORS is open for mobile; do not treat a public URL as enterprise-grade ACL.
+Repo root includes `Dockerfile` + `.dockerignore`.
 
-Full limits: [Vercel Hobby plan](https://vercel.com/docs/plans/hobby) · product guardrails: [GUARDRAILS.md](./GUARDRAILS.md).
+```bash
+docker build -t teamcompass .
+docker run --rm -p 3000:3000 -v teamcompass-data:/data teamcompass
+```
 
----
-
-## 6. Mobile after web is live
-
-1. Deploy web and copy the HTTPS origin (e.g. `https://teamcompass.vercel.app`).  
-2. On the phone home screen, set the server to that origin (no trailing path).  
-3. Create/join with the same six-character codes.
+Open http://localhost:3000 — rooms persist in the `teamcompass-data` volume.
 
 ---
 
-## 7. Verify
+## 5. Render (free Blueprint)
+
+1. Push this repo to GitHub.  
+2. [Render](https://render.com) → **New** → **Blueprint** → select the repo (`render.yaml`).  
+3. Deploy the `teamcompass` web service (Docker, free plan).  
+4. Open the `*.onrender.com` URL; create a room from two browsers.
+
+**Caveat:** Free instances sleep and usually **have no persistent disk**. Rooms may reset after sleep/redeploy. For durable local files, add a persistent disk (paid) or use Fly with a volume / any VPS.
+
+Native Node alternative (no Docker): set build `npm ci && npm run build`, start `npm run start -w @cadence/web -- -H 0.0.0.0`, and `CADENCE_STORE=file`.
+
+---
+
+## 6. Fly.io
+
+```bash
+fly apps create teamcompass          # pick a unique name; sync fly.toml app =
+fly volumes create cadence_data --region fra --size 1
+# uncomment [[mounts]] in fly.toml
+fly deploy
+```
+
+Without a volume, `/data` is ephemeral. With a volume, `rooms.json` survives Machine restarts.
+
+---
+
+## 7. Optional: Vercel + Redis
+
+Only if you accept remote storage:
+
+1. Root Directory `apps/web`  
+2. Add Upstash Redis (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`)  
+3. Redeploy  
+
+Without those env vars, Vercel returns **503** with a store configuration message.
+
+---
+
+## 8. Mobile
+
+1. Copy the HTTPS origin of your single-process host.  
+2. On the phone home screen, set that origin (no path).  
+3. Join with the same six-character codes.
+
+---
+
+## 9. Verify
 
 ```bash
 npm test
 npm run build
+npm run start
 ```
 
-Smoke: create room → second client join → phase/op → reload both clients (data must survive).
+Smoke: create room → second client join → op → reload both (data must survive process restart if using a volume/disk).
 
 ---
 
-## 8. Rollback / local
+## 10. Trust model
 
-- Local without Redis: unset Upstash vars (or `CADENCE_STORE=file`).  
-- Production issues: check Vercel runtime logs and Upstash dashboard; redeploy previous deployment from the Vercel UI if needed.
+Room code is the only key. CORS is open for mobile. Prefer a trusted network or accept that a public URL is code-gated only. Full limits: [GUARDRAILS.md](./GUARDRAILS.md).

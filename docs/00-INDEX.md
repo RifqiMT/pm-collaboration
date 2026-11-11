@@ -38,7 +38,7 @@ This index is the reading map for product, engineering, design, and leadership s
 | [CHANGELOG.md](./CHANGELOG.md) | Historical development log |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System design, privacy, sync, storage |
 | [TECH_STACK.md](./TECH_STACK.md) | Packages, versions, scripts, environments |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | Vercel Hobby deploy, Upstash Redis, mobile URL |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Single-process Docker/Render/Fly file store; optional Vercel+Redis |
 | [API.md](./API.md) | HTTP routes and operation catalog |
 
 ---
@@ -54,7 +54,7 @@ This index is the reading map for product, engineering, design, and leadership s
 | Retro CSV export | `packages/core/src/retro-export.ts` |
 | Web UI & polling | `apps/web/src/components/` |
 | Room API & store (file/Redis) | `apps/web/src/app/api/`, `apps/web/src/server/` |
-| Vercel Hobby deploy | `apps/web/vercel.json`, [DEPLOYMENT.md](./DEPLOYMENT.md) |
+| Single-process deploy | `Dockerfile`, `render.yaml`, `fly.toml`, [DEPLOYMENT.md](./DEPLOYMENT.md) |
 | Design tokens (web) | `apps/web/src/app/globals.css` |
 | Mobile client | `apps/mobile/App.js`, `apps/mobile/src/` |
 

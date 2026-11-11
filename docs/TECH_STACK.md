@@ -13,7 +13,7 @@
 | UI library | React **19.x** | Web + mobile |
 | Mobile | Expo **~58**, React Native **0.88** | `@cadence/mobile` |
 | Domain | `@cadence/core` pure TS | Vitest unit tests |
-| Storage | JSON file (local) / Upstash Redis (Vercel Hobby) | Auto-select via env |
+| Storage | JSON file on one process (preferred) / optional Redis | Auto-select via env |
 | Font (web) | Instrument Sans (Google via `next/font`) | `--font-sans` |
 | Node | **≥ 20** | Root engines |
 | Package manager | npm workspaces | Mobile separate install |
@@ -84,7 +84,8 @@ npx expo start
 | Android emulator → host | Often `http://10.0.2.2:3000` |
 | Physical device | Host LAN IP, e.g. `http://192.168.1.20:3000` |
 | Production-like (local) | Single Node `next start`; backup `rooms.json` if needed |
-| Production (Vercel Hobby) | Functions + Upstash Redis; Root Directory `apps/web` — see [DEPLOYMENT.md](./DEPLOYMENT.md) |
+| Production (preferred) | Docker / Render / Fly single Node + `CADENCE_STORE=file` — see [DEPLOYMENT.md](./DEPLOYMENT.md) |
+| Production (optional Vercel) | Functions + Upstash Redis only |
 
 ---
 

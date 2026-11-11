@@ -1,0 +1,38 @@
+# Fly.io — one Machine running Next.js with local rooms.json.
+# Create app + optional volume, then: fly deploy
+#
+#   fly apps create teamcompass
+#   fly volumes create cadence_data --region fra --size 1
+#   fly deploy
+#
+# Without a volume, /data is ephemeral (lost on Machine replace).
+
+app = "teamcompass"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  CADENCE_STORE = "file"
+  CADENCE_DATA_DIR = "/data"
+  NODE_ENV = "production"
+  HOSTNAME = "0.0.0.0"
+  PORT = "3000"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+# Uncomment after creating the volume (keeps rooms across restarts):
+# [[mounts]]
+#   source = "cadence_data"
+#   destination = "/data"
