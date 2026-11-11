@@ -183,7 +183,7 @@ docker run --rm -p 3000:3000 -v teamcompass-data:/data teamcompass
 
 Or use **Render** (`render.yaml`) / **Fly.io** (`fly.toml`). Details: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-Avoid Vercel unless you add Redis—Functions cannot keep a shared `rooms.json`.
+Avoid Vercel unless you add **Supabase** (or Redis)—Functions cannot keep a shared `rooms.json`. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) §7.
 
 ---
 

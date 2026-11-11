@@ -55,6 +55,7 @@ This index is the reading map for product, engineering, design, and leadership s
 | Web UI & polling | `apps/web/src/components/` |
 | Room API & store (file/Redis) | `apps/web/src/app/api/`, `apps/web/src/server/` |
 | Single-process deploy | `Dockerfile`, `render.yaml`, `fly.toml`, [DEPLOYMENT.md](./DEPLOYMENT.md) |
+| Supabase schema (Vercel) | [supabase-schema.sql](./supabase-schema.sql) |
 | Design tokens (web) | `apps/web/src/app/globals.css` |
 | Mobile client | `apps/mobile/App.js`, `apps/mobile/src/` |
 

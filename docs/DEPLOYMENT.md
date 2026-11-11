@@ -86,15 +86,24 @@ Without a volume, `/data` is ephemeral. With a volume, `rooms.json` survives Mac
 
 ---
 
-## 7. Optional: Vercel + Redis
+## 7. Optional: Vercel + Supabase (remote store)
 
-Only if you accept remote storage:
+Vercel Functions cannot use the local JSON file. Use **Supabase** (or Redis) for rooms.
 
-1. Root Directory `apps/web`  
-2. Add Upstash Redis (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`)  
-3. Redeploy  
+1. In Supabase → **SQL Editor**, run [`docs/supabase-schema.sql`](./supabase-schema.sql).  
+2. Vercel project → **Settings → Environment Variables** (Production + Preview):
+   - `SUPABASE_URL` = `https://YOUR_PROJECT.supabase.co`
+   - `SUPABASE_SERVICE_ROLE_KEY` = service_role key (preferred; Settings → API)  
+     or `SUPABASE_ANON_KEY` = anon key (then enable the anon policy in the SQL file)
+   - Optional: `CADENCE_STORE=supabase`
+3. Redeploy the Vercel project.  
+4. Smoke-test create-room on `/new`.
 
-Without those env vars, Vercel returns **503** with a store configuration message.
+**Do not commit keys.** If an anon/service key was pasted into chat or a ticket, rotate it in Supabase → Settings → API.
+
+### Optional: Vercel + Redis
+
+Set `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` instead (or as well; Supabase wins when both are set).
 
 ---
 

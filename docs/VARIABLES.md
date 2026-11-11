@@ -319,8 +319,12 @@ sequenceDiagram
 | --- | --- | --- | --- | --- | --- |
 | `CADENCE_STORE` | Store backend override | Forces file or Redis persistence | `file` \| `redis`; omit → auto | `persistence.ts` `resolveStoreBackend` | `redis` |
 | `CADENCE_DATA_DIR` | Local data directory | Directory for `rooms.json` / lock | Defaults to `process.cwd()/data` | `persistence.ts` | `/tmp/cadence-data` |
-| `UPSTASH_REDIS_REST_URL` | Upstash REST URL | Redis HTTP endpoint for Hobby | Required with token when backend is redis | Vercel env; Marketplace | `https://….upstash.io` |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash REST token | Auth for Redis REST | Required with URL when backend is redis | Vercel env; Marketplace | (secret) |
+| `SUPABASE_URL` | Supabase project URL | REST origin for room document | Required with a key when backend is supabase | Vercel env | `https://….supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role | Server key (bypasses RLS) | Preferred on Vercel | Vercel env; never expose to browser | (secret) |
+| `SUPABASE_ANON_KEY` | Supabase anon key | Fallback server key | Needs anon RLS policy | Vercel env | (secret) |
+| `UPSTASH_REDIS_REST_URL` | Upstash REST URL | Redis HTTP endpoint | Required with token when backend is redis | Vercel env | `https://….upstash.io` |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash REST token | Auth for Redis REST | Required with URL when backend is redis | Vercel env | (secret) |
+| `cadence_store` | Supabase rooms table | Row `id=rooms` holds `{ rooms }` JSON | Upsert via PostgREST | `persistence.ts` | jsonb document |
 | `cadence:rooms` | Redis rooms key | Document key for `{ rooms }` JSON | Whole-DB document | `persistence.ts` | Redis JSON value |
 | `cadence:rooms:lock` | Redis lock key | Mutual exclusion while mutating | `SET NX` + ~5s TTL | `persistence.ts` | lock token string |
 

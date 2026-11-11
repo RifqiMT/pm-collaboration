@@ -14,48 +14,81 @@ describe("resolveStoreBackend", () => {
   const previous = {
     store: process.env.CADENCE_STORE,
     vercel: process.env.VERCEL,
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    upstashUrl: process.env.UPSTASH_REDIS_REST_URL,
+    upstashToken: process.env.UPSTASH_REDIS_REST_TOKEN,
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseAnon: process.env.SUPABASE_ANON_KEY,
+    supabaseService: process.env.SUPABASE_SERVICE_ROLE_KEY,
   };
 
   afterEach(() => {
-    if (previous.store === undefined) delete process.env.CADENCE_STORE;
-    else process.env.CADENCE_STORE = previous.store;
-    if (previous.vercel === undefined) delete process.env.VERCEL;
-    else process.env.VERCEL = previous.vercel;
-    if (previous.url === undefined) delete process.env.UPSTASH_REDIS_REST_URL;
-    else process.env.UPSTASH_REDIS_REST_URL = previous.url;
-    if (previous.token === undefined) delete process.env.UPSTASH_REDIS_REST_TOKEN;
-    else process.env.UPSTASH_REDIS_REST_TOKEN = previous.token;
+    const restore = (key: keyof typeof previous, envKey: string) => {
+      const value = previous[key];
+      if (value === undefined) delete process.env[envKey];
+      else process.env[envKey] = value;
+    };
+    restore("store", "CADENCE_STORE");
+    restore("vercel", "VERCEL");
+    restore("upstashUrl", "UPSTASH_REDIS_REST_URL");
+    restore("upstashToken", "UPSTASH_REDIS_REST_TOKEN");
+    restore("supabaseUrl", "SUPABASE_URL");
+    restore("supabaseAnon", "SUPABASE_ANON_KEY");
+    restore("supabaseService", "SUPABASE_SERVICE_ROLE_KEY");
   });
 
-  it("defaults to file when Redis env is absent", () => {
+  it("defaults to file when remote env is absent", () => {
     delete process.env.CADENCE_STORE;
     delete process.env.VERCEL;
     delete process.env.UPSTASH_REDIS_REST_URL;
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_ANON_KEY;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     expect(resolveStoreBackend()).toBe("file");
   });
 
-  it("requires redis on Vercel when Upstash env is absent", () => {
+  it("selects supabase on Vercel when remote env is absent (fails clearly at runtime)", () => {
     delete process.env.CADENCE_STORE;
     process.env.VERCEL = "1";
     delete process.env.UPSTASH_REDIS_REST_URL;
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
-    expect(resolveStoreBackend()).toBe("redis");
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_ANON_KEY;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    expect(resolveStoreBackend()).toBe("supabase");
   });
 
-  it("selects redis when Upstash env is present", () => {
+  it("selects supabase when Supabase env is present", () => {
     delete process.env.CADENCE_STORE;
+    delete process.env.VERCEL;
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_ANON_KEY = "anon";
+    expect(resolveStoreBackend()).toBe("supabase");
+  });
+
+  it("prefers supabase over redis when both are configured", () => {
+    delete process.env.CADENCE_STORE;
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_ANON_KEY = "anon";
+    process.env.UPSTASH_REDIS_REST_URL = "https://example.upstash.io";
+    process.env.UPSTASH_REDIS_REST_TOKEN = "token";
+    expect(resolveStoreBackend()).toBe("supabase");
+  });
+
+  it("selects redis when only Upstash env is present", () => {
+    delete process.env.CADENCE_STORE;
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_ANON_KEY;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     process.env.UPSTASH_REDIS_REST_URL = "https://example.upstash.io";
     process.env.UPSTASH_REDIS_REST_TOKEN = "token";
     expect(resolveStoreBackend()).toBe("redis");
   });
 
-  it("honors CADENCE_STORE=file over Redis env", () => {
+  it("honors CADENCE_STORE=file over remote env", () => {
     process.env.CADENCE_STORE = "file";
-    process.env.UPSTASH_REDIS_REST_URL = "https://example.upstash.io";
-    process.env.UPSTASH_REDIS_REST_TOKEN = "token";
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_ANON_KEY = "anon";
     expect(resolveStoreBackend()).toBe("file");
   });
 });

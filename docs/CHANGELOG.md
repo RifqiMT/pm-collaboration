@@ -11,8 +11,8 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 ### Added — Engineering
 
 - Preferred deploy: **single-process file store** via `Dockerfile`, `render.yaml`, `fly.toml` (no Redis).  
-- Optional Vercel path remains: `apps/web/vercel.json` + Upstash Redis when Functions are used.  
-- Room store backends: local JSON file (default) and optional Redis via `persistence.ts`.  
+- Optional Vercel path: **Supabase** document store (`cadence_store`) or Upstash Redis via `persistence.ts`.  
+- Room store backends: `file` (default) · `supabase` · `redis`.  
 - Store vitest coverage for backend selection and file create/join/op durability.
 
 ### Documentation
