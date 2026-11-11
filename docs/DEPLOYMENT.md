@@ -91,15 +91,17 @@ Without a volume, `/data` is ephemeral. With a volume, `rooms.json` survives Mac
 Vercel Functions cannot use the local JSON file. Use **Supabase** (or Redis) for rooms.
 
 1. In Supabase → **SQL Editor**, run [`docs/supabase-schema.sql`](./supabase-schema.sql).  
+   Keys alone cannot create tables — this SQL step is mandatory.  
 2. Vercel project → **Settings → Environment Variables** (Production + Preview):
    - `SUPABASE_URL` = `https://YOUR_PROJECT.supabase.co`
-   - `SUPABASE_SERVICE_ROLE_KEY` = service_role key (preferred; Settings → API)  
-     or `SUPABASE_ANON_KEY` = anon key (then enable the anon policy in the SQL file)
+   - `SUPABASE_SECRET_KEY` = `sb_secret_…` (preferred; Settings → API Keys)  
+     or `SUPABASE_PUBLISHABLE_KEY` = `sb_publishable_…` (works with the schema’s anon policy)
+   - Legacy JWT `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_ANON_KEY` still work
    - Optional: `CADENCE_STORE=supabase`
-3. Redeploy the Vercel project.  
+3. Redeploy the Vercel project after changing env vars.  
 4. Smoke-test create-room on `/new`.
 
-**Do not commit keys.** If an anon/service key was pasted into chat or a ticket, rotate it in Supabase → Settings → API.
+**Do not commit keys.** If a key was pasted into chat, rotate it in Supabase → Settings → API Keys.
 
 ### Optional: Vercel + Redis
 

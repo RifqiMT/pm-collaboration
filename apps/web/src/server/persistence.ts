@@ -32,11 +32,24 @@ function hasSupabaseEnv(): boolean {
 }
 
 function supabaseKey(): string | undefined {
+  // Prefer secret/server keys. Support new sb_* keys and legacy JWT anon/service_role.
   return (
+    process.env.SUPABASE_SECRET_KEY?.trim() ||
     process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
+    process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ||
     process.env.SUPABASE_ANON_KEY?.trim() ||
     undefined
   );
+}
+
+function supabaseAuthHeaders(key: string): Record<string, string> {
+  const headers: Record<string, string> = { apikey: key };
+  // Legacy JWT keys need Bearer for PostgREST role. New sb_* keys are not JWTs —
+  // send them on apikey only (Bearer can break some gateways with Invalid JWT).
+  if (!key.startsWith("sb_")) {
+    headers.Authorization = `Bearer ${key}`;
+  }
+  return headers;
 }
 
 function dataDir(): string {
@@ -68,7 +81,7 @@ function delay(ms: number) {
 
 function missingRemoteStoreError(): CadenceError {
   return new CadenceError(
-    "Room storage is not configured for this deployment. On Vercel, set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY), run docs/supabase-schema.sql, then redeploy. Alternatively use a single-process host with the local file store.",
+    "Room storage is not configured for this deployment. On Vercel, set SUPABASE_URL and SUPABASE_SECRET_KEY (or SUPABASE_PUBLISHABLE_KEY), run docs/supabase-schema.sql, then redeploy. Alternatively use a single-process host with the local file store.",
     "store",
   );
 }
@@ -231,8 +244,7 @@ async function supabaseRequest(
   return fetch(`${config.url}/rest/v1/${pathAndQuery}`, {
     ...rest,
     headers: {
-      apikey: config.key,
-      Authorization: `Bearer ${config.key}`,
+      ...supabaseAuthHeaders(config.key),
       "Content-Type": "application/json",
       ...(prefer ? { Prefer: prefer } : {}),
       ...(headers as Record<string, string> | undefined),
