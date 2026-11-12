@@ -11,6 +11,7 @@ import {
   truthDisplayOrder,
   type IcebreakerGame,
 } from "./content";
+import { demoActions, demoNotesForColumns, demoReviewContent, demoRoadmapContent } from "./demo";
 import { createId } from "./ids";
 import {
   asBoolean,
@@ -1302,150 +1303,61 @@ function blankInitiative(): Initiative {
 }
 
 function fillDemo(room: Room, hostId: string, now: string): void {
+  const host = room.participants.find((person) => person.id === hostId) ?? room.participants[0];
+  if (!host) return;
   const alex = makeParticipant("person_alexdemo01", "Alex Rivera", room.participants.length, past(now, 120_000));
   const sam = makeParticipant("person_samdemo001", "Sam Okonkwo", room.participants.length + 1, past(now, 90_000));
-  room.participants.push(alex, sam);
+  const jordan = makeParticipant("person_jordandemo1", "Jordan Lee", room.participants.length + 2, past(now, 60_000));
+  room.participants.push(alex, sam, jordan);
+  const authors = [host, alex, sam, jordan];
 
   if (room.retro) {
-    const [first, second, third] = room.retro.columns;
-    if (!first || !second || !third) return;
-    const cards: RetroCard[] = [
-      note(first.id, "Standup ran long because we re-litigated scope.", hostId, false, [], now),
-      note(first.id, "Pair on the billing bug the morning it appears.", alex.id, false, [], now),
-      note(second.id, "Staging deploys failed twice and nobody owned the fix.", sam.id, false, [], now),
-      note(second.id, "Review comments arrived the day before sprint end.", hostId, true, [], now),
-      note(third.id, "The empty-state copy saved a support thread.", alex.id, false, [], now),
-      note(third.id, "Keep the Wednesday design critique. It unblocked two stories.", sam.id, false, [], now),
-    ];
-    room.retro.cards = cards;
-    const action: ActionItem = {
-      id: "act_demoowner01",
-      body: "Name a deploy owner before the next staging release.",
-      ownerId: sam.id,
-      done: false,
-      sourceCardId: cards[2]?.id ?? null,
-    };
-    room.retro.actions = [action];
-    moveStopwatch(room.retro, "brainstorm", now);
+    room.retro.cards = demoNotesForColumns(room.retro.columns, authors, now);
+    const source =
+      room.retro.cards.find((card) => card.columnId === room.retro?.columns[1]?.id)?.id ??
+      room.retro.cards[0]?.id ??
+      null;
+    room.retro.actions = demoActions(authors, source);
+    room.retro.phase = "discuss";
+    room.retro.discussionBy = "status";
+    room.retro.icebreaker = "one-word";
+    room.retro.icebreakerAnswers = authors.slice(0, 3).map((person, index) => ({
+      id: `ice_demo_${index}`,
+      authorId: person.id,
+      game: "one-word" as const,
+      round: 0,
+      body: ["Focused", "Steady", "Curious"][index] ?? "Ready",
+      createdAt: now,
+    }));
+    moveStopwatch(room.retro, "discuss", now);
   }
 
   if (room.review) {
-    room.review.goal = "A merchant can retry a failed payout without contacting support.";
-    check(room.review, "goal-visible", hostId);
-    check(room.review, "environment", alex.id);
-    check(room.review, "journey", hostId);
-    room.review.feedback.push({
-      id: "note_demofeed01",
-      authorId: sam.id,
-      kind: "change",
-      body: "Show the payout failure reason before the retry button. Finance asked twice.",
-      createdAt: now,
-    });
+    const seed = demoReviewContent(authors, now);
+    room.review.goal = seed.goal;
+    room.review.decision = seed.decision;
+    room.review.decisionNotes = seed.decisionNotes;
+    room.review.feedback = seed.feedback;
+    for (const itemId of seed.checkedItemIds) {
+      check(room.review, itemId, host.id);
+      check(room.review, itemId, alex.id);
+      if (itemId === "dod" || itemId === "journey" || itemId === "decision-made") {
+        check(room.review, itemId, sam.id);
+      }
+    }
   }
 
   if (room.roadmap) {
-    room.roadmap.objective = "Reduce failed payout contacts and open a path to usage-based pricing.";
-    room.roadmap.initiatives = [
-      initiative("bet_demoquick01", {
-        title: "Self-serve payout retry",
-        outcome: "Merchants recover a failed payout without a support ticket.",
-        assumption: "The payments API already returns a retry token.",
-        reach: 800,
-        impact: 2,
-        confidence: 0.8,
-        effort: 1.5,
-        iceImpact: 8,
-        iceConfidence: 8,
-        iceEase: 8,
-        value: 8,
-        complexityTechnical: 2,
-        complexityDependency: 2,
-        complexityUncertainty: 2,
-        horizon: "now",
-        ownerId: hostId,
-      }),
-      initiative("bet_demobig001", {
-        title: "Usage-based billing",
-        outcome: "Revenue tracks actual payout volume instead of a flat plan.",
-        assumption: "Finance can close the books on a new meter this quarter.",
-        reach: 5000,
-        impact: 3,
-        confidence: 0.5,
-        effort: 8,
-        iceImpact: 9,
-        iceConfidence: 4,
-        iceEase: 3,
-        value: 9,
-        complexityTechnical: 5,
-        complexityDependency: 5,
-        complexityUncertainty: 4,
-        horizon: "later",
-        ownerId: alex.id,
-      }),
-      initiative("bet_demofill001", {
-        title: "Admin theme refresh",
-        outcome: "Internal tools look like the product. No customer metric moves.",
-        assumption: "Design system tokens already exist.",
-        reach: 12,
-        impact: 0.25,
-        confidence: 1,
-        effort: 2,
-        iceImpact: 3,
-        iceConfidence: 8,
-        iceEase: 9,
-        value: 2,
-        complexityTechnical: 2,
-        complexityDependency: 1,
-        complexityUncertainty: 1,
-        horizon: "later",
-        ownerId: null,
-      }),
-      initiative("bet_demopark001", {
-        title: "Replace the ledger database",
-        outcome: "Nightly reconciliation finishes before finance arrives.",
-        assumption: "We have not measured where the time goes.",
-        reach: 40,
-        impact: 1,
-        confidence: 0.4,
-        effort: 10,
-        iceImpact: 4,
-        iceConfidence: 3,
-        iceEase: 2,
-        value: 4,
-        complexityTechnical: 5,
-        complexityDependency: 4,
-        complexityUncertainty: 5,
-        horizon: "later",
-        ownerId: sam.id,
-      }),
-    ];
+    const seed = demoRoadmapContent(authors);
+    room.roadmap.framework = "rice";
+    room.roadmap.objective = seed.objective;
+    room.roadmap.initiatives = seed.initiatives;
   }
-}
-
-function note(
-  columnId: string,
-  body: string,
-  authorId: string,
-  anonymous: boolean,
-  votes: string[],
-  createdAt: string,
-): RetroCard {
-  return { id: createId("card"), columnId, body, authorId, anonymous, votes, createdAt };
 }
 
 function check(review: ReviewState, itemId: string, actorId: string) {
   const item = findItem(review, itemId);
   if (!item.doneBy.includes(actorId)) item.doneBy.push(actorId);
-}
-
-function initiative(id: string, patch: Omit<Initiative, "id" | "iceImpact" | "iceConfidence" | "iceEase"> & Partial<Initiative>): Initiative {
-  return {
-    iceImpact: 6,
-    iceConfidence: 6,
-    iceEase: 6,
-    ...patch,
-    id,
-  };
 }
 
 function hostOf(room: { hostId?: string; participants: { id: string }[] }): string {

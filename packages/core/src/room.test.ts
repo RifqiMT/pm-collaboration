@@ -692,6 +692,7 @@ describe("roadmap scoring", () => {
       { code: "ROAD01", kind: "roadmap", title: "Bets", hostId: HOST, hostName: "Rifqi", demo: true },
       NOW,
     );
+    expect(room.roadmap?.initiatives.length).toBeGreaterThanOrEqual(8);
     const ranked = scoreRoadmap(room.roadmap!);
     const byTitle = Object.fromEntries(ranked.map((item) => [item.initiative.title, item]));
     expect(byTitle["Self-serve payout retry"]?.quadrant).toBe("do-first");
@@ -701,6 +702,47 @@ describe("roadmap scoring", () => {
     expect(byTitle["Replace the ledger database"]?.quadrant).toBe("reconsider");
     expect(ranked[0]?.rank).toBe(1);
     expect(ranked[0]?.score).toBeGreaterThan(ranked[1]?.score ?? 0);
+  });
+
+  it("seeds ten professional notes per retro column across templates", () => {
+    const ids = Object.keys(RETRO_TEMPLATES) as RetroTemplateId[];
+    for (const templateId of ids) {
+      const room = createRoom(
+        {
+          code: "DEMO01",
+          kind: "retro",
+          title: "Demo",
+          hostId: HOST,
+          hostName: "Rifqi",
+          templateId,
+          demo: true,
+        },
+        NOW,
+      );
+      expect(room.retro?.phase).toBe("discuss");
+      for (const column of room.retro?.columns ?? []) {
+        const count = room.retro?.cards.filter((card) => card.columnId === column.id).length ?? 0;
+        expect(count, `${templateId}/${column.id}`).toBe(10);
+      }
+      expect(room.retro?.actions.length).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it("seeds a complete professional sprint review example", () => {
+    const room = createRoom(
+      { code: "REVW01", kind: "review", title: "Review", hostId: HOST, hostName: "Rifqi", demo: true },
+      NOW,
+    );
+    expect(room.review?.goal.length).toBeGreaterThan(40);
+    expect(room.review?.decision).toBe("ship");
+    expect(room.review?.decisionNotes.length).toBeGreaterThan(40);
+    expect(room.review?.feedback.length).toBeGreaterThanOrEqual(9);
+    const kinds = new Set(room.review?.feedback.map((note) => note.kind));
+    expect(kinds.has("praise")).toBe(true);
+    expect(kinds.has("change")).toBe(true);
+    expect(kinds.has("question")).toBe(true);
+    const required = room.review?.sections.flatMap((section) => section.items).filter((item) => item.required) ?? [];
+    expect(required.every((item) => item.doneBy.length > 0)).toBe(true);
   });
 
   it("rejects an impact value outside the RICE scale", () => {

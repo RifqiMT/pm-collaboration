@@ -46,7 +46,8 @@ Primary users are agile product and engineering teams running time-boxed rituals
 ### 3.1 Rooms and presence
 
 - Create a room by ritual kind (`retro` | `review` | `roadmap`), optional title, host name, and (for retros) template  
-- Optional **demo** seed content for exploration  
+- Optional **demo** seed: 10 notes per retro column (every template), full professional review + 10-bet roadmap  
+ 
 - Join by six-character code and display name  
 - Local identity persisted in browser `localStorage` / mobile AsyncStorage (`person_…` id + name)  
 - Presence: a participant is **active** if `lastSeen` is within **20 seconds** (`ACTIVE_MS`)  

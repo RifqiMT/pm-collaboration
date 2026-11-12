@@ -8,6 +8,10 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 
 ## [Unreleased]
 
+### Added — Product
+
+- Richer **Start from an example** demos: 10 notes per retro column for every template, a complete professional sprint review (checklist, feedback, ship decision), and a 10-initiative roadmap spanning all quadrants.
+
 ### Added — Engineering
 
 - Preferred deploy: **single-process file store** via `Dockerfile`, `render.yaml`, `fly.toml` (no Redis).  
