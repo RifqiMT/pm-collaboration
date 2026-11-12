@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-11 |
+| Last updated | 2026-11-12 |
 
 ---
 
@@ -86,6 +86,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-RET9 | Per-section countdown + stopwatch (not on summary) | Should |
 | FR-RET10 | Summary view + CSV export of full retro data | Must |
 | FR-RET11 | Column glyphs grow with note volume | Could |
+| FR-RET12 | Discuss raise-hand queue; named notes highlight; anonymous stay unattributed; cleared on phase change | Should |
 
 ### 4.3 Sprint review
 
@@ -127,7 +128,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | --- | --- |
 | NFR-1 | Domain logic covered by Vitest unit tests in `@cadence/core` |
 | NFR-2 | Request body size capped (~100KB) |
-| NFR-3 | Store uses file lock + in-process queue; single writer process |
+| NFR-3 | Store uses queue + lock (file / Redis NX); file backend is single-writer; remote backends for serverless |
 | NFR-4 | Accessible focus styles and skip link on web |
 | NFR-5 | Graceful user-facing errors for domain failures (host, phase, votes, etc.) |
 | NFR-6 | No secrets in repository; room data path gitignored |
@@ -139,11 +140,12 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 
 1. Two browsers can join the same room and see each other’s allowed edits within a few seconds of polling.  
 2. During brainstorm, participant A never receives participant B’s note text from the API.  
-3. Host-only ops fail for non-hosts with a clear error.  
-4. RICE example `(400 × 2 × 0.8) / 2 = 320` matches `scoreInitiative`.  
-5. Complexity ≥ 3.5 with score ≥ median maps to `big-bet`.  
-6. Retro CSV export includes notes, votes, actions, icebreaker answers, and section timings.  
-7. Mobile can complete create → join → mutate against a LAN-hosted web API.  
+3. In Discuss, raise-hand works; named notes highlight; anonymous authorship is not leaked; queue clears on phase change.  
+4. Host-only ops fail for non-hosts with a clear error.  
+5. RICE example `(400 × 2 × 0.8) / 2 = 320` matches `scoreInitiative`.  
+6. Complexity ≥ 3.5 with score ≥ median maps to `big-bet`.  
+7. Retro CSV export includes notes, votes, actions, icebreaker answers, and section timings.  
+8. Mobile can complete create → join → mutate against a LAN-hosted web API.  
 
 Traceability to stories and code: [TRACEABILITY_MATRIX.md](./TRACEABILITY_MATRIX.md).
 
@@ -154,8 +156,8 @@ Traceability to stories and code: [TRACEABILITY_MATRIX.md](./TRACEABILITY_MATRIX
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Room code leakage | Unauthorized join | Trusted network; short-lived ritual rooms; communicate trust model |
-| File store / Hobby Redis | Data loss / free-tier limits | Local: one writer; Vercel: Upstash Redis — see DEPLOYMENT.md |
-| Polling lag | Feels “not live” | 1.5s visible poll; version ignore for stale |
+| File / free-tier remote store | Data loss / free-tier limits | Local: one writer; Vercel: Supabase or Redis — see DEPLOYMENT.md |
+| Polling lag | Feels “not live” | Web 1.5s / mobile 2s poll; version ignore for stale |
 | Package name ≠ brand | Confusion | Document Cadence namespace vs TeamCompass brand |
 | Mobile API URL misconfig | Cannot join | Clear home-screen server field + README examples |
 

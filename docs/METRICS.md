@@ -1,7 +1,7 @@
 # TeamCompass — Product Metrics & OKRs
 
 **Audience:** Product team, engineering leads, facilitators of internal adoption  
-**Last updated:** 2026-11-11  
+**Last updated:** 2026-11-12  
 **Note:** TeamCompass MVP does not yet ship an analytics pipeline. Metrics below define what to measure when instrumentation is added, plus qualitative proxies available today from `rooms.json` and meeting outcomes.
 
 ---
@@ -57,6 +57,7 @@
 | --- | --- | --- | --- |
 | `web_vs_mobile_sessions` | Client mix | Sessions by client | Inform design investment |
 | `csv_export_rate` | CSV export rate | Exports / retros reaching summary | ≥ 40% for Maya’s teams |
+| `raise_hand_rate` | Discuss raise-hand usage | Retros with ≥1 raise-hand op in Discuss / retros reaching Discuss | Inform facilitation quality; no hard target yet |
 
 ---
 

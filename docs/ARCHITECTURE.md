@@ -1,6 +1,6 @@
 # TeamCompass — Architecture
 
-**Last updated:** 2026-11-11  
+**Last updated:** 2026-11-12  
 
 ---
 
@@ -17,15 +17,16 @@ flowchart TB
     Core["@cadence/core"]
     Store[Store adapter]
   end
-  WebUI -->|poll + ops| API
-  Mobile -->|poll + ops| API
+  WebUI -->|poll 1.5s/8s + ops| API
+  Mobile -->|poll 2s + ops| API
   API --> Core
   API --> Store
-  Store --> Disk[(file: rooms.json on one Node host)]
-  Store -.-> Redis[(optional Redis — Vercel only)]
+  Store --> Disk[(file: rooms.json)]
+  Store -.-> Supabase[(supabase cadence_store)]
+  Store -.-> Redis[(optional Upstash Redis)]
 ```
 
-TeamCompass is a **monorepo** with a shared domain library and two clients that speak the same HTTP room API. Preferred persistence is a **local JSON file on one Node/Docker process**. Redis is an optional escape hatch for Vercel Functions only.
+TeamCompass is a **monorepo** with a shared domain library and two clients that speak the same HTTP room API. Preferred persistence is a **local JSON file on one Node/Docker process**. On Vercel Functions, use **Supabase** (preferred remote) or **Upstash Redis**.
 
 ---
 
@@ -61,11 +62,12 @@ Mutations are **Ops** (discriminated union). The server:
 | Mechanism | Behavior |
 | --- | --- |
 | Transport | HTTP JSON |
-| Freshness | Client poll: **1500 ms** when document visible, **8000 ms** when hidden (`use-room.ts`) |
+| Freshness (web) | Poll **1500 ms** visible / **8000 ms** hidden (`use-room.ts`) |
+| Freshness (mobile) | Fixed poll **2000 ms** (`App.js`) |
 | Concurrency | Last write wins on overlapping fields |
 | Versioning | Clients ignore snapshots older than local `version` |
 | Presence | `markSeen` on get/join/ops; throttle skips writes if seen &lt; 5s ago |
-| Idempotency | Votes/checks send desired boolean state |
+| Idempotency | Votes/checks/raise-hand send desired boolean state |
 
 Not used: WebSockets, CRDTs, OT, or offline queues beyond optimistic local text fields.
 
@@ -77,7 +79,8 @@ Not used: WebSockets, CRDTs, OT, or offline queues beyond optimistic local text 
 | --- | --- |
 | Brainstorm notes | Other authors’ `body` / identity hidden in `RoomView` until Discuss |
 | Discuss onward | Notes revealed per phase rules |
-| Server operator | Can read file store or Redis document — trust the host environment |
+| Discuss raise hand | Queue in `raisedHands`; named notes highlight; anonymous authorship stays protected |
+| Server operator | Can read file / Supabase / Redis document — trust the host environment |
 | Transport | No end-to-end encryption; use trusted network |
 
 ---
@@ -86,14 +89,15 @@ Not used: WebSockets, CRDTs, OT, or offline queues beyond optimistic local text 
 
 `apps/web/src/server/store.ts` + `persistence.ts`:
 
-- **Backends:** `file` (local default) or `redis` (auto when Upstash env is set; required on Vercel)  
-- Document shape unchanged: `{ rooms: Record<code, Room> }`  
+- **Backends** (`resolveStoreBackend`): `file` · `supabase` · `redis`  
+  - Forced by `CADENCE_STORE`, else Supabase env → Upstash env → on `VERCEL` prefer `supabase` → else `file`  
+- Document shape: `{ rooms: Record<code, Room> }` (file JSON, Redis key, or Supabase `cadence_store` row `id=rooms`)  
 - In-process serialization queue  
-- Distributed-ish lock: file lock locally, Redis `SET NX` + TTL on Hobby  
+- Locks: file lock locally; Redis `SET NX` + TTL; Supabase upsert path serialized via the same queue  
 - Stale lock recovery (~5s); busy error after ~4s wait  
 - Room codes: 6 chars from alphabet excluding ambiguous `I`, `O`, `0`, `1`  
 
-**Implication:** file backend needs one writer process (Docker/Render/Fly/VPS). Do not use Vercel Functions with the file backend. See [DEPLOYMENT.md](./DEPLOYMENT.md).
+**Implication:** file backend needs one writer process (Docker/Render/Fly/VPS). Vercel Functions need Supabase or Redis. See [DEPLOYMENT.md](./DEPLOYMENT.md) and [supabase-schema.sql](./supabase-schema.sql).
 
 ---
 

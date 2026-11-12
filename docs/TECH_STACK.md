@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-11  
+**Last updated:** 2026-11-12  
 
 ---
 
@@ -13,7 +13,7 @@
 | UI library | React **19.x** | Web + mobile |
 | Mobile | Expo **~58**, React Native **0.88** | `@cadence/mobile` |
 | Domain | `@cadence/core` pure TS | Vitest unit tests |
-| Storage | JSON file on one process (preferred) / optional Redis | Auto-select via env |
+| Storage | JSON file (preferred) / Supabase / Upstash Redis | Auto-select via env |
 | Font (web) | Instrument Sans (Google via `next/font`) | `--font-sans` |
 | Node | **≥ 20** | Root engines |
 | Package manager | npm workspaces | Mobile separate install |
@@ -43,7 +43,7 @@ Root package name remains `cadence@0.1.0` while product brand is **TeamCompass**
 | next ^15.5.4 | App + API routes |
 | react / react-dom ^19.1.1 | UI |
 | @cadence/core * | Domain |
-| @upstash/redis | Durable room store on Vercel |
+| @upstash/redis | Optional Redis room store (Vercel alternative to Supabase) |
 | vitest ^3.2 | Helper + store tests |
 
 ### `@cadence/mobile` `1.0.0`
@@ -85,7 +85,7 @@ npx expo start
 | Physical device | Host LAN IP, e.g. `http://192.168.1.20:3000` |
 | Production-like (local) | Single Node `next start`; backup `rooms.json` if needed |
 | Production (preferred) | Docker / Render / Fly single Node + `CADENCE_STORE=file` — see [DEPLOYMENT.md](./DEPLOYMENT.md) |
-| Production (optional Vercel) | Functions + Upstash Redis only |
+| Production (optional Vercel) | Functions + **Supabase** (preferred) or Upstash Redis |
 
 ---
 
@@ -105,9 +105,10 @@ npx expo start
 
 ## 6. Data & ops
 
-- Local persistence: `apps/web/data/rooms.json` (gitignored; override with `CADENCE_DATA_DIR`)  
-- Vercel Hobby: Upstash Redis keys `cadence:rooms` / `cadence:rooms:lock` via `UPSTASH_REDIS_REST_*`  
-- Optional force: `CADENCE_STORE=file|redis`  
+- Local persistence: `CADENCE_DATA_DIR/rooms.json` (default `apps/web/data`; gitignored)  
+- Vercel preferred: Supabase table `cadence_store` via `SUPABASE_URL` + `SUPABASE_SECRET_KEY` (or publishable/legacy keys); run [supabase-schema.sql](./supabase-schema.sql) once  
+- Vercel alternative: Upstash Redis keys `cadence:rooms` / `cadence:rooms:lock`  
+- Force backend: `CADENCE_STORE=file|supabase|redis`  
 - No auth provider (Clerk, Auth0, etc.)  
 - Env template: [`.env.example`](../.env.example) · deploy guide: [DEPLOYMENT.md](./DEPLOYMENT.md)  
 
@@ -130,7 +131,7 @@ Recommended before merge: `npm test` and a two-browser smoke of create → join 
 1. Put shared rules in `@cadence/core`, never duplicate formulas in UI.  
 2. Keep API routes thin: parse → store → core → present.  
 3. Prefer desired-state ops over toggles.  
-4. Local file backend: one writer process. Vercel: require Upstash Redis (see DEPLOYMENT.md).  
+4. Local file backend: one writer process. Vercel: require Supabase or Redis (see DEPLOYMENT.md).  
 5. Document new `LIMITS` and formulas in [VARIABLES.md](./VARIABLES.md).  
 6. Preserve brainstorm privacy in `presentRoom` when changing card views.  
 

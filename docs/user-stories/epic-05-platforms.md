@@ -59,11 +59,12 @@
 
 **Acceptance criteria**
 
-- [ ] Visible poll ≈ 1.5s; hidden ≈ 8s  
+- [ ] Web: visible poll ≈ 1.5s; hidden ≈ 8s  
+- [ ] Mobile: fixed poll ≈ 2s  
 - [ ] Stale (older version) snapshots are ignored  
 - [ ] Ops are serialized on the client to reduce races  
 
-**PRD:** FR-P5 · **Code:** `use-room.ts`
+**PRD:** FR-P5 · **Code:** `use-room.ts`, `apps/mobile/App.js`
 
 ---
 

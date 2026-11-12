@@ -152,6 +152,8 @@ export interface RetroState {
   discussionBy: DiscussionBy;
   /** Column id, author id, or "anonymous" for the group currently in focus. */
   discussedGroupKey: string | null;
+  /** Participant ids, in the order they raised a hand during Discuss. */
+  raisedHands: string[];
   icebreaker: IcebreakerId;
   icebreakerRound: number;
   /** Host-written This or That pairs. Null uses the built-in pairs. */
@@ -305,6 +307,7 @@ export type Op =
   | { type: "retro.focusCard"; cardId: string | null }
   | { type: "retro.setDiscussionBy"; by: DiscussionBy }
   | { type: "retro.focusGroup"; key: string }
+  | { type: "retro.raiseHand"; raised: boolean }
   | { type: "retro.addAction"; body: string; sourceCardId?: string | null }
   | { type: "retro.setActionDone"; actionId: string; done: boolean }
   | { type: "retro.assignAction"; actionId: string; ownerId: string | null }

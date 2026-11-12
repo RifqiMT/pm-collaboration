@@ -1,24 +1,24 @@
-# TeamCompass — Deployment (single-process file store)
+# TeamCompass — Deployment
 
 **Audience:** Operators hosting `@cadence/web`  
-**Preferred model:** One Node process + local `rooms.json` (no Redis)  
-**Last updated:** 2026-11-11  
+**Preferred model:** One Node process + local `rooms.json`  
+**Last updated:** 2026-11-12  
 
 Mobile (`@cadence/mobile`) stays on Expo. Point the phone at your web origin after deploy.
 
 ---
 
-## 1. Why not Vercel (without Redis)
+## 1. Why not Vercel (without a remote store)
 
 TeamCompass was built for **one writer** and a local JSON file (`CADENCE_DATA_DIR/rooms.json`).
 
-**Vercel Functions** have no durable shared disk. Without Upstash Redis, create-room fails in production. If you want **local-only storage**, do **not** use Vercel as the API host—use a single long-running Node/Docker host instead.
+**Vercel Functions** have no durable shared disk. Without **Supabase** or **Upstash Redis**, create-room fails in production. If you want **local-only storage**, do **not** use Vercel as the API host—use a single long-running Node/Docker host instead.
 
 | Host | Local file store | Notes |
 | --- | --- | --- |
 | **Local / LAN** | Yes | `npm run dev` / `npm run start` |
-| **Render / Fly / Railway / VPS (Docker)** | Yes | Preferred public host for Option A |
-| **Vercel Hobby** | No | Needs Redis — see §7 (optional) |
+| **Render / Fly / Railway / VPS (Docker)** | Yes | Preferred public host for file store |
+| **Vercel Hobby** | No | Needs Supabase (preferred) or Redis — see §7 |
 
 ---
 

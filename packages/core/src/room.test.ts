@@ -603,7 +603,37 @@ describe("retrospective", () => {
 
     const legacy = retroRoom();
     delete (legacy.retro as { discussionBy?: string }).discussionBy;
+    delete (legacy.retro as { raisedHands?: string[] }).raisedHands;
     expect(presentRoom(legacy, HOST, NOW).retro?.discussionBy).toBe("status");
+    expect(presentRoom(legacy, HOST, NOW).retro?.raisedHands).toEqual([]);
+  });
+
+  it("lets a person raise a hand in discuss and highlight only their named notes", () => {
+    let room = retroRoom();
+    room = joinRoom(room, { id: "person_alexdemo01", name: "Alex Rivera" }, NOW).room;
+    room = applyOp(room, { type: "retro.setPhase", phase: "brainstorm" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.addCard", columnId: "start", body: "Ship retries", anonymous: false }, "person_alexdemo01", NOW);
+    room = applyOp(room, { type: "retro.addCard", columnId: "continue", body: "Pairing", anonymous: true }, "person_alexdemo01", NOW);
+    room = applyOp(room, { type: "retro.addCard", columnId: "stop", body: "Late reviews", anonymous: false }, HOST, NOW);
+    expect(() => applyOp(room, { type: "retro.raiseHand", raised: true }, "person_alexdemo01", NOW)).toThrow(/discuss section/);
+
+    room = applyOp(room, { type: "retro.setPhase", phase: "discuss" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.raiseHand", raised: true }, "person_alexdemo01", NOW);
+    room = applyOp(room, { type: "retro.raiseHand", raised: true }, HOST, NOW);
+    expect(room.retro?.raisedHands).toEqual(["person_alexdemo01", HOST]);
+    expect(applyOp(room, { type: "retro.raiseHand", raised: true }, "person_alexdemo01", NOW)).toBe(room);
+
+    const hostView = presentRoom(room, HOST, NOW).retro;
+    const alexNotes = hostView?.cards.filter((card) => card.authorId === "person_alexdemo01") ?? [];
+    expect(alexNotes.map((card) => card.body)).toEqual(["Ship retries"]);
+    expect(hostView?.cards.find((card) => card.body === "Pairing")?.authorId).toBeNull();
+    const alexView = presentRoom(room, "person_alexdemo01", NOW).retro;
+    expect(alexView?.cards.find((card) => card.body === "Pairing")?.mine).toBe(true);
+
+    room = applyOp(room, { type: "retro.raiseHand", raised: false }, "person_alexdemo01", NOW);
+    expect(room.retro?.raisedHands).toEqual([HOST]);
+    room = applyOp(room, { type: "retro.setPhase", phase: "vote" }, HOST, NOW);
+    expect(room.retro?.raisedHands).toEqual([]);
   });
 
   it("turns each note into an action only once", () => {
@@ -702,6 +732,15 @@ describe("roadmap scoring", () => {
     expect(byTitle["Replace the ledger database"]?.quadrant).toBe("reconsider");
     expect(ranked[0]?.rank).toBe(1);
     expect(ranked[0]?.score).toBeGreaterThan(ranked[1]?.score ?? 0);
+    expect(room.roadmap?.initiatives).toHaveLength(10);
+    expect(room.roadmap?.objective.length).toBeGreaterThan(40);
+    for (const bet of room.roadmap?.initiatives ?? []) {
+      expect(bet.title.length).toBeGreaterThan(8);
+      expect(bet.outcome.length).toBeGreaterThan(20);
+      expect(bet.assumption.length).toBeGreaterThan(20);
+      expect(bet.reach).toBeGreaterThan(0);
+      expect(bet.effort).toBeGreaterThan(0);
+    }
   });
 
   it("seeds ten professional notes per retro column across templates", () => {
@@ -721,8 +760,10 @@ describe("roadmap scoring", () => {
       );
       expect(room.retro?.phase).toBe("discuss");
       for (const column of room.retro?.columns ?? []) {
-        const count = room.retro?.cards.filter((card) => card.columnId === column.id).length ?? 0;
-        expect(count, `${templateId}/${column.id}`).toBe(10);
+        const notes = room.retro?.cards.filter((card) => card.columnId === column.id) ?? [];
+        expect(notes, `${templateId}/${column.id}`).toHaveLength(10);
+        expect(new Set(notes.map((card) => card.body)).size, `${templateId}/${column.id}`).toBe(10);
+        expect(notes.every((card) => card.body.length > 24), `${templateId}/${column.id}`).toBe(true);
       }
       expect(room.retro?.actions.length).toBeGreaterThanOrEqual(4);
     }
@@ -741,8 +782,12 @@ describe("roadmap scoring", () => {
     expect(kinds.has("praise")).toBe(true);
     expect(kinds.has("change")).toBe(true);
     expect(kinds.has("question")).toBe(true);
-    const required = room.review?.sections.flatMap((section) => section.items).filter((item) => item.required) ?? [];
-    expect(required.every((item) => item.doneBy.length > 0)).toBe(true);
+    const items = room.review?.sections.flatMap((section) => section.items) ?? [];
+    expect(items.length).toBeGreaterThanOrEqual(16);
+    expect(items.every((item) => item.doneBy.length >= 2)).toBe(true);
+    expect(items.every((item) => item.note.length > 40)).toBe(true);
+    const required = items.filter((item) => item.required);
+    expect(required.every((item) => item.doneBy.length >= 3)).toBe(true);
   });
 
   it("rejects an impact value outside the RICE scale", () => {

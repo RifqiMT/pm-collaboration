@@ -2,7 +2,7 @@
 
 **Purpose:** Technical and business limitations that constrain product development.  
 **Audience:** Engineers, PMs, designers, security reviewers  
-**Last updated:** 2026-11-11  
+**Last updated:** 2026-11-12  
 
 Violating a hard guardrail without an approved architecture change is a product defect, not a stretch goal.
 
@@ -15,7 +15,7 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-SEC-1 Room code access** | The six-character code is the only access control | Do not market as enterprise ACL/SSO product |
 | **G-SEC-2 No accounts** | No authentication, authorization roles, or audit identity beyond local person ids | Host privileges are not cryptographically bound to a human |
 | **G-SEC-3 Trusted network** | Designed for LAN/VPN/team-owned hosts | Do not expose casually on the public internet without additional controls |
-| **G-SEC-4 Operator visibility** | Operator can read file store or Redis document | Brainstorm privacy is peer-to-peer within the room model, not operator-proof |
+| **G-SEC-4 Operator visibility** | Operator can read file / Supabase / Redis document | Brainstorm privacy is peer-to-peer within the room model, not operator-proof |
 | **G-SEC-5 Open CORS** | API allows `*` | Convenient for mobile; inappropriate as sole public API hardening |
 | **G-SEC-6 No E2E encryption** | Traffic and storage are plaintext to the server | Use TLS at the reverse-proxy layer if deployed beyond localhost |
 
@@ -38,9 +38,9 @@ Violating a hard guardrail without an approved architecture change is a product 
 
 | Guardrail | Limitation | Do / Don’t |
 | --- | --- | --- |
-| **G-DATA-1 Document store** | File JSON locally; Upstash Redis document on Vercel | Do not run two Node writers against one file backend; use Redis on serverless |
-| **G-DATA-2 In-process queue + lock** | Soft concurrency (file lock / Redis NX) | Do not assume CRDT or strong multi-region consistency |
-| **G-DATA-3 Hobby durability** | Redis free-tier limits; file can be lost with disk | Do not promise enterprise multi-AZ durability without paid ops |
+| **G-DATA-1 Document store** | File JSON locally; Supabase or Redis on Vercel | Do not run two Node writers against one file backend; configure remote store on serverless |
+| **G-DATA-2 In-process queue + lock** | Soft concurrency (file lock / Redis NX / queued remote writes) | Do not assume CRDT or strong multi-region consistency |
+| **G-DATA-3 Hobby durability** | Free-tier remote limits; file can be lost with disk | Do not promise enterprise multi-AZ durability without paid ops |
 | **G-DATA-4 Hard caps** | See `LIMITS` | Do not raise caps casually without memory/perf review |
 | **G-DATA-5 Last write wins** | Concurrent edits on same field | Do not promise CRDT-grade merge |
 | **G-DATA-6 Body size ~100KB** | Request cap | Do not accept unbounded drawings/payloads |
@@ -51,7 +51,7 @@ Violating a hard guardrail without an approved architecture change is a product 
 
 | Guardrail | Limitation | Product implication |
 | --- | --- | --- |
-| **G-SYNC-1 Polling only** | ~1.5s visible / ~8s hidden | “Live” means near-live, not websocket instant |
+| **G-SYNC-1 Polling only** | Web ~1.5s visible / ~8s hidden; mobile ~2s fixed | “Live” means near-live, not websocket instant |
 | **G-SYNC-2 Version ignore** | Stale snapshots dropped | Clients must keep local version discipline |
 | **G-SYNC-3 Desired-state ops** | Votes/checks are not toggles | UI must send intended boolean state |
 | **G-SYNC-4 Presence approx** | 20s active window | Not a precise online roster |
@@ -91,7 +91,8 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-PLAT-4 Node ≥ 20** | Engines field | Don’t target older Node without testing |
 | **G-PLAT-5 Light theme only** | No dark tokens shipped | Don’t half-implement dark mode |
 | **G-PLAT-6 Prefer single-process host** | File store needs one Node writer + disk | Prefer Docker/Render/Fly/VPS; do not use Vercel Functions for file-only store |
-| **G-PLAT-7 Vercel optional** | Functions need Redis if used | Redis is optional escape hatch only — not the preferred path |
+| **G-PLAT-7 Vercel optional** | Functions need Supabase or Redis | Prefer Supabase on Vercel; Redis remains an alternative; file store is preferred off-Vercel |
+| **G-PLAT-8 Mobile timer chrome** | Mobile omits start/clear timer UI | Do not document mobile as feature-identical facilitation chrome |
 
 ---
 
@@ -122,7 +123,7 @@ Aligned with org Performance Guardrail: no silent regressions on critical paths 
 
 These are **not** current features; they are the sanctioned ways out of hard limits:
 
-1. Move beyond single Redis document to per-room keys / SQL + stronger transactions (Hobby path already uses Upstash)  
+1. Move beyond single document stores to per-room keys / SQL + stronger transactions  
 2. Add optional room passphrase or expiring codes  
 3. Add SSE/WebSocket fan-out while keeping core ops identical  
 4. Add auth if moving to multi-tenant SaaS (changes trust model entirely)  

@@ -1,6 +1,6 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-11  
+**Status:** Current as of repository state 2026-11-12  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
 **Note:** On case-insensitive filesystems this path is also `docs/product.md`. There is a single product document—this one.
@@ -46,7 +46,7 @@ Primary users are agile product and engineering teams running time-boxed rituals
 ### 3.1 Rooms and presence
 
 - Create a room by ritual kind (`retro` | `review` | `roadmap`), optional title, host name, and (for retros) template  
-- Optional **demo** seed: 10 notes per retro column (every template), full professional review + 10-bet roadmap  
+- Optional **demo** seed, for showing the product: 10 notes on every column of every retrospective template, a sprint review with evidence on every checklist item, and 10 scored roadmap bets  
  
 - Join by six-character code and display name  
 - Local identity persisted in browser `localStorage` / mobile AsyncStorage (`person_…` id + name)  
@@ -63,10 +63,11 @@ Primary users are agile product and engineering teams running time-boxed rituals
 | Templates | 8 classic + 26 pop-culture shapes (34 total) from `RETRO_TEMPLATES` |
 | Icebreaker | 18 games; host picks game; This or That supports host-written pairs (1–8) |
 | Private notes | During brainstorm, `presentRoom` strips others’ note bodies before leaving the server |
-| Discuss walks | Status walk (column) or author walk; board columns remain status categories |
+| Discuss walks | Status walk (column) or author walk; board columns remain status categories. A person can raise a hand; their named notes are highlighted. Anonymous notes stay unattributed. |
 | Dot voting | Default **3** votes per person (host sets **1–10**); lowering budget drops excess newest dots |
 | Actions | Body, owner, done flag; can be created from a note |
-| Timers | Per-section countdown; UI presets **3 / 5 / 8** minutes; server allows 30–3600 seconds |
+| Raise hand | In Discuss, anyone can raise/lower a hand (ordered queue). Named notes from that person highlight; anonymous notes stay unattributed except to the raiser |
+| Timers | Per-section countdown; **web** UI presets **3 / 5 / 8** minutes; server allows 30–3600 seconds (mobile does not expose timer controls yet) |
 | Stopwatch | Accrues while a section is open; Summary has no timer/stopwatch UI |
 | Column glyphs | Header graphics grow as notes collect in that column |
 | Summary + CSV | Collects notes, votes, actions, icebreaker answers, and section timing; downloadable CSV |
@@ -95,23 +96,24 @@ Primary users are agile product and engineering teams running time-boxed rituals
 
 | Surface | Role |
 | --- | --- |
-| Web (`apps/web`) | Full UI, App Router pages, room API, file/Redis store |
-| Mobile (`apps/mobile`) | Expo client for home / create / room for all three rituals |
-| Core (`packages/core`) | Types, ops, privacy presentation, scoring, content, export |
+| Web (`apps/web`) | Full UI, App Router pages, room API, persistence (`file` / `supabase` / `redis`) |
+| Mobile (`apps/mobile`) | Expo client for home / create / room for all three rituals (2s poll; raise hand; no timer chrome) |
+| Core (`packages/core`) | Types, ops, privacy presentation, scoring, content, demo seed, export |
 
 ---
 
 ## 4. Product logics (business rules)
 
 1. **Room code is the access key.** Anyone with the code and a name can join and edit (subject to host gates and phase rules).  
-2. **One room document, versioned.** Each successful op bumps `version`. Clients poll (~1.5s visible / ~8s hidden) and ignore stale snapshots.  
+2. **One room document, versioned.** Each successful op bumps `version`. Web polls ~1.5s visible / ~8s hidden; mobile polls ~2s. Clients ignore stale snapshots.  
 3. **Desired-state votes and checks.** Sending “voting: true” or “done: true” is idempotent; a double tap does not toggle away the first intent.  
 4. **Brainstorm privacy is server-side.** Hiding notes only in the browser is not considered private.  
 5. **Host authority.** Only the host changes phase, icebreaker selection/pairs/rounds, and discussion walk mode.  
 6. **Last write wins** on the same field when two people edit concurrently.  
 7. **Text fields commit on blur or Enter** (single-line); failed saves restore previous text.  
 8. **Scoring math lives in core** so web and mobile cannot diverge on formulas.  
-9. **Hard limits** protect the single-process JSON store (see §7 and [GUARDRAILS](./GUARDRAILS.md)).  
+9. **Hard limits** protect shared document stores (see §7 and [GUARDRAILS](./GUARDRAILS.md)).  
+10. **Raise hand** is Discuss-only desired state; the queue clears whenever the host changes phase.  
 
 Collaboration flow:
 
@@ -120,7 +122,7 @@ flowchart LR
   create[Create a room] --> code[Share 6-character code]
   code --> join[Each person joins with a name]
   join --> edit[Edits are operations on one room]
-  edit --> poll[Clients refresh ~1.5s / ~8s hidden]
+  edit --> poll[Web ~1.5s/8s · Mobile ~2s]
 ```
 
 ---
@@ -160,10 +162,10 @@ Full definitions live in [VARIABLES.md](./VARIABLES.md).
 | Topic | Guideline |
 | --- | --- |
 | Stack | Next.js 15 + React 19 web; Expo ~58 mobile; TypeScript core; Vitest |
-| Storage | Local `rooms.json` or Upstash Redis document + queue/lock ([DEPLOYMENT.md](./DEPLOYMENT.md)) |
-| Sync | HTTP polling, not WebSockets |
+| Storage | Preferred: local `rooms.json` on one Node process. Vercel: Supabase (`cadence_store`) or Upstash Redis ([DEPLOYMENT.md](./DEPLOYMENT.md)) |
+| Sync | HTTP polling, not WebSockets (web visibility-aware; mobile fixed 2s) |
 | Auth | None beyond room code |
-| Scaling | One Node process owns the file; do not run two writers against one store |
+| Scaling | File backend: one Node writer. Serverless: Supabase or Redis. Do not run two writers against one file |
 | Limits | 40 people, 180 cards, 80 actions, 40 initiatives, 100 feedback notes, etc. |
 | CORS | Open (`*`) for local/LAN mobile access |
 | Errors | Domain `CadenceError` with machine `code` (e.g. `host`, `phase`, `private`, `votes`) |

@@ -6,6 +6,7 @@ import {
   formatElapsed,
   notesEditable,
   phaseProgress,
+  sortDiscussNotes,
   timerTone,
   votingOpen,
 } from "./retro-ui";
@@ -24,6 +25,10 @@ const baseCard = {
   hidden: false,
   mine: false,
 } satisfies RetroCardView;
+
+function card(partial: Partial<RetroCardView> & Pick<RetroCardView, "id" | "body">): RetroCardView {
+  return { ...baseCard, ...partial };
+}
 
 describe("retro-ui helpers", () => {
   it("exposes the ritual phases in order", () => {
@@ -82,5 +87,22 @@ describe("retro-ui helpers", () => {
     expect(authorLabel({ ...baseCard, anonymous: true })).toBe("Anonymous");
     expect(authorLabel({ ...baseCard, anonymous: true, mine: true })).toBe("You · anonymous");
     expect(authorLabel({ ...baseCard, hidden: true })).toBe("Private");
+  });
+
+  it("sorts discuss notes by author, then by the time they were written", () => {
+    const notes = [
+      card({ id: "a", body: "A", authorName: "Sam", authorId: "sam", createdAt: "2026-01-01T02:00:00.000Z" }),
+      card({ id: "d", body: "D", authorName: "Alex", authorId: "alex", createdAt: "2026-01-01T03:00:00.000Z" }),
+      card({ id: "b", body: "B", authorName: "Alex", authorId: "alex", createdAt: "2026-01-01T01:00:00.000Z" }),
+      card({
+        id: "c",
+        body: "C",
+        anonymous: true,
+        authorId: null,
+        authorName: null,
+        createdAt: "2026-01-01T00:30:00.000Z",
+      }),
+    ];
+    expect(sortDiscussNotes(notes).map((item) => item.id)).toEqual(["b", "d", "a", "c"]);
   });
 });

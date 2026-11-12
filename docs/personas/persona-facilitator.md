@@ -30,7 +30,7 @@
 - Creates the room; becomes `hostId`  
 - Picks template and icebreaker; may customize This or That pairs  
 - Advances phases; starts 3/5/8 minute timers  
-- Chooses discuss walk (status vs author) and focuses groups  
+- Chooses discuss walk (status vs author), focuses groups, and uses the raise-hand queue to manage speaking  
 - Sets vote budget; drives action assignment  
 - Opens Summary and downloads CSV  
 

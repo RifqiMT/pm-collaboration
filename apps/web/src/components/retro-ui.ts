@@ -7,7 +7,7 @@ export const RETRO_PHASES: { id: RetroPhase; label: string; short: string; hint:
     id: "discuss",
     label: "Discuss",
     short: "Discuss",
-    hint: "The host walks the room by status or by author. Notes stay in their status columns.",
+    hint: "The host walks the room by status or by author. Raise a hand to talk, and your notes light up.",
   },
   { id: "vote", label: "Vote", short: "Vote", hint: "Spend your dots on the notes that matter most." },
   { id: "act", label: "Actions", short: "Act", hint: "Leave with an owner, not a pile of observations." },
@@ -63,4 +63,18 @@ export function phaseProgress(phase: RetroPhase): number {
   const index = RETRO_PHASES.findIndex((item) => item.id === phase);
   if (index < 0) return 0;
   return index / (RETRO_PHASES.length - 1);
+}
+
+function authorSortKey(card: RetroCardView): string {
+  if (card.anonymous || !card.authorId) return "\uffff";
+  return authorLabel(card).toLocaleLowerCase();
+}
+
+export function sortDiscussNotes(cards: RetroCardView[]): RetroCardView[] {
+  return cards.slice().sort(
+    (a, b) =>
+      authorSortKey(a).localeCompare(authorSortKey(b)) ||
+      a.createdAt.localeCompare(b.createdAt) ||
+      a.id.localeCompare(b.id),
+  );
 }

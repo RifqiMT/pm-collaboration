@@ -68,6 +68,25 @@
 
 ---
 
+## US-2.4b Raise hand in Discuss
+
+**As** Jordan  
+**I want** to raise my hand during Discuss  
+**So that** the room sees a fair speaking queue without exposing anonymous authorship  
+
+**Acceptance criteria**
+
+- [ ] `retro.raiseHand` works only in Discuss (`phase` error otherwise)  
+- [ ] Desired-state: raising when already raised is a no-op; lowering removes the id  
+- [ ] Queue order is append order in `raisedHands`  
+- [ ] Changing phase clears `raisedHands`  
+- [ ] Named notes authored by a raised person highlight; anonymous notes highlight only for the raiser’s own card  
+- [ ] Web and mobile both expose raise/lower controls  
+
+**PRD:** FR-RET12 · **Code:** `retro.raiseHand`, `handUp()` in `retro-board.tsx` / `App.js`, tests in `room.test.ts`
+
+---
+
 ## US-2.5 Dot vote with a budget
 
 **As** Jordan  
@@ -110,11 +129,12 @@
 
 **Acceptance criteria**
 
-- [ ] UI presets 3, 5, 8 minutes; custom within server 30–3600s  
+- [ ] Web UI presets 3, 5, 8 minutes; custom within server 30–3600s  
 - [ ] Stopwatch accrues while the section is active  
 - [ ] Summary has no timer/stopwatch controls  
+- [ ] Mobile may omit timer chrome; server timers still apply if started from web  
 
-**PRD:** FR-RET9 · **Code:** timers in `RetroState`, `PhaseTimer`
+**PRD:** FR-RET9 · **Code:** timers in `RetroState`, `PhaseTimer` (web)
 
 ---
 

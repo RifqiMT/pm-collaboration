@@ -10,21 +10,21 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 
 ### Added — Product
 
-- Richer **Start from an example** demos: 10 notes per retro column for every template, a complete professional sprint review (checklist, feedback, ship decision), and a 10-initiative roadmap spanning all quadrants.
+- **Start from an example** loads a demo session: 10 notes in every column of every retrospective shape, a sprint review with evidence on every checklist item, and a 10-bet roadmap across all four quadrants.  
+- **Raise hand** in Discuss: ordered speaking queue; named notes highlight; anonymous authorship stays protected; queue clears on phase change (web + mobile).
 
 ### Added — Engineering
 
 - Preferred deploy: **single-process file store** via `Dockerfile`, `render.yaml`, `fly.toml` (no Redis).  
 - Optional Vercel path: **Supabase** document store (`cadence_store`) or Upstash Redis via `persistence.ts`.  
 - Room store backends: `file` (default) · `supabase` · `redis`.  
-- Store vitest coverage for backend selection and file create/join/op durability.
+- Store vitest coverage for backend selection and file create/join/op durability.  
+- Core tests for `retro.raiseHand` / `raisedHands` presentation.
 
 ### Documentation
 
-- Added enterprise documentation suite under `docs/` (index, PRODUCT, PRD, personas, user stories, variables with relationship charts, metrics/OKRs, design guidelines, traceability matrix, guardrails, architecture, tech stack, API).  
-- Added [DEPLOYMENT.md](./DEPLOYMENT.md) for Hobby + Upstash + mobile API URL.  
-- Expanded root `README.md` to professional product standard with deep links.  
-- Clarified brand **TeamCompass** vs engineering namespace `@cadence/*`.
+- Enterprise documentation suite under `docs/` (index, PRODUCT, PRD, personas, user stories, variables with relationship charts, metrics/OKRs, design guidelines, traceability matrix, guardrails, architecture, tech stack, API, deployment).  
+- **2026-11-12 refresh:** documented raise-hand end-to-end; aligned store backends (`file`/`supabase`/`redis`) and Supabase key precedence; clarified web vs mobile poll/timer differences; corrected accent token notes.
 
 ---
 

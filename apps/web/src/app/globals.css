@@ -570,9 +570,14 @@ legend { padding: 0 0.3rem; font-weight: 700; font-size: 0.82rem; }
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.85rem;
+  gap: 0.85rem 1rem;
 }
 .phase-copy { min-width: 0; flex: 1; }
+.phase-meta > .phase-timer {
+  flex: 0 1 auto;
+  margin-left: 0;
+  align-self: center;
+}
 .phase-kicker {
   display: flex;
   flex-wrap: wrap;
@@ -1763,38 +1768,35 @@ button.truth-choice { cursor: pointer; font: inherit; }
 .dot-picker input.dot-custom::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .dot-picker input.dot-custom { -moz-appearance: textfield; appearance: textfield; }
 .phase-timer {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.65rem 0.85rem;
+  gap: 0.45rem 0.7rem;
   align-items: center;
-  justify-content: space-between;
   margin-left: auto;
-  min-width: min(100%, 22rem);
-  padding: 0.45rem 0.5rem 0.45rem 0.55rem;
-  border-radius: 16px;
+  max-width: 100%;
+  padding: 0.35rem 0.4rem 0.35rem 0.4rem;
+  border-radius: 999px;
   border: 1px solid rgba(18, 20, 26, 0.08);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 245, 247, 0.96));
-  box-shadow: 0 6px 18px rgba(18, 20, 26, 0.04);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 6px 16px rgba(18, 20, 26, 0.04);
   transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease), background 180ms var(--ease);
 }
 .phase-timer.on {
   border-color: rgba(18, 20, 26, 0.14);
-  background:
-    radial-gradient(120% 140% at 0% 0%, rgba(226, 59, 22, 0.07), transparent 48%),
-    linear-gradient(180deg, #fff, #f6f7fa);
-  box-shadow: 0 10px 24px rgba(18, 20, 26, 0.06);
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(18, 20, 26, 0.06);
 }
 .phase-timer-face {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.45rem;
   min-width: 0;
+  padding-left: 0.1rem;
 }
 .phase-timer-ring {
   position: relative;
-  width: 2.55rem;
-  height: 2.55rem;
+  width: 2.1rem;
+  height: 2.1rem;
   flex: 0 0 auto;
   color: var(--ink-soft);
 }
@@ -1806,7 +1808,7 @@ button.truth-choice { cursor: pointer; font: inherit; }
 .phase-timer-track,
 .phase-timer-progress {
   fill: none;
-  stroke-width: 2.4;
+  stroke-width: 2.5;
 }
 .phase-timer-track { stroke: rgba(18, 20, 26, 0.1); }
 .phase-timer-progress {
@@ -1816,7 +1818,7 @@ button.truth-choice { cursor: pointer; font: inherit; }
   transition: stroke-dasharray 240ms linear, stroke 180ms var(--ease);
 }
 .phase-timer.on:not(.has-progress) .phase-timer-progress {
-  stroke-dasharray: 24 97.4;
+  stroke-dasharray: 22 97.4;
   animation: timer-spin 1.2s linear infinite;
 }
 @keyframes timer-spin {
@@ -1826,31 +1828,32 @@ button.truth-choice { cursor: pointer; font: inherit; }
   position: absolute;
   inset: 0;
   margin: auto;
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 0.82rem;
+  height: 0.82rem;
   color: var(--ink);
 }
 .phase-timer-copy {
   display: flex;
   flex-direction: column;
-  gap: 0.05rem;
-  min-width: 4.4rem;
+  gap: 0.02rem;
+  min-width: 3.4rem;
 }
 .phase-timer-label {
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 750;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-soft);
+  line-height: 1;
 }
 .phase-timer-copy strong {
   font-variant-numeric: tabular-nums;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   letter-spacing: -0.04em;
-  line-height: 1;
+  line-height: 1.1;
 }
 .phase-timer-status {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 650;
   color: var(--ink-soft);
   white-space: nowrap;
@@ -1858,64 +1861,64 @@ button.truth-choice { cursor: pointer; font: inherit; }
 .phase-timer-controls {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.28rem;
+  gap: 0.2rem;
   align-items: center;
+  padding: 0.18rem;
+  border-radius: 999px;
+  background: #f3f4f7;
 }
 .phase-timer-controls button,
 .phase-timer-custom {
-  border: 1px solid var(--line);
-  background: white;
+  border: 0;
+  background: transparent;
   color: var(--ink);
-  border-radius: 10px;
-  min-height: 2rem;
-  padding: 0.28rem 0.62rem;
-  font-size: 0.82rem;
-  font-weight: 700;
+  border-radius: 999px;
+  min-height: 1.85rem;
+  padding: 0.25rem 0.62rem;
+  font-size: 0.8rem;
+  font-weight: 750;
   cursor: pointer;
-  transition: background 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease), transform 160ms var(--ease);
+  transition: background 160ms var(--ease), color 160ms var(--ease), box-shadow 160ms var(--ease);
 }
 .phase-timer-controls button.on {
   background: var(--ink);
-  border-color: var(--ink);
   color: white;
+  box-shadow: 0 6px 14px rgba(18, 20, 26, 0.12);
 }
 .phase-timer-controls button.custom:not(.on) {
-  border-style: dashed;
   color: var(--ink-soft);
 }
 .phase-timer-controls button.clear {
-  background: transparent;
   color: var(--ink-soft);
+  padding-inline: 0.55rem;
 }
 @media (hover: hover) {
   .phase-timer-controls button:hover:not(.on) {
-    border-color: #b7bdc8;
-    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.9);
   }
   .phase-timer-controls button.clear:hover {
     color: var(--bad);
-    border-color: rgba(196, 35, 58, 0.28);
-    background: rgba(196, 35, 58, 0.06);
+    background: rgba(196, 35, 58, 0.08);
   }
 }
 .phase-timer-custom {
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
-  padding: 0.15rem 0.45rem 0.15rem 0.35rem;
+  gap: 0.15rem;
+  padding: 0.12rem 0.45rem 0.12rem 0.35rem;
   background: white;
-  box-shadow: inset 0 0 0 1px var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
 }
 .phase-timer-custom input {
-  width: 2.6rem;
-  height: 1.55rem;
+  width: 2.2rem;
+  height: 1.4rem;
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
   text-align: center;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
@@ -1923,21 +1926,17 @@ button.truth-choice { cursor: pointer; font: inherit; }
 .phase-timer-custom input::-webkit-outer-spin-button,
 .phase-timer-custom input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .phase-timer-custom input { -moz-appearance: textfield; appearance: textfield; }
-.phase-timer-custom span { color: var(--ink-soft); font-size: 0.78rem; font-weight: 750; }
+.phase-timer-custom span { color: var(--ink-soft); font-size: 0.74rem; font-weight: 750; }
 .phase-timer.tone-urgent {
   border-color: rgba(196, 35, 58, 0.28);
-  background:
-    radial-gradient(120% 140% at 0% 0%, rgba(196, 35, 58, 0.1), transparent 50%),
-    linear-gradient(180deg, #fff, #fff5f6);
+  background: #fff8f8;
 }
 .phase-timer.tone-urgent .phase-timer-copy strong,
 .phase-timer.tone-urgent .phase-timer-progress { color: var(--bad); stroke: var(--bad); }
 .phase-timer.tone-urgent .phase-timer-copy strong { animation: timer-pulse 1s var(--ease) infinite; }
 .phase-timer.tone-done {
   border-color: rgba(226, 59, 22, 0.24);
-  background:
-    radial-gradient(120% 140% at 0% 0%, rgba(226, 59, 22, 0.1), transparent 50%),
-    linear-gradient(180deg, #fff, #fff6f1);
+  background: #fff8f4;
 }
 .phase-timer.tone-done .phase-timer-copy strong,
 .phase-timer.tone-done .phase-timer-progress { color: var(--accent-deep); stroke: var(--accent-deep); }
@@ -2777,40 +2776,53 @@ button.truth-choice { cursor: pointer; font: inherit; }
 .discuss-walk {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.9rem;
   animation: retro-enter 280ms var(--ease);
 }
 .discuss-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.65rem;
+  gap: 0.55rem 0.7rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 16px;
+  border: 1px solid rgba(18, 20, 26, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 20px rgba(18, 20, 26, 0.035);
+}
+.discuss-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .discuss-progress {
-  margin: 0;
-  font-size: 0.84rem;
+  margin: 0 0 0 auto;
+  font-size: 0.8rem;
   font-weight: 750;
   color: var(--ink-soft);
-  background: white;
-  border: 1px solid var(--line);
+  background: #f3f4f7;
+  border: 1px solid transparent;
   border-radius: 999px;
-  padding: 0.3rem 0.7rem;
+  padding: 0.32rem 0.65rem;
+  white-space: nowrap;
 }
 .discuss-basis {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.28rem;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid var(--line);
+  gap: 0.25rem;
+  padding: 0.22rem;
+  background: #f3f4f7;
+  border: 1px solid transparent;
   border-radius: 999px;
   color: var(--ink-soft);
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 650;
 }
-.discuss-basis > span { padding: 0 0.35rem 0 0.55rem; }
+.discuss-basis > span { padding: 0 0.3rem 0 0.55rem; }
 .discuss-basis button {
   border: 0;
   background: transparent;
@@ -2819,34 +2831,262 @@ button.truth-choice { cursor: pointer; font: inherit; }
   padding: 0.38rem 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 160ms var(--ease), color 160ms var(--ease);
+  transition: background 160ms var(--ease), color 160ms var(--ease), transform 160ms var(--ease);
 }
 .discuss-basis button.on { background: var(--ink); color: white; }
 .discuss-basis button:disabled:not(.on) { opacity: 0.5; cursor: default; }
 .discuss-basis button.on:disabled { cursor: default; }
-.discuss-notes, .discuss-statuses ul { list-style: none; margin: 0.65rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-.discuss-notes li, .discuss-statuses li {
-  background: white;
-  border: 1px solid rgba(18, 20, 26, 0.06);
-  border-radius: 14px;
-  padding: 0.75rem 0.85rem;
-  box-shadow: 0 4px 12px rgba(18, 20, 26, 0.03);
+@media (hover: hover) {
+  .discuss-basis button:not(:disabled):not(.on):hover { background: var(--paper); }
 }
-.discuss-notes p, .discuss-statuses li { margin: 0; line-height: 1.45; }
-.discuss-notes span { display: block; margin-top: 0.3rem; color: var(--ink-soft); font-size: 0.82rem; font-weight: 650; }
+.discuss-progress-track {
+  height: 3px;
+  border-radius: 99px;
+  background: var(--paper-deep);
+  overflow: hidden;
+  margin: -0.15rem 0 0.15rem;
+}
+.discuss-progress-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ink), color-mix(in srgb, var(--tone, var(--accent)) 70%, var(--ink)));
+  transition: width 280ms var(--ease);
+}
+.discuss-spotlight {
+  --tone: var(--ink);
+  border-left: 4px solid color-mix(in srgb, var(--tone) 75%, var(--ink));
+}
+.discuss-spotlight.tone-good { --tone: var(--sage); }
+.discuss-spotlight.tone-bad { --tone: var(--bad); }
+.discuss-spotlight.tone-idea { --tone: var(--sea); }
+.discuss-spotlight.tone-neutral { --tone: var(--gold); }
+.discuss-spotlight h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.discuss-avatar {
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 99px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #5c6573;
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+.discuss-avatar.lg { width: 2.15rem; height: 2.15rem; font-size: 0.78rem; }
+.discuss-avatar.sm { width: 1.45rem; height: 1.45rem; font-size: 0.62rem; }
+.discuss-note-list {
+  list-style: none;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.discuss-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+  background: white;
+  border: 1px solid rgba(18, 20, 26, 0.08);
+  border-radius: 16px;
+  padding: 0.85rem 0.95rem;
+  box-shadow: 0 8px 20px rgba(18, 20, 26, 0.04);
+  animation: note-enter 260ms var(--ease) both;
+}
+.discuss-note.speaking {
+  border-color: var(--hand, var(--ink));
+  background: color-mix(in srgb, var(--hand, var(--ink)) 10%, white);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hand, var(--ink)) 24%, transparent);
+}
+.hand-raise {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+}
+.hand-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(18, 20, 26, 0.1);
+  background: white;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.34rem 0.7rem 0.34rem 0.34rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 160ms var(--ease), color 160ms var(--ease), border-color 160ms var(--ease), box-shadow 160ms var(--ease);
+}
+.hand-toggle-mark {
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 99px;
+  background: #eef0f3;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+@media (hover: hover) {
+  .hand-toggle:hover {
+    border-color: rgba(18, 20, 26, 0.18);
+    box-shadow: 0 6px 14px rgba(18, 20, 26, 0.06);
+  }
+}
+.hand-toggle.on {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+.hand-toggle.on .hand-toggle-mark {
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+}
+.hand-empty {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.hand-queue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hand-queue li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 12rem;
+  padding: 0.22rem 0.55rem 0.22rem 0.22rem;
+  border-radius: 999px;
+  background: #f3f4f7;
+  border: 1px solid transparent;
+  transition: border-color 160ms var(--ease), background 160ms var(--ease), box-shadow 160ms var(--ease);
+  animation: note-enter 200ms var(--ease) both;
+}
+.hand-place {
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 99px;
+  background: rgba(18, 20, 26, 0.08);
+  color: var(--ink-soft);
+  font-size: 0.62rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.hand-person {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.hand-person strong {
+  font-size: 0.78rem;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hand-queue em {
+  font-style: normal;
+  font-weight: 650;
+  color: var(--ink-soft);
+  font-size: 0.64rem;
+  line-height: 1.1;
+}
+.hand-queue li.speaking {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: white;
+  box-shadow: 0 8px 18px rgba(18, 20, 26, 0.12);
+}
+.hand-queue li.speaking .hand-place {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  animation: hand-pulse 1.6s var(--ease) infinite;
+}
+.hand-queue li.speaking em { color: rgba(255, 255, 255, 0.72); }
+@keyframes hand-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08); }
+  50% { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.16); }
+}
+@media (hover: hover) {
+  .discuss-note:hover {
+    border-color: color-mix(in srgb, var(--tone, var(--ink)) 28%, var(--line));
+    box-shadow: 0 12px 28px rgba(18, 20, 26, 0.07);
+    transform: translateY(-1px);
+  }
+}
+.discuss-note-mark {
+  width: 0.42rem;
+  height: 0.42rem;
+  margin-top: 0.55rem;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--tone, var(--ink)) 70%, white);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone, var(--ink)) 14%, transparent);
+}
+.discuss-note-copy { min-width: 0; }
+.discuss-note-copy p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 1.02rem;
+  letter-spacing: -0.015em;
+  font-weight: 520;
+  color: var(--ink);
+  word-break: break-word;
+}
+.discuss-note-author {
+  display: inline-flex;
+  margin-top: 0.4rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
 .discuss-statuses {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.8rem;
 }
-.discuss-statuses section {
-  background: color-mix(in srgb, var(--tone, var(--ink-soft)) 8%, white);
-  border: 1px solid color-mix(in srgb, var(--tone, var(--ink-soft)) 16%, var(--line));
-  border-radius: 16px;
-  padding: 0.8rem 0.85rem;
+.discuss-status-panel {
+  --tone: var(--ink-soft);
+  background: color-mix(in srgb, var(--tone) 8%, white);
+  border: 1px solid color-mix(in srgb, var(--tone) 16%, var(--line));
+  border-radius: 18px;
+  padding: 0.8rem 0.85rem 0.9rem;
 }
-.discuss-statuses h3 {
+.discuss-status-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+.discuss-status-panel h3 {
   margin: 0;
   display: flex;
   align-items: center;
@@ -2856,15 +3096,35 @@ button.truth-choice { cursor: pointer; font: inherit; }
   text-transform: uppercase;
   color: var(--ink-soft);
 }
-.discuss-statuses h3::before {
-  content: "";
-  width: 0.45rem;
-  height: 0.45rem;
+.discuss-status-panel h3 .retro-glyph { width: 0.95rem; height: 0.95rem; color: var(--tone, var(--ink)); }
+.discuss-status-panel > header em {
+  font-style: normal;
+  min-width: 1.45rem;
+  height: 1.45rem;
+  display: grid;
+  place-items: center;
   border-radius: 99px;
-  background: var(--tone, var(--ink-soft));
+  background: white;
+  border: 1px solid color-mix(in srgb, var(--tone) 18%, var(--line));
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--ink-soft);
 }
-.discuss-statuses h3:has(.retro-glyph)::before { content: none; }
-.discuss-statuses h3 .retro-glyph { width: 0.95rem; height: 0.95rem; color: var(--tone, var(--ink)); }
+.discuss-status-panel .discuss-note {
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.7rem 0.8rem;
+}
+.queue-status {
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  color: var(--tone, var(--ink));
+  flex: 0 0 auto;
+}
+.queue-status .retro-glyph { width: 0.9rem; height: 0.9rem; }
 .note.aside { opacity: 0.42; }
 .spotlight {
   display: flex;
@@ -4702,10 +4962,27 @@ input[type="range"] { width: 100%; accent-color: var(--ink); padding: 0; border:
   .ritual.retro { margin: 0; padding-left: 0; padding-right: 0; }
   .phasebar { top: 0.5rem; }
   .phase-stepper { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .phase-timer { margin-left: 0; width: 100%; min-width: 0; }
-  .phase-timer-controls { width: 100%; }
+  .phase-meta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .phase-meta > .phase-timer {
+    align-self: stretch;
+    width: 100%;
+    max-width: none;
+    border-radius: 18px;
+    justify-content: space-between;
+  }
+  .phase-timer-controls {
+    width: 100%;
+    justify-content: stretch;
+  }
   .phase-timer-controls button,
-  .phase-timer-custom { flex: 1 1 auto; justify-content: center; }
+  .phase-timer-custom {
+    flex: 1 1 0;
+    justify-content: center;
+    text-align: center;
+  }
   .vote-rail {
     position: relative;
     top: auto;
@@ -4786,6 +5063,14 @@ input[type="range"] { width: 100%; accent-color: var(--ink); padding: 0; border:
   .ice-games { grid-template-columns: 1fr; }
   .pair-row { grid-template-columns: 1fr; }
   .discuss-statuses { grid-template-columns: 1fr; }
+  .discuss-toolbar { align-items: stretch; }
+  .discuss-progress { margin-left: 0; width: 100%; text-align: center; }
+  .discuss-controls { width: 100%; }
+  .discuss-basis { width: 100%; }
+  .hand-raise { width: 100%; }
+  .hand-toggle { flex: 0 0 auto; }
+  .hand-queue { width: 100%; }
+  .discuss-note { padding: 0.8rem; }
   .review-steps { grid-template-columns: 1fr; }
   .review-stage-nav { width: 100%; }
   .review-stage-nav .btn { flex: 1; }

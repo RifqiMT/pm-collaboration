@@ -183,6 +183,7 @@ export function applyOp(room: Room, op: Op, actorId: string, now: string): Room 
     case "retro.focusCard":
     case "retro.setDiscussionBy":
     case "retro.focusGroup":
+    case "retro.raiseHand":
     case "retro.addAction":
     case "retro.setActionDone":
     case "retro.assignAction":
@@ -385,6 +386,8 @@ export function parseOp(input: unknown): Op {
       return { type, by: expectEnum(record.by, DISCUSSION_BY, "Discussion") };
     case "retro.focusGroup":
       return { type, key: expectString(record.key, "Discussion group") };
+    case "retro.raiseHand":
+      return { type, raised: asBoolean(record.raised, "Hand") };
     case "retro.addAction":
       return {
         type,
@@ -526,6 +529,7 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       ensureTimers(retro);
       moveStopwatch(retro, op.phase, now);
       retro.timerEndsAt = retro.timers[op.phase] ?? null;
+      retro.raisedHands = [];
       return true;
     }
     case "retro.setIcebreaker": {
@@ -709,6 +713,14 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       assertDiscussionGroup(retro, op.key);
       if (retro.discussedGroupKey === op.key) return false;
       retro.discussedGroupKey = op.key;
+      return true;
+    }
+    case "retro.raiseHand": {
+      requirePhase(retro, "discuss", "Hands go up in the discuss section.");
+      const hands = Array.isArray(retro.raisedHands) ? retro.raisedHands : [];
+      const raised = hands.includes(actorId);
+      if (op.raised === raised) return false;
+      retro.raisedHands = op.raised ? [...hands, actorId] : hands.filter((id) => id !== actorId);
       return true;
     }
     case "retro.addAction": {
@@ -938,7 +950,12 @@ function presentRetro(retro: RetroState, actorId: string | null, names: Map<stri
     if (!fresh) return column;
     return { ...column, title: fresh.title, hint: fresh.hint, tone: fresh.tone };
   });
-  return { ...presented, cards, icebreakerAnswers: presentAnswers(presented, actorId) };
+  return {
+    ...presented,
+    cards,
+    raisedHands: presented.raisedHands.filter((id) => names.has(id)),
+    icebreakerAnswers: presentAnswers(presented, actorId),
+  };
 }
 
 function presentAnswers(retro: RetroState, actorId: string | null) {
@@ -1175,7 +1192,17 @@ function withIcebreaker(retro: RetroState): RetroState {
     icebreakerAnswers: Array.isArray(retro.icebreakerAnswers) ? retro.icebreakerAnswers : [],
     discussionBy: retro.discussionBy === "author" ? "author" : "status",
     discussedGroupKey: typeof retro.discussedGroupKey === "string" ? retro.discussedGroupKey : null,
+    raisedHands: cleanRaisedHands(retro.raisedHands),
   };
+}
+
+function cleanRaisedHands(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const ids: string[] = [];
+  for (const id of value) {
+    if (typeof id === "string" && /^[A-Za-z0-9_-]{8,80}$/.test(id) && !ids.includes(id)) ids.push(id);
+  }
+  return ids;
 }
 
 function withStopwatches(retro: RetroState): Pick<RetroState, "stopwatchMs" | "stopwatchRunningSince"> {
@@ -1248,6 +1275,7 @@ function ensureIcebreaker(retro: RetroState): void {
   retro.icebreakerAnswers = next.icebreakerAnswers;
   retro.discussionBy = next.discussionBy;
   retro.discussedGroupKey = next.discussedGroupKey;
+  retro.raisedHands = next.raisedHands;
   retro.timers = next.timers;
   retro.timerEndsAt = next.timerEndsAt;
   retro.stopwatchMs = next.stopwatchMs;
@@ -1269,6 +1297,7 @@ function blankRetro(templateId: RetroTemplateId, now: string): RetroState {
     discussedCardId: null,
     discussionBy: "status",
     discussedGroupKey: null,
+    raisedHands: [],
     icebreaker: "one-word",
     icebreakerRound: 0,
     icebreakerPairs: null,
@@ -1338,11 +1367,13 @@ function fillDemo(room: Room, hostId: string, now: string): void {
     room.review.decision = seed.decision;
     room.review.decisionNotes = seed.decisionNotes;
     room.review.feedback = seed.feedback;
-    for (const itemId of seed.checkedItemIds) {
-      check(room.review, itemId, host.id);
-      check(room.review, itemId, alex.id);
-      if (itemId === "dod" || itemId === "journey" || itemId === "decision-made") {
-        check(room.review, itemId, sam.id);
+    for (const section of room.review.sections) {
+      for (const item of section.items) {
+        const note = seed.itemNotes[item.id];
+        if (note) item.note = note.slice(0, LIMITS.note);
+        check(room.review, item.id, host.id);
+        check(room.review, item.id, alex.id);
+        if (item.required) check(room.review, item.id, sam.id);
       }
     }
   }

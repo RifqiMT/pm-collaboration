@@ -5,7 +5,7 @@
 **CORS:** `Access-Control-Allow-Origin: *`  
 **Caching:** `Cache-Control: no-store`  
 **Runtime:** Node.js (`force-dynamic`)  
-**Last updated:** 2026-11-11  
+**Last updated:** 2026-11-12  
 
 ---
 
@@ -118,6 +118,7 @@ Fails with `full` if participants ≥ 40.
 | `retro.focusCard` | `cardId \| null` | Discuss |
 | `retro.setDiscussionBy` | `by: status\|author` | Host only |
 | `retro.focusGroup` | `key` | Column id, author id, or `anonymous` |
+| `retro.raiseHand` | `raised` | Discuss only; desired-state speak queue. Cleared on phase change. |
 
 ### Retrospective — actions
 

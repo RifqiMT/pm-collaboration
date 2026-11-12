@@ -2,7 +2,7 @@
 
 **Document type:** Requirements ↔ Stories ↔ Implementation ↔ Verification  
 **Product:** TeamCompass (`@cadence/*`)  
-**Last updated:** 2026-11-11  
+**Last updated:** 2026-11-12  
 
 ---
 
@@ -48,6 +48,7 @@
 | FR-RET9 | Timers + stopwatch | US-2.7 | `timers`, `stopwatchMs`, `PhaseTimer` | Timer/stopwatch tests | Implemented |
 | FR-RET10 | Summary + CSV | US-2.8 | `retro-export.ts`, summary UI | `retro-export.test.ts` | Implemented |
 | FR-RET11 | Column glyphs | — | `retro-glyphs.tsx` | `retro-glyphs.test.ts` | Implemented |
+| FR-RET12 | Discuss raise hand | US-2.4b | `retro.raiseHand`, `raisedHands`, web+mobile Discuss UI | `room.test.ts` raise-hand cases | Implemented |
 
 ---
 
@@ -88,8 +89,8 @@
 | FR-P5 | Polling sync | US-5.4 | `use-room.ts` | Manual | Implemented |
 | NFR-1 | Vitest domain coverage | US-5.3 | `*.test.ts` | CI/`npm test` | Implemented |
 | NFR-2 | Body size cap | — | `http.ts` | Manual | Implemented |
-| NFR-3 | Durable shared store | — | `store.ts`, `persistence.ts` | File lock / Redis NX + tests | Implemented |
-| NFR-Hobby | Vercel Hobby deploy | — | `apps/web/vercel.json`, DEPLOYMENT.md | Build + Redis env | Implemented |
+| NFR-3 | Durable shared store | — | `store.ts`, `persistence.ts` | File / Supabase / Redis selection + `store.test.ts` | Implemented |
+| NFR-Hobby | Vercel Hobby deploy | — | `DEPLOYMENT.md`, `supabase-schema.sql`, optional Upstash | Build + Supabase or Redis env | Implemented |
 | NFR-4 | A11y basics | US-5.1 | skip link, focus-visible | Manual | Implemented |
 | NFR-5 | Domain error UX | — | `CadenceError` mapping | Tests throw codes | Implemented |
 | NFR-6 | No secrets in repo | — | `.gitignore` data path | Review | Implemented |

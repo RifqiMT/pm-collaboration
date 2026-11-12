@@ -202,7 +202,10 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
                 Start from an example
               </button>
             </div>
-            <p className="muted setup-note">An example fills the room so the team can see how a session looks.</p>
+            <p className="muted setup-note">
+              An example fills the session. A retrospective gets ten notes in every column. A sprint review gets a
+              finished checklist, evidence, feedback, and a ship decision. A roadmap gets ten scored bets.
+            </p>
           </form>
         </aside>
 

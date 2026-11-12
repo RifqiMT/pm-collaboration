@@ -13,7 +13,7 @@ import {
   type ReviewDecision,
 } from "./types";
 
-export const DEMO_NOTES_PER_COLUMN = 10;
+const DEMO_NOTES_PER_COLUMN = 10;
 
 /** Professional note banks keyed by column tone — used for every template column. */
 const TONE_NOTES: Record<ColumnTone, string[]> = {
@@ -109,9 +109,252 @@ const COLUMN_NOTES: Record<string, string[]> = {
     "A quiet disagreement about API ownership surfaced too late to resolve cleanly.",
   ],
   glad: TONE_NOTES.good,
+  wind: [
+    "Pairing on the checkout defect kept the recovery work moving the same day.",
+    "The stakeholder walkthrough unblocked three decisions before the build froze.",
+    "A named release owner meant staging went red once and recovered in the hour.",
+    "Feature flags let the payout retry ship without waiting for a full cutover.",
+    "Wednesday design critique removed a day of rework before code started.",
+    "Support joined planning and the empty-state copy was right the first time.",
+    "The webhook runbook was opened during the incident and the steps held.",
+    "Contract sketches with Payments closed the retry-token gap before coding.",
+    "Protected Tuesday focus finished the critical path a day early.",
+    "Screenshot checks caught the invoice regression before anyone demoed it.",
+  ],
+  anchor: [
+    "Scope arrived mid-sprint with no story removed, and the critical path slipped.",
+    "Staging failed twice and the room spent a day deciding who owned the fix.",
+    "Review comments landed the afternoon before sprint end.",
+    "Standup became an API debate that belonged in a thirty-minute spike.",
+    "A flaky CI job owned half a day before anyone quarantined it.",
+    "Frontend and backend reconstructed decisions from Slack instead of a note.",
+    "The ledger dependency was planned as two days and took the week.",
+    "Acceptance criteria stayed vague until QA hit the edge case in staging.",
+    "The spike quietly used capacity that was promised to the user journey.",
+    "Incident follow-ups lived in a doc that planning never opened.",
+  ],
+  rocks: [
+    "Webhook retries still spike on Mondays and we do not know why.",
+    "The payments sandbox may not match what stakeholders will actually see.",
+    "Finance has not confirmed the meter design the next date depends on.",
+    "A retry token can expire while the merchant is still in the flow.",
+    "Legal review is sitting on three invoice templates with no date.",
+    "We may be counting the same effort on both Platform and Growth.",
+    "The temporary admin workaround has no retirement date.",
+    "Outcome events for recovered payouts are not reliable enough to quote.",
+    "On-call coverage for the cutover is assumed, not staffed.",
+    "The spike has no rule for when it becomes a commitment.",
+  ],
+  island: [
+    "A merchant retries a failed payout in under two minutes, without support.",
+    "Finance sees the recovery rate on the shared dashboard the same day.",
+    "Staging uses the same feature flags as the stakeholder demo.",
+    "Every payments pull request passes a five-minute contract check.",
+    "Failure reasons are written for merchants, not copied from the provider.",
+    "The next sprint starts from an updated backlog, not last week’s list.",
+    "Support macros for non-retryable codes ship with the flow, not after it.",
+    "The release notes state the flag, the known edge, and the owner of the watch.",
+    "Accessibility on the retry path is part of done, not a follow-up story.",
+    "The team can say the sprint goal in one sentence before the first click.",
+  ],
+  rose: [
+    "The Definition of Done gate stopped two unfinished stories from entering review.",
+    "Pairing cut the checkout recovery to under two hours.",
+    "The release checklist had one owner and staging stayed green.",
+    "Feature flags made the payout retry reversible.",
+    "Support macros shipped with the empty state and tickets dropped.",
+    "The webhook runbook worked the two times we needed it.",
+    "Customer quotes made the release notes the same day.",
+    "Cross-team sync with Payments closed the token gap before build.",
+    "Automated screenshots caught the invoice regression.",
+    "Focus time on Tuesday finished the critical path early.",
+  ],
+  bud: [
+    "Contract tests against payouts are sketched, not running in CI yet.",
+    "The recovery dashboard has the events, and not the daily number Finance wants.",
+    "Failure-reason copy exists for two codes and needs the rest.",
+    "Office hours with support started once and already deflected an escalation.",
+    "The decision log after walkthroughs is a doc, not yet a habit.",
+    "A mid-sprint scope trade was tried once and needs a named trigger.",
+    "Acceptance examples with QA happened on one story and should be the default.",
+    "The staging flag mirror works for payouts and not for the rest of the product.",
+    "The spike budget was named in planning and then ignored. Keep the name, use it.",
+    "The changelog draft is internal. It is ready to become the customer note.",
+  ],
+  thorn: [
+    "We demoed a path that only existed on one laptop.",
+    "Scope grew and nothing left the sprint to pay for it.",
+    "Review feedback arrived too late to change the increment.",
+    "Missing analytics meant the review had a story and no number.",
+    "Config drift made staging lie about production.",
+    "One person held the payments context after pairing stopped.",
+    "We announced a date before Finance confirmed the meter.",
+    "The accessibility pass was dropped and the invoice story reopened.",
+    "A spike was abandoned without writing down what it taught.",
+    "Incident actions from last time never entered this sprint.",
+  ],
+  well: [
+    "Saying the goal before the demo kept the room on the journey.",
+    "One deploy owner removed the debate when staging went red.",
+    "Flags let us show the retry path without betting the whole release.",
+    "QA at kickoff caught the token mismatch before the last day.",
+    "The runbook was short enough that someone actually followed it.",
+    "Support saw the empty states before customers did.",
+    "We cut a story instead of hoping the week would stretch.",
+    "The pilot metric was on the same slide as the goal.",
+    "Design critique happened mid-sprint, not the night before review.",
+    "The checklist made “done” visible to people outside the team.",
+  ],
+  didnt: [
+    "We treated a laptop build as the stakeholder environment.",
+    "New scope entered with no explicit trade.",
+    "Comments on the pull request arrived after the increment was frozen.",
+    "Standup was used to design the API.",
+    "The outcome metric was still dark when we called the sprint done.",
+    "CI flaked for a day because quarantine waited for a volunteer.",
+    "Hand-offs depended on someone scrolling Slack.",
+    "The dependency estimate ignored wait time.",
+    "Follow-ups from the incident stayed outside the plan.",
+    "We celebrated the merge and had not checked the recovery number.",
+  ],
+  puzzle: [
+    "Why do webhook retries spike on Monday mornings?",
+    "Is the payments sandbox close enough for a stakeholder decision?",
+    "Which number is “recovered without support,” and who trusts it?",
+    "How long is Finance’s review of the remaining invoice templates?",
+    "What happens when the retry token expires mid-flow?",
+    "Are Platform and Growth both sizing the same bet?",
+    "When does this spike stop being research?",
+    "Who is on call if the 10% flag increases ticket volume?",
+    "Can the admin workaround be removed without its own project?",
+    "Which backlog items are actually blocked on legal, not on us?",
+  ],
+  drop: [
+    "Stop adding scope without naming the story that leaves.",
+    "Stop demoing from a machine the stakeholder cannot open.",
+    "Stop holding API design in standup.",
+    "Stop leaving CI flakes for “someone” to notice.",
+    "Stop freezing release notes before customer quotes exist.",
+    "Stop planning dependencies as if the other team is waiting for us.",
+    "Stop storing incident actions in a doc planning does not read.",
+    "Stop calling a story done while its metric is dark.",
+    "Stop concentrating payments knowledge on one person.",
+    "Stop promising a date before the dependency owner has agreed.",
+  ],
+  add: [
+    "Name a deploy owner before each staging promotion.",
+    "Add a contract test for the payout retry token.",
+    "Mirror production flags into the stakeholder sandbox.",
+    "Write acceptance examples with QA when the story starts.",
+    "Put the recovery rate on the dashboard the review will show.",
+    "Ship support macros in the same increment as the empty state.",
+    "Keep a one-page decision log after each walkthrough.",
+    "Reserve a fixed spike budget so research cannot steal the journey.",
+    "Add the failure reason before the retry button.",
+    "Record new review requests as backlog notes before anyone commits.",
+  ],
+  keep: [
+    "Keep the Definition of Done gate in front of review.",
+    "Keep one owner on the release checklist.",
+    "Keep pairing for payments defects until recovery is boring.",
+    "Keep feature flags on any path a stakeholder will see.",
+    "Keep the weekly walkthrough. It unblocked real decisions.",
+    "Keep Wednesday critique. It was cheaper than Friday rework.",
+    "Keep the webhook runbook where the on-call already looks.",
+    "Keep Tuesday focus. The critical path finished early because of it.",
+    "Keep screenshot checks on the invoice page.",
+    "Keep writing the goal in one sentence before the demo starts.",
+  ],
+  improve: [
+    "Keep the walkthrough, and state the goal before the first click.",
+    "Keep flags, and make staging use the production set automatically.",
+    "Keep the checklist, and name the owner before the promotion, not during it.",
+    "Keep pairing, and rotate the second person so context is not trapped.",
+    "Keep the runbook, and add the Monday retry spike once we understand it.",
+    "Keep critique, and move it earlier when the story touches payments.",
+    "Keep macros, and link them from the confirmation screen.",
+    "Keep the dashboard, and show recovery rate next to support contacts.",
+    "Keep the decision log, and file it where planning will open it.",
+    "Keep the spike, and stop it when the budget is spent.",
+  ],
+  less: [
+    "Less unplanned scope. One trade is enough to show the cost.",
+    "Less API design inside standup. Take it to a short spike.",
+    "Less late review. Comments on the last day do not change the increment.",
+    "Less Slack archaeology. Write the decision once.",
+    "Less heroics on flaky CI. Quarantine it the morning it flakes.",
+    "Less date-setting before the dependency owner has spoken.",
+    "Less demo polish on a path customers cannot open.",
+    "Less carry-over that is “almost done” and unmeasured.",
+    "Less silence when pairing stops and one person holds the context.",
+    "Less optimism that Friday can absorb a new story.",
+  ],
+  more: [
+    "More contract tests before the payouts build, not after the bug.",
+    "More of the goal said out loud before the demo.",
+    "More acceptance examples written with QA at kickoff.",
+    "More of the recovery metric in the review, not a follow-up slide.",
+    "More flag parity between staging and the stakeholder environment.",
+    "More explicit scope trades when new work appears.",
+    "More of the runbook used during the incident, not after the write-up.",
+    "More shared context on payments so one absence does not stop the sprint.",
+    "More backlog updates before the review room closes.",
+    "More time on hardening once the journey works.",
+  ],
 };
 
-export type DemoAuthor = Pick<Participant, "id" | "name">;
+const COLUMN_CLOSERS: Record<ColumnTone, readonly ((title: string) => string)[]> = {
+  good: [
+    (title) => `Keep that. It is ${title}.`,
+    (title) => `${title} should be protected next sprint.`,
+    (title) => `This is the ${title} the team can rely on again.`,
+    (title) => `Leave it unchanged and call it ${title}.`,
+    (title) => `${title} is why this one moves forward.`,
+    (title) => `Put a pin in it under ${title}.`,
+    (title) => `Next sprint still wants this ${title}.`,
+    (title) => `Do not redesign it. File it as ${title}.`,
+    (title) => `${title} earned the repeat.`,
+    (title) => `The room can point to this and say ${title}.`,
+  ],
+  bad: [
+    (title) => `Stop it. That is ${title}.`,
+    (title) => `${title} should not enter the next sprint.`,
+    (title) => `Name it ${title} and cut it.`,
+    (title) => `This drag belongs under ${title}.`,
+    (title) => `${title} is the part that slowed the sprint.`,
+    (title) => `Do not schedule it again. It is ${title}.`,
+    (title) => `Next sprint drops this as ${title}.`,
+    (title) => `${title} is the cost we already paid.`,
+    (title) => `Call it out as ${title} before planning.`,
+    (title) => `The team should not relive this ${title}.`,
+  ],
+  idea: [
+    (title) => `Start with this. It is ${title}.`,
+    (title) => `${title} is the opening for next sprint.`,
+    (title) => `We have not done this yet. Put it in ${title}.`,
+    (title) => `Bring it in and label it ${title}.`,
+    (title) => `${title} is a concrete first step.`,
+    (title) => `The next sprint can begin at ${title}.`,
+    (title) => `Try it once and record it as ${title}.`,
+    (title) => `${title} gives the next sprint a place to start.`,
+    (title) => `Add it to the plan as ${title}.`,
+    (title) => `This is the ${title} worth attempting.`,
+  ],
+  neutral: [
+    (title) => `Still open. It sits in ${title}.`,
+    (title) => `${title} does not have an answer yet.`,
+    (title) => `Settle ${title} before the next commitment.`,
+    (title) => `Write it down as ${title} so planning sees it.`,
+    (title) => `${title} is visible and unresolved.`,
+    (title) => `Do not guess past ${title}.`,
+    (title) => `Give ${title} an owner before we plan around it.`,
+    (title) => `Leave it on the board as ${title}.`,
+    (title) => `${title} is the question, not a decision.`,
+    (title) => `The next sprint should not ignore this ${title}.`,
+  ],
+};
+
+type DemoAuthor = Pick<Participant, "id" | "name">;
 
 export function demoNotesForColumns(
   columns: RetroColumn[],
@@ -138,18 +381,24 @@ export function demoNotesForColumns(
 }
 
 function pickLines(column: RetroColumn, count: number): string[] {
-  const bank = COLUMN_NOTES[column.id] ?? TONE_NOTES[column.tone] ?? TONE_NOTES.neutral;
+  const dedicated = COLUMN_NOTES[column.id];
+  const bank = dedicated ?? TONE_NOTES[column.tone] ?? TONE_NOTES.neutral;
   const lines: string[] = [];
   for (let index = 0; index < count; index += 1) {
     const base = bank[index % bank.length] ?? TONE_NOTES.neutral[index % TONE_NOTES.neutral.length]!;
-    // Keep pop-culture boards readable: ground the note in the column lens without losing professionalism.
-    const withLens =
-      column.title.length > 0 && !COLUMN_NOTES[column.id]
-        ? `${base} (${column.title})`
-        : base;
-    lines.push(withLens.slice(0, LIMITS.card));
+    const sentence = /[.!?]$/.test(base) ? base : `${base}.`;
+    const line = dedicated
+      ? sentence
+      : `${sentence} ${closerFor(column, index)}`;
+    lines.push(line.slice(0, LIMITS.card));
   }
   return lines;
+}
+
+function closerFor(column: RetroColumn, index: number): string {
+  const closers = COLUMN_CLOSERS[column.tone] ?? COLUMN_CLOSERS.neutral;
+  const write = closers[index % closers.length] ?? closers[0]!;
+  return write(column.title);
 }
 
 export function demoActions(authors: DemoAuthor[], sourceCardId: string | null): ActionItem[] {
@@ -198,7 +447,7 @@ export function demoReviewContent(authors: DemoAuthor[], now: string): {
   decision: ReviewDecision;
   decisionNotes: string;
   feedback: FeedbackNote[];
-  checkedItemIds: string[];
+  itemNotes: Record<string, string>;
 } {
   const [host, alex, sam, jordan] = padAuthors(authors);
   return {
@@ -271,24 +520,37 @@ export function demoReviewContent(authors: DemoAuthor[], now: string): {
         createdAt: now,
       },
     ],
-    checkedItemIds: [
-      "goal-visible",
-      "dod",
-      "undone",
-      "environment",
-      "stakeholders",
-      "journey",
-      "acceptance",
-      "outcome-stated",
-      "metrics",
-      "bugs",
-      "quality-bar",
-      "notes",
-      "feedback-live",
-      "scope",
-      "decision-made",
-      "backlog",
-    ],
+    itemNotes: {
+      "goal-visible":
+        "Said before the first click: a merchant retries a failed payout in under two minutes, and Finance sees the recovery rate the same day.",
+      dod: "Stories in this increment have passing tests, analytics events, and a reviewed empty state. The invoice migration stayed out.",
+      undone:
+        "Usage-based billing is not in this increment. It goes back to the roadmap as a later bet, not a silent carry-over.",
+      environment:
+        "Staging uses the production payout flags. The walkthrough runs in the stakeholder sandbox, not a laptop-only build.",
+      stakeholders:
+        "Support, Finance, and the merchant advisory proxy are in the room and can judge whether the recovery journey works.",
+      journey:
+        "The demo runs failed-payout email, open the payout, read the reason, retry, and land on confirmation. No ticket list.",
+      acceptance:
+        "Each story shows its check beside the screen: retry under two minutes, reason before the button, confirmation without a support ticket.",
+      "outcome-stated":
+        "Pilot merchants recover without contacting support. Ticket volume for “where is my money” is the number watched for 48 hours.",
+      metrics:
+        "Recovery rate, median time to retry, and support contacts per 100 failed payouts are on the shared dashboard.",
+      bugs: "One known issue: a retry token that expires mid-flow shows a generic error. Severity is low, a macro covers it, and it is outside the 10% flag.",
+      "quality-bar":
+        "Accessibility on the retry flow passed, analytics events were verified, and the failure-reason copy adds no new personal data.",
+      notes: "Changelog drafted: what shipped, the 10% flag, the token-expiry edge, and who owns the 48-hour watch.",
+      "feedback-live":
+        "Praise, changes, and questions from this room are in the feedback list, with the person who said them.",
+      scope:
+        "Two requests are recorded and not committed: show the failure reason before the button, and publish the changelog before raising the flag.",
+      "decision-made":
+        "Ship behind the existing payouts flag to 10% of merchants. Hold only if the sandbox path diverges from production.",
+      backlog:
+        "The next sprint backlog was updated before close: failure-reason copy, the confirmation macro, and the 48-hour recovery watch.",
+    },
   };
 }
 

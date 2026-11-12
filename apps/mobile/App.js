@@ -33,6 +33,19 @@ const SERVER_KEY = "cadence.server";
 const IDENTITY_KEY = "cadence.identity";
 const DEFAULT_SERVER = "http://localhost:3000";
 
+function notesByAuthor(cards) {
+  const key = (card) => (card.anonymous || !card.authorId ? "\uffff" : (card.authorName || "Someone").toLocaleLowerCase());
+  return cards.slice().sort(
+    (a, b) => key(a).localeCompare(key(b)) || String(a.createdAt).localeCompare(String(b.createdAt)) || String(a.id).localeCompare(String(b.id)),
+  );
+}
+
+function handUp(card, raisedHands, actorId) {
+  const hands = raisedHands ?? [];
+  if (card.anonymous) return card.mine && hands.includes(actorId);
+  return card.authorId != null && hands.includes(card.authorId);
+}
+
 export default function App() {
   const [server, setServer] = useState(DEFAULT_SERVER);
   const [identity, setIdentity] = useState(null);
@@ -266,6 +279,9 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
       <Pressable style={styles.ghost} disabled={pending} onPress={() => create(true)}>
         <Text style={styles.ghostText}>Start from an example</Text>
       </Pressable>
+      <Text style={styles.meta}>
+        Ten notes in every retro column, a finished sprint review, or ten scored roadmap bets.
+      </Text>
     </ScrollView>
   );
 }
@@ -467,6 +483,24 @@ function Retro({ room, actorId, send }) {
             ))}
           </View>
           {host ? null : <Text style={styles.meta}>Only the host can choose how the room discusses.</Text>}
+          <Pressable
+            style={[styles.ghost, (retro.raisedHands ?? []).includes(actorId) ? styles.chipOn : null]}
+            onPress={() => send({ type: "retro.raiseHand", raised: !(retro.raisedHands ?? []).includes(actorId) })}
+          >
+            <Text style={styles.ghostText}>
+              {(retro.raisedHands ?? []).includes(actorId) ? "Lower hand" : "Raise hand"}
+            </Text>
+          </Pressable>
+          {(retro.raisedHands ?? []).length > 0 ? (
+            <Text style={styles.meta}>
+              Hands:{" "}
+              {(retro.raisedHands ?? [])
+                .map((id, index) => `${index === 0 ? "Speaking" : "Waiting"} · ${id === actorId ? "You" : room.participants.find((person) => person.id === id)?.name ?? "Someone"}`)
+                .join("  ")}
+            </Text>
+          ) : (
+            <Text style={styles.meta}>Raise a hand to talk about your notes.</Text>
+          )}
           {focus ? (
             <>
               <Text style={styles.meta}>Now discussing · {discussionBy === "author" ? "Author" : "Status"}</Text>
@@ -481,15 +515,31 @@ function Retro({ room, actorId, send }) {
                           {columnMark(retro.templateId, column.id)} {column.title}
                         </Text>
                         {columnNotes.map((card) => (
-                          <Text key={card.id} style={{ color: colors.ink, fontSize: 16, lineHeight: 22 }}>
+                          <Text
+                            key={card.id}
+                            style={{
+                              color: colors.ink,
+                              fontSize: 16,
+                              lineHeight: 22,
+                              backgroundColor: handUp(card, retro.raisedHands, actorId) ? "#f3efe4" : "transparent",
+                            }}
+                          >
                             {card.body}
                           </Text>
                         ))}
                       </View>
                     );
                   })
-                : focus.cards.map((card) => (
-                    <Text key={card.id} style={{ color: colors.ink, fontSize: 16, lineHeight: 22 }}>
+                : notesByAuthor(focus.cards).map((card) => (
+                    <Text
+                      key={card.id}
+                      style={{
+                        color: colors.ink,
+                        fontSize: 16,
+                        lineHeight: 22,
+                        backgroundColor: handUp(card, retro.raisedHands, actorId) ? "#f3efe4" : "transparent",
+                      }}
+                    >
                       {card.body}
                     </Text>
                   ))}

@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-11  
+**Last documentation refresh:** 2026-11-12  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -38,7 +38,8 @@ This index is the reading map for product, engineering, design, and leadership s
 | [CHANGELOG.md](./CHANGELOG.md) | Historical development log |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System design, privacy, sync, storage |
 | [TECH_STACK.md](./TECH_STACK.md) | Packages, versions, scripts, environments |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | Single-process Docker/Render/Fly file store; optional Vercel+Redis |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Single-process Docker/Render/Fly file store; optional Vercel + Supabase/Redis |
+| [supabase-schema.sql](./supabase-schema.sql) | Supabase table for Vercel remote store |
 | [API.md](./API.md) | HTTP routes and operation catalog |
 
 ---
@@ -51,9 +52,10 @@ This index is the reading map for product, engineering, design, and leadership s
 | Room mutations & privacy | `packages/core/src/room.ts` |
 | Scoring & quadrants | `packages/core/src/scoring.ts` |
 | Templates, icebreakers, review seed | `packages/core/src/content.ts` |
+| Demo seed data | `packages/core/src/demo.ts` |
 | Retro CSV export | `packages/core/src/retro-export.ts` |
 | Web UI & polling | `apps/web/src/components/` |
-| Room API & store (file/Redis) | `apps/web/src/app/api/`, `apps/web/src/server/` |
+| Room API & persistence | `apps/web/src/app/api/`, `apps/web/src/server/{store,persistence}.ts` |
 | Single-process deploy | `Dockerfile`, `render.yaml`, `fly.toml`, [DEPLOYMENT.md](./DEPLOYMENT.md) |
 | Supabase schema (Vercel) | [supabase-schema.sql](./supabase-schema.sql) |
 | Design tokens (web) | `apps/web/src/app/globals.css` |

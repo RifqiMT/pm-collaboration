@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-11  
+**Last updated:** 2026-11-12  
 
 ---
 
@@ -45,8 +45,8 @@ Do not introduce Inter, Roboto, or system-ui as the primary brand face on new ma
 | `--card` | `#ffffff` | Surfaces |
 | `--line` | `#e3e6ec` | Hairline borders |
 | `--line-strong` | `#d3d7e0` | Stronger borders on controls |
-| `--accent` | `#e23b16` | Brand accent (also `--terra`) |
-| `--accent-deep` | `#b4230e` | Accent press / links |
+| `--accent` | `#e23b16` | Brand accent (mobile mirrors as `colors.terra`; no `--terra` CSS alias) |
+| `--accent-deep` | `#b4230e` | Accent press / links (mobile `terraDeep`) |
 | `--sage` | `#0d7a45` | Positive / “good” |
 | `--sea` | `#1d4ed8` | Idea / focus ring |
 | `--gold` | `#9a6700` | Neutral / caution |
@@ -158,6 +158,12 @@ Hover (pointer devices): stronger border + `--shadow-lift`; ritual cards lift `-
 ### 5.6 Icebreaker This or That
 
 Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on text alone.
+
+### 5.6b Discuss raise hand
+
+- Toggle control and ordered queue in Discuss chrome (`.hand-raise`, `.hand-toggle`)  
+- Speaking notes use a calm highlight wash (web) / soft paper tint (mobile `#f3efe4`)  
+- Do not reveal anonymous authors via the queue label rules—only highlight the raiser’s own anonymous card for them
 
 ### 5.7 Roadmap chart
 

@@ -3,7 +3,7 @@
 **Purpose:** Exhaustive catalog of product and domain variables used across TeamCompass.  
 **Format:** Variable name · Friendly name · Definition · Formula / rule · Location · Example  
 **Source of truth:** `packages/core/src/{types,scoring,room,text,content,ids}.ts`, web/mobile clients  
-**Last updated:** 2026-11-11  
+**Last updated:** 2026-11-12  
 
 ---
 
@@ -104,6 +104,8 @@
 | `discussedCardId` | Focused note | Note in discuss focus | Card id or null | Discuss UI | — |
 | `discussionBy` | Discuss walk mode | How the host walks the board | `status` \| `author` | Host control | `author` |
 | `discussedGroupKey` | Focused group | Current column, author, or `anonymous` | Validated against board | `focusGroup` | column id |
+| `raisedHands` | Speaking queue | Ordered participant ids with hand raised in Discuss | Discuss phase only; desired-state via `retro.raiseHand`; cleared when phase changes; presentation filters to current participants | `RetroState`; `retro-board.tsx`; mobile Discuss | `["person_alex…", "person_host…"]` |
+| Hand highlight rule | Note speaking highlight | Whether a note visually shows as “speaking” | Named notes: author id ∈ `raisedHands`. Anonymous notes: highlight only for the raiser’s own (`mine`) note | `handUp()` in web + mobile | Anonymous note of raiser highlighted for them only |
 | `icebreaker` | Icebreaker game | Active warm-up game id | One of 18 `IcebreakerId` | Host picker | `this-or-that` |
 | `icebreakerRound` | Icebreaker round | Round index for multi-round games | Integer advanced by host | Ops | `2` |
 | `icebreakerPairs` | Custom pairs | Host-written This or That pairs | 1–8 pairs; sides distinct; question derived | Host editor | left/right labels |
@@ -113,7 +115,7 @@
 | `ActionItem.done` | Action done | Completion flag | Desired boolean | Checkbox | `false` |
 | `ActionItem.sourceCardId` | Source note | Note this action came from | Unique per note when set | Add from note | `card_…` |
 
-**Timer presets (UI):** 3, 5, 8 minutes → 180, 300, 480 seconds (`TIMER_PRESETS` in `retro-board.tsx`).
+**Timer presets (web UI):** 3, 5, 8 minutes → 180, 300, 480 seconds (`TIMER_PRESETS` in `retro-board.tsx`). Mobile participates in phases and can raise a hand, but does not currently expose start/clear timer controls.
 
 ---
 
@@ -187,8 +189,9 @@ reach 100 · impact 1 · confidence 0.8 · effort 1 · ICE 5/5/5 · value 5 · c
 
 | Variable name | Friendly name | Definition | Formula / rule | Location | Example |
 | --- | --- | --- | --- | --- | --- |
-| Poll interval (visible) | Live refresh interval | How often clients refetch when tab visible | **1500** ms | `use-room.ts` | 1.5s |
-| Poll interval (hidden) | Background refresh | Refetch when tab hidden | **8000** ms | `use-room.ts` | 8s |
+| Poll interval (web, visible) | Web live refresh | How often the web client refetches when the tab is visible | **1500** ms | `apps/web/.../use-room.ts` | 1.5s |
+| Poll interval (web, hidden) | Web background refresh | Refetch when the browser tab is hidden | **8000** ms | `use-room.ts` | 8s |
+| Poll interval (mobile) | Mobile refresh | Fixed poll on the Expo client | **2000** ms (no visibility split) | `apps/mobile/App.js` | 2s |
 | Request body limit | Max request body | JSON body character cap | **100_000** | `http.ts` | — |
 | Store lock stale | Stale lock window | When a file lock is considered abandoned | ~**5** s | `store.ts` | — |
 | Store busy wait | Store busy timeout | When to error if lock not acquired | ~**4** s → `store` error | `store.ts` | — |
@@ -208,7 +211,7 @@ See [DESIGN_GUIDELINES.md](./DESIGN_GUIDELINES.md) for full palettes. Core seman
 | `--ink` | Primary ink | `#12141a` | Text, primary buttons |
 | `--ink-soft` | Soft ink | `#5c6573` | Secondary text |
 | `--paper` | Page paper | `#f4f5f7` | Page wash / themeColor |
-| `--accent` / `--terra` | Accent | `#e23b16` | Brand accent |
+| `--accent` | Accent | `#e23b16` | Brand accent (mobile `colors.terra` mirrors this hex) |
 | `--sage` | Positive | `#0d7a45` | Good tone |
 | `--sea` | Idea / focus | `#1d4ed8` | Idea tone, focus ring |
 | `--gold` | Neutral warn | `#9a6700` | Neutral tone |
@@ -249,11 +252,14 @@ flowchart TB
     actions[actions]
     timers[timers / stopwatch]
     icebreaker[icebreaker + answers]
+    raisedHands[raisedHands]
   end
 
   phase --> cards
   phase --> votesPerPerson
+  phase -->|clears| raisedHands
   cards --> actions
+  raisedHands -->|discuss highlight| cards
   hostId -->|gates| phase
   hostId -->|gates| icebreaker
 
@@ -317,11 +323,13 @@ sequenceDiagram
 
 | Variable name | Friendly name | Definition | Formula / rule | Location | Example |
 | --- | --- | --- | --- | --- | --- |
-| `CADENCE_STORE` | Store backend override | Forces file or Redis persistence | `file` \| `redis`; omit → auto | `persistence.ts` `resolveStoreBackend` | `redis` |
-| `CADENCE_DATA_DIR` | Local data directory | Directory for `rooms.json` / lock | Defaults to `process.cwd()/data` | `persistence.ts` | `/tmp/cadence-data` |
-| `SUPABASE_URL` | Supabase project URL | REST origin for room document | Required with a key when backend is supabase | Vercel env | `https://….supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role | Server key (bypasses RLS) | Preferred on Vercel | Vercel env; never expose to browser | (secret) |
-| `SUPABASE_ANON_KEY` | Supabase anon key | Fallback server key | Needs anon RLS policy | Vercel env | (secret) |
+| `CADENCE_STORE` | Store backend override | Forces persistence backend | `file` \| `supabase` \| `redis`; omit → auto (Supabase env → Redis env → on `VERCEL` prefer supabase → else file) | `persistence.ts` `resolveStoreBackend` | `supabase` |
+| `CADENCE_DATA_DIR` | Local data directory | Directory for `rooms.json` / lock | Defaults to `process.cwd()/data` | `persistence.ts` | `/data` |
+| `SUPABASE_URL` | Supabase project URL | REST origin for room document | Required with a key when backend is supabase | Vercel / `.env` | `https://….supabase.co` |
+| `SUPABASE_SECRET_KEY` | Supabase secret key | Preferred server key (`sb_secret_…`) | Highest precedence in `supabaseKey()` | Server env only | `sb_secret_…` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role (legacy JWT) | Legacy server key | Used if secret key absent | Server env only | (JWT) |
+| `SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key | `sb_publishable_…`; works with schema anon policy | After service role in precedence | Server env | `sb_publishable_…` |
+| `SUPABASE_ANON_KEY` | Supabase anon key (legacy JWT) | Lowest-precedence fallback key | Needs anon RLS policy | Server env | (JWT) |
 | `UPSTASH_REDIS_REST_URL` | Upstash REST URL | Redis HTTP endpoint | Required with token when backend is redis | Vercel env | `https://….upstash.io` |
 | `UPSTASH_REDIS_REST_TOKEN` | Upstash REST token | Auth for Redis REST | Required with URL when backend is redis | Vercel env | (secret) |
 | `cadence_store` | Supabase rooms table | Row `id=rooms` holds `{ rooms }` JSON | Upsert via PostgREST | `persistence.ts` | jsonb document |

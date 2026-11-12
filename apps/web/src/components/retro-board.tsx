@@ -20,6 +20,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { IcebreakerPanel } from "./icebreaker-panel";
 import { RetroGlyph } from "./retro-glyphs";
 import { SharedField } from "./shared-field";
+import { initials } from "./identity";
 import {
   RETRO_PHASES,
   authorLabel,
@@ -27,6 +28,7 @@ import {
   formatElapsed,
   notesEditable,
   phaseProgress,
+  sortDiscussNotes,
   timerTone,
   votingOpen,
 } from "./retro-ui";
@@ -188,9 +190,17 @@ export function RetroBoard({
               {host ? "" : " Only the host can change the section."}
             </p>
           </div>
+          {retro.phase === "icebreak" || retro.phase === "summary" ? null : (
+            <PhaseTimer
+              remaining={remaining}
+              endsAt={sectionEndsAt}
+              phase={retro.phase}
+              send={send}
+            />
+          )}
         </div>
 
-        {retro.phase === "icebreak" || retro.phase === "summary" ? null : (
+        {showNotes || showVote ? (
           <div className="phase-tools" aria-label="Session tools">
             {showNotes ? (
               <span className="tool-chip muted">Only you can see your notes until Discuss</span>
@@ -201,23 +211,20 @@ export function RetroBoard({
                 onChange={(count) => void send({ type: "retro.setVotesPerPerson", count })}
               />
             ) : null}
-            <PhaseTimer
-              remaining={remaining}
-              endsAt={sectionEndsAt}
-              phase={retro.phase}
-              send={send}
-            />
           </div>
-        )}
+        ) : null}
       </header>
 
       {showDiscuss ? (
         <DiscussWalk
           host={host}
+          actorId={actorId}
+          raisedHands={retro.raisedHands}
           discussionBy={discussionBy}
           groups={groups}
           focus={focusGroup}
           columns={retro.columns}
+          participants={room.participants}
           templateId={retro.templateId}
           send={send}
           onAdvance={advanceGroup}
@@ -514,50 +521,110 @@ export function RetroBoard({
 
 function DiscussWalk({
   host,
+  actorId,
+  raisedHands,
   discussionBy,
   groups,
   focus,
   columns,
+  participants,
   templateId,
   send,
   onAdvance,
 }: {
   host: boolean;
+  actorId: string;
+  raisedHands: string[];
   discussionBy: DiscussionBy;
   groups: DiscussionGroup[];
   focus: DiscussionGroup | null;
-  columns: { id: string; title: string; tone?: string }[];
+  columns: RetroColumn[];
+  participants: RoomView["participants"];
   templateId: string;
   send: (op: Op) => Promise<boolean>;
   onAdvance: () => void;
 }) {
   const nextLabel = discussionBy === "author" ? "Next author" : "Next status";
   const focusIndex = focus ? groups.findIndex((group) => group.key === focus.key) : -1;
+  const progressRatio = groups.length > 1 && focusIndex >= 0 ? (focusIndex + 1) / groups.length : 0;
+  const focusTone =
+    discussionBy === "status" ? columns.find((column) => column.id === focus?.key)?.tone : undefined;
+  const sortedNotes = useMemo(() => (focus ? sortDiscussNotes(focus.cards) : []), [focus]);
+  const colorFor = (card: RetroCardView) => {
+    if (card.anonymous || !card.authorId) return undefined;
+    return participants.find((person) => person.id === card.authorId)?.color;
+  };
+
   return (
     <div className="discuss-walk">
       <div className="discuss-toolbar">
-        <div className="discuss-basis" role="group" aria-label="Discussion basis">
-          <span>Walk by</span>
-          {(
-            [
-              ["status", "Status"],
-              ["author", "Author"],
-            ] as const
-          ).map(([by, label]) => (
+        <div className="discuss-controls">
+          <div className="discuss-basis" role="group" aria-label="Discussion basis">
+            <span>Walk by</span>
+            {(
+              [
+                ["status", "Status"],
+                ["author", "Author"],
+              ] as const
+            ).map(([by, label]) => (
+              <button
+                key={by}
+                type="button"
+                className={discussionBy === by ? "on" : ""}
+                aria-pressed={discussionBy === by}
+                disabled={!host}
+                title={host ? undefined : "Only the host can choose how the room discusses"}
+                onClick={() => {
+                  if (discussionBy !== by) void send({ type: "retro.setDiscussionBy", by });
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className={`hand-raise${raisedHands.length > 0 ? " live" : ""}`} aria-label="Speaking queue">
             <button
-              key={by}
               type="button"
-              className={discussionBy === by ? "on" : ""}
-              aria-pressed={discussionBy === by}
-              disabled={!host}
-              title={host ? undefined : "Only the host can choose how the room discusses"}
-              onClick={() => {
-                if (discussionBy !== by) void send({ type: "retro.setDiscussionBy", by });
-              }}
+              className={`hand-toggle${raisedHands.includes(actorId) ? " on" : ""}`}
+              aria-pressed={raisedHands.includes(actorId)}
+              onClick={() => void send({ type: "retro.raiseHand", raised: !raisedHands.includes(actorId) })}
             >
-              {label}
+              <span className="hand-toggle-mark" aria-hidden="true">
+                {raisedHands.includes(actorId) ? "↓" : "↑"}
+              </span>
+              {raisedHands.includes(actorId) ? "Lower hand" : "Raise hand"}
             </button>
-          ))}
+            {raisedHands.length > 0 ? (
+              <ol className="hand-queue" aria-label="Raised hands">
+                {raisedHands.map((id, index) => {
+                  const person = participants.find((item) => item.id === id);
+                  const name = id === actorId ? "You" : person?.name ?? "Someone";
+                  const speaking = index === 0;
+                  return (
+                    <li key={id} className={speaking ? "speaking" : "waiting"}>
+                      <span className="hand-place" aria-hidden="true">
+                        {speaking ? "●" : index + 1}
+                      </span>
+                      <span
+                        className="discuss-avatar sm"
+                        style={person?.color ? { background: person.color } : undefined}
+                        aria-hidden="true"
+                      >
+                        {initials(person?.name ?? name)}
+                      </span>
+                      <span className="hand-person">
+                        <strong>{name}</strong>
+                        <em>{speaking ? "Speaking" : `#${index + 1}`}</em>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            ) : (
+              <p className="hand-empty">Raise a hand to join the queue</p>
+            )}
+          </div>
         </div>
         {focus && groups.length > 1 ? (
           <p className="discuss-progress">
@@ -565,17 +632,31 @@ function DiscussWalk({
           </p>
         ) : null}
       </div>
+
       {focus ? (
-        <article className="spotlight" key={focus.key}>
+        <article
+          className={`spotlight discuss-spotlight${focusTone ? ` tone-${focusTone}` : ""}`}
+          key={`${discussionBy}-${focus.key}`}
+        >
+          <div className="discuss-progress-track" aria-hidden="true">
+            <span style={{ width: `${progressRatio * 100}%` }} />
+          </div>
           <div className="spotlight-top">
             <div className="spotlight-copy">
-              <p className="eyebrow">Now discussing · {discussionBy === "author" ? "Author" : "Status"}</p>
+              <p className="eyebrow">
+                Now discussing · {discussionBy === "author" ? "Author" : "Status"}
+              </p>
               <h2>
                 {discussionBy === "status" ? <RetroGlyph templateId={templateId} columnId={focus.key} /> : null}
+                {discussionBy === "author" ? (
+                  <span className="discuss-avatar lg" style={avatarStyle(focus.key, focus.label, participants)} aria-hidden="true">
+                    {focus.key === "anonymous" ? "?" : initials(focus.label)}
+                  </span>
+                ) : null}
                 {focus.label}
               </h2>
               <p className="spotlight-count">
-                {focus.cards.length} {focus.cards.length === 1 ? "note" : "notes"}
+                {focus.cards.length} {focus.cards.length === 1 ? "note" : "notes"} in this walk
               </p>
             </div>
             <div className="spotlight-actions">
@@ -584,20 +665,31 @@ function DiscussWalk({
               </button>
             </div>
           </div>
+
           {discussionBy === "author" ? (
             <div className="discuss-statuses">
               {columns.map((column) => {
                 const notes = focus.cards.filter((card) => card.columnId === column.id);
                 if (notes.length === 0) return null;
                 return (
-                  <section key={column.id} className={column.tone ? `tone-${column.tone}` : undefined}>
-                    <h3>
-                      <RetroGlyph templateId={templateId} columnId={column.id} />
-                      {column.title}
-                    </h3>
-                    <ul>
-                      {notes.map((card) => (
-                        <li key={card.id}>{card.body}</li>
+                  <section key={column.id} className={`discuss-status-panel tone-${column.tone}`}>
+                    <header>
+                      <h3>
+                        <RetroGlyph templateId={templateId} columnId={column.id} />
+                        {column.title}
+                      </h3>
+                      <em>{notes.length}</em>
+                    </header>
+                    <ul className="discuss-note-list">
+                      {notes.map((card, index) => (
+                        <DiscussNoteCard
+                          key={card.id}
+                          card={card}
+                          index={index}
+                          color={colorFor(card)}
+                          showAuthor={false}
+                          speaking={handUp(card, raisedHands, actorId)}
+                        />
                       ))}
                     </ul>
                   </section>
@@ -605,29 +697,49 @@ function DiscussWalk({
               })}
             </div>
           ) : (
-            <ul className="discuss-notes">
-              {focus.cards.map((card) => (
-                <li key={card.id}>
-                  <p>{card.body}</p>
-                  <span>{authorLabel(card)}</span>
-                </li>
+            <ul className="discuss-note-list">
+              {sortedNotes.map((card, index) => (
+                <DiscussNoteCard
+                  key={card.id}
+                  card={card}
+                  index={index}
+                  color={colorFor(card)}
+                  showAuthor
+                  speaking={handUp(card, raisedHands, actorId)}
+                />
               ))}
             </ul>
           )}
+
           {groups.length > 1 ? (
             <ol className="spotlight-queue" aria-label="Discussion order">
-              {groups.map((group, index) => (
-                <li key={group.key} className={group.key === focus.key ? "on" : ""}>
-                  <button type="button" onClick={() => void send({ type: "retro.focusGroup", key: group.key })}>
-                    <span className="queue-rank">{index + 1}</span>
-                    <span className="queue-body">
-                      {discussionBy === "status" ? <RetroGlyph templateId={templateId} columnId={group.key} /> : null}
-                      <span>{group.label}</span>
-                    </span>
-                    <span className="queue-meta">{group.cards.length}</span>
-                  </button>
-                </li>
-              ))}
+              {groups.map((group, index) => {
+                const tone = discussionBy === "status" ? columns.find((column) => column.id === group.key)?.tone : undefined;
+                return (
+                  <li key={group.key} className={group.key === focus.key ? "on" : ""}>
+                    <button type="button" onClick={() => void send({ type: "retro.focusGroup", key: group.key })}>
+                      <span className="queue-rank">{index + 1}</span>
+                      <span className="queue-body">
+                        {discussionBy === "status" ? (
+                          <span className={`queue-status${tone ? ` tone-${tone}` : ""}`}>
+                            <RetroGlyph templateId={templateId} columnId={group.key} />
+                          </span>
+                        ) : (
+                          <span
+                            className="discuss-avatar sm"
+                            style={avatarStyle(group.key, group.label, participants)}
+                            aria-hidden="true"
+                          >
+                            {group.key === "anonymous" ? "?" : initials(group.label)}
+                          </span>
+                        )}
+                        <span>{group.label}</span>
+                      </span>
+                      <span className="queue-meta">{group.cards.length}</span>
+                    </button>
+                  </li>
+                );
+              })}
             </ol>
           ) : null}
         </article>
@@ -639,6 +751,57 @@ function DiscussWalk({
       )}
     </div>
   );
+}
+
+function handUp(card: RetroCardView, raisedHands: string[], actorId: string): boolean {
+  if (card.anonymous) return card.mine && raisedHands.includes(actorId);
+  return card.authorId != null && raisedHands.includes(card.authorId);
+}
+
+function DiscussNoteCard({
+  card,
+  index,
+  color,
+  showAuthor,
+  speaking,
+}: {
+  card: RetroCardView;
+  index: number;
+  color?: string;
+  showAuthor: boolean;
+  speaking: boolean;
+}) {
+  const label = authorLabel(card);
+  return (
+    <li
+      className={speaking ? "discuss-note speaking" : "discuss-note"}
+      style={{ animationDelay: `${Math.min(index, 10) * 35}ms`, ["--hand" as string]: color ?? "var(--ink)" }}
+    >
+      {showAuthor ? (
+        <span className="discuss-avatar" style={color ? { background: color } : undefined} aria-hidden="true">
+          {card.anonymous ? "?" : initials(label.replace(/^You( · anonymous)?$/, "You"))}
+        </span>
+      ) : (
+        <span className="discuss-note-mark" aria-hidden="true" />
+      )}
+      <div className="discuss-note-copy">
+        <p>{card.body}</p>
+        {showAuthor ? <span className="discuss-note-author">{label}</span> : null}
+      </div>
+    </li>
+  );
+}
+
+function avatarStyle(
+  key: string,
+  label: string,
+  participants: RoomView["participants"],
+): { background?: string } | undefined {
+  if (key === "anonymous") return undefined;
+  const person = participants.find((item) => item.id === key);
+  if (person?.color) return { background: person.color };
+  const named = participants.find((item) => item.name === label);
+  return named?.color ? { background: named.color } : undefined;
 }
 
 function SummaryPanel({ room }: { room: RoomView }) {
@@ -1187,12 +1350,13 @@ function PhaseTimer({
       ? Math.max(0, Math.min(1, remaining / (startedSeconds * 1000)))
       : null;
   const status =
-    remaining == null ? "Ready when you are" : remaining <= 0 ? "Time is up" : "Counting down";
+    remaining == null ? null : remaining <= 0 ? "Time's up" : tone === "urgent" ? "Almost done" : null;
 
   return (
     <div
       className={`phase-timer tone-${tone}${running ? " on" : ""}${progress != null ? " has-progress" : ""}`}
       aria-live="polite"
+      aria-label={remaining == null ? "Timer off" : `Timer ${formatClock(remaining)}`}
     >
       <div className="phase-timer-face">
         <span className="phase-timer-ring" aria-hidden="true">
@@ -1215,7 +1379,7 @@ function PhaseTimer({
         <div className="phase-timer-copy">
           <span className="phase-timer-label">Timer</span>
           <strong>{remaining == null ? "Off" : formatClock(remaining)}</strong>
-          <span className="phase-timer-status">{status}</span>
+          {status ? <span className="phase-timer-status">{status}</span> : null}
         </div>
       </div>
 

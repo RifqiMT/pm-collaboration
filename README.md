@@ -37,7 +37,7 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Area | Capabilities |
 | --- | --- |
 | Rooms | Create/join by code, local identity, presence (20s), optional demo seed, max 40 people |
-| Retro | 34 templates, 18 icebreakers, privacy, discuss walks, votes (default 3), actions, timers 3/5/8, summary CSV |
+| Retro | 34 templates, 18 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8, summary CSV |
 | Review | Seeded checklist, multi-signer checks, goal, praise/change/question, ship·iterate·hold |
 | Roadmap | RICE / ICE / value÷complexity, complexity index, median & 3.5 guides, quadrants, insights |
 | Platforms | Next.js web + Expo mobile + shared TypeScript core |
@@ -82,12 +82,12 @@ The host moves the room through six sections. Each section shows only its own wo
 
 1. **Icebreaker** — Short warm-up (18 games). On This or That, the host can write the two sides.  
 2. **Notes** — Classic and pop-culture templates; you see only your notes until Discuss. Column glyphs grow as notes collect.  
-3. **Discuss** — Notes revealed; status walk or author walk.  
+3. **Discuss** — Notes revealed; status walk or author walk; raise-hand speaking queue (named notes highlight; anonymous stay unattributed).  
 4. **Vote** — Dot budget (default 3, host sets 1–10). Notes are not editable while voting.  
 5. **Actions** — Text, owner, done; can start from a note.  
 6. **Summary** — Collect notes, dots, actions, icebreaker answers; download CSV (includes section timings).  
 
-Each timed section has its own countdown (presets 3 / 5 / 8 minutes) and stopwatch.
+Each timed section has its own countdown (web presets 3 / 5 / 8 minutes) and stopwatch. Mobile joins the same phases and raise-hand controls; timer chrome is web-first.
 
 ### Sprint review
 
@@ -108,10 +108,10 @@ flowchart LR
   create[Create a room] --> code[Share the 6-character code]
   code --> join[Each person joins with a name]
   join --> edit[Edits are operations on one room]
-  edit --> poll[Clients refresh ~1.5s visible / ~8s hidden]
+  edit --> poll[Web ~1.5s/8s · Mobile ~2s]
 ```
 
-Votes and checks send the **desired state** (idempotent). During private brainstorm, the server removes other people’s note text before the response leaves. Text fields commit on blur or Enter; failed saves restore previous text.
+Votes, checks, and raise-hand send the **desired state** (idempotent). During private brainstorm, the server removes other people’s note text before the response leaves. Text fields commit on blur or Enter; failed saves restore previous text.
 
 Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API.md](docs/API.md)
 
@@ -119,7 +119,7 @@ Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API.md]
 
 ## Trust model
 
-The room code is the only key. There are no accounts. Run TeamCompass on a **trusted network** (or accept that a public URL is code-gated only). Rooms live in a local JSON file on **one** Node process (`CADENCE_DATA_DIR/rooms.json`). That matches Docker / Render / Fly / a VPS—not Vercel Functions (those need Redis if used at all).
+The room code is the only key. There are no accounts. Run TeamCompass on a **trusted network** (or accept that a public URL is code-gated only). Preferred hosting keeps rooms in a local JSON file on **one** Node process (`CADENCE_DATA_DIR/rooms.json`)—Docker / Render / Fly / a VPS. Vercel Functions need **Supabase** (preferred) or Upstash Redis instead of a local file.
 
 Full limitations: [docs/GUARDRAILS.md](docs/GUARDRAILS.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
@@ -132,7 +132,7 @@ Full limitations: [docs/GUARDRAILS.md](docs/GUARDRAILS.md) · Deploy: [docs/DEPL
 | Domain | TypeScript `@cadence/core`, Vitest |
 | Web | Next.js 15, React 19, Instrument Sans, CSS tokens |
 | Mobile | Expo ~58, React Native, AsyncStorage |
-| Storage | Local JSON file on one process (preferred); optional Redis only for Vercel |
+| Storage | Local JSON file on one process (preferred); Vercel: Supabase or Redis |
 
 Details: [docs/TECH_STACK.md](docs/TECH_STACK.md)
 
