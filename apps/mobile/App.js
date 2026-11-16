@@ -25,13 +25,118 @@ import {
 } from "@cadence/core";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Image, Pressable, ScrollView, Share, Text, TextInput, View } from "react-native";
+import { Image, Linking, Pressable, ScrollView, Share, Text, TextInput, View } from "react-native";
 import { createPersonId, request, trimServer } from "./src/api";
 import { colors, styles } from "./src/ui";
 
 const SERVER_KEY = "cadence.server";
 const IDENTITY_KEY = "cadence.identity";
 const DEFAULT_SERVER = "http://localhost:3000";
+const CREDIT_TEXT = "Developed, managed, and maintained by Rifqi Tjahyono";
+const LINKEDIN_URL = "https://www.linkedin.com/in/rifqi-tjahjono/";
+const WEBSITE_URL = "https://rifqi-tjahyono.com/";
+const GITHUB_URL = "https://github.com/RifqiMT/pm-collaboration";
+const ARTICLE_URL =
+  "https://rifqi-tjahyono.com/%f0%9f%93%9d-sticky-note-chaos-to-team-clarity-reflect-together-review-progress-and-decide-what-comes-next-%f0%9f%a4%9d%f0%9f%a7%ad/";
+
+async function openCreditLink(url) {
+  try {
+    const supported = await Linking.canOpenURL(url);
+    if (!supported) {
+      console.error("[cadence] cannot open credit link", { url });
+      return;
+    }
+    await Linking.openURL(url);
+  } catch (error) {
+    console.error("[cadence] credit link failed", {
+      url,
+      message: error instanceof Error ? error.message : "unknown",
+    });
+  }
+}
+
+function LinkedInMark() {
+  return (
+    <View style={styles.linkedInMark} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <Text style={styles.linkedInMarkText}>in</Text>
+    </View>
+  );
+}
+
+function WebsiteMark() {
+  return (
+    <View style={styles.websiteMark} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View style={styles.websiteMarkRing}>
+        <View style={styles.websiteMarkEquator} />
+        <View style={styles.websiteMarkMeridian} />
+      </View>
+    </View>
+  );
+}
+
+function GitHubMark() {
+  return (
+    <View style={styles.githubMark} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View style={styles.githubMarkHead} />
+      <View style={styles.githubMarkEarLeft} />
+      <View style={styles.githubMarkEarRight} />
+    </View>
+  );
+}
+
+function ArticleMark() {
+  return (
+    <View style={styles.articleMark} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View style={styles.articleMarkPage}>
+        <View style={styles.articleMarkLine} />
+        <View style={[styles.articleMarkLine, styles.articleMarkLineShort]} />
+        <View style={styles.articleMarkLine} />
+      </View>
+    </View>
+  );
+}
+
+function CreditFooter() {
+  return (
+    <View style={styles.creditFooter} accessibilityRole="summary">
+      <Text style={styles.creditText}>{CREDIT_TEXT}</Text>
+      <View style={styles.creditLinks}>
+        <Pressable
+          style={({ pressed }) => [styles.creditLink, pressed ? { opacity: 0.7 } : null]}
+          onPress={() => openCreditLink(LINKEDIN_URL)}
+          accessibilityRole="link"
+          accessibilityLabel="Rifqi Tjahyono on LinkedIn"
+        >
+          <LinkedInMark />
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.creditLink, pressed ? { opacity: 0.7 } : null]}
+          onPress={() => openCreditLink(WEBSITE_URL)}
+          accessibilityRole="link"
+          accessibilityLabel="Rifqi Tjahyono personal website"
+        >
+          <WebsiteMark />
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.creditLink, pressed ? { opacity: 0.7 } : null]}
+          onPress={() => openCreditLink(GITHUB_URL)}
+          accessibilityRole="link"
+          accessibilityLabel="TeamCompass on GitHub"
+        >
+          <GitHubMark />
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.creditLink, pressed ? { opacity: 0.7 } : null]}
+          onPress={() => openCreditLink(ARTICLE_URL)}
+          accessibilityRole="link"
+          accessibilityLabel="Article: Sticky-Note Chaos to Team Clarity"
+        >
+          <ArticleMark />
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
 function notesByAuthor(cards) {
   const key = (card) => (card.anonymous || !card.authorId ? "\uffff" : (card.authorName || "Someone").toLocaleLowerCase());
@@ -198,6 +303,7 @@ function Home({ server, onServer, onCreate, onOpen }) {
       >
         <Text style={styles.buttonText}>Join room</Text>
       </Pressable>
+      <CreditFooter />
     </ScrollView>
   );
 }
@@ -282,6 +388,7 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
       <Text style={styles.meta}>
         Ten notes in every retro column, a finished sprint review, or ten scored roadmap bets.
       </Text>
+      <CreditFooter />
     </ScrollView>
   );
 }

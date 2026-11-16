@@ -2,7 +2,7 @@
 
 **Audience:** Operators hosting `@cadence/web`  
 **Preferred model:** One Node process + local `rooms.json`  
-**Last updated:** 2026-11-12  
+**Last updated:** 2026-11-16  
 
 Mobile (`@cadence/mobile`) stays on Expo. Point the phone at your web origin after deploy.
 
@@ -102,6 +102,10 @@ Vercel Functions cannot use the local JSON file. Use **Supabase** (or Redis) for
 4. Smoke-test create-room on `/new`.
 
 **Do not commit keys.** If a key was pasted into chat, rotate it in Supabase → Settings → API Keys.
+
+**Auth headers:** Legacy JWT keys send `apikey` + `Authorization: Bearer`. New `sb_*` keys send `apikey` only (Bearer is omitted because those tokens are not JWTs).
+
+**Project config:** `apps/web/vercel.json` sets monorepo `installCommand` / `buildCommand` from the web app directory (`cd ../.. && npm install` / `npm run build -w @cadence/web`).
 
 ### Optional: Vercel + Redis
 

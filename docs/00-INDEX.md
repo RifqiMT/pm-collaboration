@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-12  
+**Last documentation refresh:** 2026-11-16  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -13,7 +13,7 @@ This index is the reading map for product, engineering, design, and leadership s
 
 | Audience | Start here | Then read |
 | --- | --- | --- |
-| New team member | [README](../README.md) → [PRODUCT](./PRODUCT.md) | Personas, Guardrails |
+| New team member | [README](../README.md) → [PRODUCT](./product.md) | Personas, Guardrails |
 | Product / PM | [PRD](./PRD.md) → [User stories](./user-stories/) → [Metrics](./METRICS.md) | Variables, Traceability |
 | Engineering | [ARCHITECTURE](./ARCHITECTURE.md) → [TECH_STACK](./TECH_STACK.md) → [API](./API.md) | Guardrails, Variables |
 | Design | [DESIGN_GUIDELINES](./DESIGN_GUIDELINES.md) | PRODUCT, Personas |
@@ -26,7 +26,7 @@ This index is the reading map for product, engineering, design, and leadership s
 | Document | Purpose |
 | --- | --- |
 | [../README.md](../README.md) | Product overview, benefits, quick start, layout, trust model |
-| [PRODUCT.md](./PRODUCT.md) | Full product documentation: rituals, logics, collaboration, limits (same file as `product.md` on case-insensitive disks) |
+| [product.md](./product.md) | Full product documentation: rituals, logics, collaboration, limits |
 | [PRD.md](./PRD.md) | Product requirements, goals, non-goals, acceptance, risks |
 | [personas/](./personas/) | Primary and secondary user personas |
 | [user-stories/](./user-stories/) | Epics, stories, and acceptance criteria |
@@ -55,7 +55,9 @@ This index is the reading map for product, engineering, design, and leadership s
 | Demo seed data | `packages/core/src/demo.ts` |
 | Retro CSV export | `packages/core/src/retro-export.ts` |
 | Web UI & polling | `apps/web/src/components/` |
-| Room API & persistence | `apps/web/src/app/api/`, `apps/web/src/server/{store,persistence}.ts` |
+| Developer credit | `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `App.js` |
+| Room API & persistence | `apps/web/src/app/api/`, `apps/web/src/server/{store,persistence,http}.ts` |
+| Vercel project config | `apps/web/vercel.json` |
 | Single-process deploy | `Dockerfile`, `render.yaml`, `fly.toml`, [DEPLOYMENT.md](./DEPLOYMENT.md) |
 | Supabase schema (Vercel) | [supabase-schema.sql](./supabase-schema.sql) |
 | Design tokens (web) | `apps/web/src/app/globals.css` |
@@ -68,7 +70,7 @@ This index is the reading map for product, engineering, design, and leadership s
 When behavior, limits, formulas, or UI copy change in code, update:
 
 1. `VARIABLES.md` and/or `API.md` if contracts change  
-2. `PRODUCT.md` / `PRD.md` if user-visible behavior changes  
+2. `product.md` / `PRD.md` if user-visible behavior changes  
 3. `TRACEABILITY_MATRIX.md` if requirement coverage moves  
 4. `CHANGELOG.md` with date, author area, and impact  
 5. This index if new docs are added  

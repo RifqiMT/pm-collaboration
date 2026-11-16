@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Instrument_Sans } from "next/font/google";
+import { CreditFooter } from "@/components/credit-footer";
 import "./globals.css";
 
 const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans" });
@@ -23,7 +24,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a className="skip" href="#main">
           Skip to content
         </a>
-        {children}
+        <div className="app-shell">
+          {children}
+          <CreditFooter />
+        </div>
       </body>
     </html>
   );

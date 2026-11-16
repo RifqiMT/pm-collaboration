@@ -3,7 +3,7 @@
 **Purpose:** Exhaustive catalog of product and domain variables used across TeamCompass.  
 **Format:** Variable name · Friendly name · Definition · Formula / rule · Location · Example  
 **Source of truth:** `packages/core/src/{types,scoring,room,text,content,ids}.ts`, web/mobile clients  
-**Last updated:** 2026-11-12  
+**Last updated:** 2026-11-16  
 
 ---
 
@@ -14,7 +14,7 @@
 3. Use **Formula / rule** when changing scoring, limits, or sync.  
 4. Use **Location** to jump to implementation.  
 5. See **§10 Relationship chart** for how variables connect in flows.  
-6. Deploy/store env vars are in **§11** (Hobby / Upstash).
+6. Deploy/store env vars are in **§11** (file / Supabase / Redis).
 
 ---
 
@@ -87,9 +87,9 @@
 | --- | --- | --- | --- | --- | --- |
 | `templateId` | Retro template | Column shape for the board | One of 34 `RetroTemplateId` values | Create; `RetroState` | `start-stop-continue` |
 | `phase` | Retro section | Current facilitation section | `icebreak` \| `brainstorm` \| `vote` \| `discuss` \| `act` \| `summary`; UI order icebreak → brainstorm → **discuss** → vote → act → summary | Host `setPhase`; boards | `discuss` |
-| `votesPerPerson` | Dot budget | Dots each person may place | Integer **1–10**; default **3**; lowering drops newest excess | Vote tools | `3` |
+| `votesPerPerson` | Dot budget | Dots each person may place | Integer **1–10**; default **3**; lowering drops newest excess. Web UI presets **1 / 2 / 3** (`DOT_PRESETS`) plus Custom | Vote tools (`retro-board.tsx`); mobile has no host budget control | `3` |
 | `votes left` | Votes remaining | Dots still available to actor | `max(0, votesPerPerson - votesUsed)` | `room.ts` / UI | `1` |
-| `timers[phase]` | Section countdown end | ISO end time for section timer | Start clamps seconds **30–3600**; UI presets **180 / 300 / 480** s | `startTimer` / `PhaseTimer` | ends in 5 min |
+| `timers[phase]` | Section countdown end | ISO end time for section timer | Server clamps seconds **30–3600**. Web UI: presets **3 / 5 / 8** min plus Custom **1–60** whole minutes (`TIMER_MIN_MINUTES`/`TIMER_MAX_MINUTES`) | `startTimer` / `PhaseTimer` in `retro-board.tsx` | Custom 12 → 720s |
 | `timerEndsAt` | Legacy timer mirror | Deprecated mirror of current phase timer | Kept for older clients | `RetroState` | — |
 | `stopwatchMs[phase]` | Section stopwatch | Accrued ms while section was active | Increases while section open; Summary has none | `sectionStopwatchMs` | `320000` |
 | `stopwatchRunningSince` | Stopwatch start | When current section stopwatch began | ISO or null | `RetroState` | — |
@@ -115,7 +115,7 @@
 | `ActionItem.done` | Action done | Completion flag | Desired boolean | Checkbox | `false` |
 | `ActionItem.sourceCardId` | Source note | Note this action came from | Unique per note when set | Add from note | `card_…` |
 
-**Timer presets (web UI):** 3, 5, 8 minutes → 180, 300, 480 seconds (`TIMER_PRESETS` in `retro-board.tsx`). Mobile participates in phases and can raise a hand, but does not currently expose start/clear timer controls.
+**Timer presets (web UI):** 3, 5, 8 minutes → 180, 300, 480 seconds (`TIMER_PRESETS`), plus Custom whole minutes 1–60. Mobile participates in phases and can raise a hand, but does not expose timer or vote-budget host controls.
 
 ---
 
@@ -193,8 +193,8 @@ reach 100 · impact 1 · confidence 0.8 · effort 1 · ICE 5/5/5 · value 5 · c
 | Poll interval (web, hidden) | Web background refresh | Refetch when the browser tab is hidden | **8000** ms | `use-room.ts` | 8s |
 | Poll interval (mobile) | Mobile refresh | Fixed poll on the Expo client | **2000** ms (no visibility split) | `apps/mobile/App.js` | 2s |
 | Request body limit | Max request body | JSON body character cap | **100_000** | `http.ts` | — |
-| Store lock stale | Stale lock window | When a file lock is considered abandoned | ~**5** s | `store.ts` | — |
-| Store busy wait | Store busy timeout | When to error if lock not acquired | ~**4** s → `store` error | `store.ts` | — |
+| `LOCK_TTL_MS` | Store lock TTL | When a lock is considered abandoned / Redis lock TTL | **5000** ms | `persistence.ts` | 5s |
+| `LOCK_WAIT_MS` | Store busy wait | When to error if lock not acquired | **4000** ms → `store` (HTTP 503) | `persistence.ts` | 4s |
 | `createId(prefix)` | Entity id | Prefixed random id | `` `${prefix}_${uuid12}` `` | `ids.ts` | `card_…` |
 | Drawing payload | Drawing strokes | Canvas icebreaker encoding | `d:` + strokes; ≤80 strokes; 2–200 pts; coords 0–100 | `normalizeDrawing` | — |
 | Two truths body | Truths payload | Three statements + lie marker | 3 lines + `#1|#2|#3`; statement ≤120 | `normalizeTruths` | — |
@@ -320,6 +320,8 @@ sequenceDiagram
 ---
 
 ## 11. Deployment / store environment variables
+
+Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or Upstash Redis. For `sb_*` keys, PostgREST uses `apikey` only (no Bearer); legacy JWT keys also send `Authorization: Bearer`.
 
 | Variable name | Friendly name | Definition | Formula / rule | Location | Example |
 | --- | --- | --- | --- | --- | --- |

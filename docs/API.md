@@ -5,7 +5,7 @@
 **CORS:** `Access-Control-Allow-Origin: *`  
 **Caching:** `Cache-Control: no-store`  
 **Runtime:** Node.js (`force-dynamic`)  
-**Last updated:** 2026-11-12  
+**Last updated:** 2026-11-16  
 
 ---
 
@@ -16,10 +16,11 @@
 | Room code | Exactly 6 alphanumeric characters (case-insensitive on join path; stored uppercase) |
 | Actor | Participant `id` from create/join; required for ops |
 | Success | JSON body with `room` (`RoomView`) and sometimes `participant` |
-| Domain error | `CadenceError` → **404** if `code === "missing"`, else **400** |
+| Domain error | `CadenceError` → **404** if `code === "missing"`; **503** if `code === "store"`; else **400** |
 | Unexpected | **500** |
 | OPTIONS | All routes answer **204** for CORS preflight |
 | Body size | Cap ~100,000 characters (`http.ts`) |
+| Error class | `fail()` duck-types `CadenceError` by `name` + `code` when bundlers duplicate the class |
 
 `RoomView` is the privacy-filtered presentation of a `Room` for a given actor.
 
@@ -158,20 +159,32 @@ Fails with `full` if participants ≥ 40.
 
 ## 4. Common error codes
 
-| Code | Meaning |
-| --- | --- |
-| `missing` | Room or entity not found |
-| `actor` | Not joined / invalid participant |
-| `host` | Host-only operation |
-| `phase` | Wrong retro phase |
-| `private` | Note still private |
-| `votes` | Vote budget exhausted |
-| `limit` | Hit a `LIMITS` cap |
-| `full` | Room participant cap |
-| `kind` | Wrong ritual for op |
-| `store` | File lock busy |
-| `code` | Invalid / exhausted room code |
-| `text` / `choice` / `type` | Validation |
+| Code | HTTP | Meaning |
+| --- | --- | --- |
+| `missing` | 404 | Room or entity not found |
+| `store` | 503 | Persistence unavailable (lock busy, remote misconfigured, missing `cadence_store`, etc.) |
+| `actor` | 400 | Not joined / invalid participant |
+| `host` | 400 | Host-only operation |
+| `phase` | 400 | Wrong retro phase |
+| `private` | 400 | Note still private |
+| `votes` | 400 | Vote budget exhausted |
+| `limit` | 400 | Hit a `LIMITS` cap (or body too large) |
+| `full` | 400 | Room participant cap |
+| `kind` | 400 | Wrong ritual for op / create |
+| `code` | 400 | Invalid / exhausted room code |
+| `template` | 400 | Unknown retro template |
+| `column` | 400 | Column not on this board |
+| `section` | 400 | Checklist section missing |
+| `duplicate` | 400 | Note already converted to an action |
+| `owner` | 400 | Assignee not in the room |
+| `game` | 400 | Icebreaker game mismatch |
+| `guess` | 400 | Two-truths guess rules |
+| `group` | 400 | Discuss group invalid / empty |
+| `round` | 400 | Icebreaker pair/round invalid |
+| `impact` | 400 | Impact not on Intercom scale |
+| `op` | 400 | Unknown or malformed op |
+| `json` | 400 | Request body not valid JSON |
+| `text` / `choice` / `type` / `range` | 400 | Validation |
 
 ---
 
@@ -181,5 +194,6 @@ Fails with `full` if participants ≥ 40.
 2. After each op, replace local room if returned `version` is newer.  
 3. Poll GET with `actorId` to refresh presence and privacy-correct views.  
 4. Mobile must set API base to the machine running `@cadence/web`, not `localhost` on the phone itself (unless simulator).  
+5. Treat **503** `store` as retryable (lock contention or cold remote).  
 
-Implementation: `apps/web/src/app/api/rooms/**`, `apps/web/src/server/{http,store}.ts`, `packages/core/src/room.ts`.
+Implementation: `apps/web/src/app/api/rooms/**`, `apps/web/src/server/{http,store,persistence}.ts`, `packages/core/src/room.ts`.

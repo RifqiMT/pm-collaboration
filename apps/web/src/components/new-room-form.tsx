@@ -212,22 +212,23 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
         {kind === "retro" ? (
           <section className="setup-stage" aria-label="Retrospective shape">
             <header className="setup-stage-head">
-              <div>
-                <p className="eyebrow">Board shape</p>
-                <h2>Choose a shape</h2>
-              </div>
-              <p>The columns are what the team writes on. You can still move notes later.</p>
+              <p className="eyebrow">Board shape</p>
+              <h2>Choose a shape</h2>
+              <p>Pick the columns the team writes on. Notes can still move later.</p>
             </header>
-            {groups.map(([group, groupTitle, note]) => (
-              <div key={group} className="shape-group">
-                <header className="shape-group-head">
-                  <h3>{groupTitle}</h3>
-                  <p>{note}</p>
-                </header>
-                <div className="shape-grid" role="radiogroup" aria-label={`${groupTitle} retrospective shapes`}>
-                  {templateIds
-                    .filter((id) => (RETRO_TEMPLATES[id].group ?? "classic") === group)
-                    .map((id, index) => {
+            {groups.map(([group, groupTitle, note]) => {
+              const shapes = templateIds.filter((id) => (RETRO_TEMPLATES[id].group ?? "classic") === group);
+              return (
+                <div key={group} className="shape-group">
+                  <header className="shape-group-head">
+                    <div>
+                      <h3>{groupTitle}</h3>
+                      <p>{note}</p>
+                    </div>
+                    <span className="shape-group-count">{shapes.length}</span>
+                  </header>
+                  <div className="shape-grid" role="radiogroup" aria-label={`${groupTitle} retrospective shapes`}>
+                    {shapes.map((id, index) => {
                       const template = RETRO_TEMPLATES[id];
                       const selected = templateId === id;
                       return (
@@ -258,25 +259,28 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
                         </button>
                       );
                     })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </section>
         ) : (
           <section className="setup-stage" aria-label="What the room includes">
             <header className="setup-stage-head">
-              <div>
-                <p className="eyebrow">Room flow</p>
-                <h2>What the room includes</h2>
-              </div>
-              <p>Everyone who has the code sees the same board.</p>
+              <p className="eyebrow">Room flow</p>
+              <h2>What the room includes</h2>
+              <p>Same board for everyone with the code — {ritual.steps.length} shared steps.</p>
             </header>
             <ol className="setup-steps">
               {ritual.steps.map((step, index) => (
                 <li key={step} style={{ animationDelay: `${index * 40}ms` }}>
-                  <span>0{index + 1}</span>
-                  <strong>{step}</strong>
-                  <p>{stepHint[kind][step]}</p>
+                  <span className="setup-step-index" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="setup-step-copy">
+                    <strong>{step}</strong>
+                    <p>{stepHint[kind][step]}</p>
+                  </div>
                 </li>
               ))}
             </ol>

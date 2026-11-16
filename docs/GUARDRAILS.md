@@ -2,7 +2,7 @@
 
 **Purpose:** Technical and business limitations that constrain product development.  
 **Audience:** Engineers, PMs, designers, security reviewers  
-**Last updated:** 2026-11-12  
+**Last updated:** 2026-11-16  
 
 Violating a hard guardrail without an approved architecture change is a product defect, not a stretch goal.
 
@@ -92,7 +92,7 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-PLAT-5 Light theme only** | No dark tokens shipped | Don’t half-implement dark mode |
 | **G-PLAT-6 Prefer single-process host** | File store needs one Node writer + disk | Prefer Docker/Render/Fly/VPS; do not use Vercel Functions for file-only store |
 | **G-PLAT-7 Vercel optional** | Functions need Supabase or Redis | Prefer Supabase on Vercel; Redis remains an alternative; file store is preferred off-Vercel |
-| **G-PLAT-8 Mobile timer chrome** | Mobile omits start/clear timer UI | Do not document mobile as feature-identical facilitation chrome |
+| **G-PLAT-8 Mobile facilitation chrome** | Mobile omits start/clear timer UI and host vote-budget controls | Do not document mobile as feature-identical facilitation chrome; raise hand and ritual boards remain |
 
 ---
 

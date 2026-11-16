@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-12  
+**Last updated:** 2026-11-16  
 
 ---
 
@@ -163,7 +163,13 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 
 - Toggle control and ordered queue in Discuss chrome (`.hand-raise`, `.hand-toggle`)  
 - Speaking notes use a calm highlight wash (web) / soft paper tint (mobile `#f3efe4`)  
-- Do not reveal anonymous authors via the queue label rules—only highlight the raiser’s own anonymous card for them
+- Do not reveal anonymous authors via the queue label rules—only highlight the raiser’s own anonymous card for them  
+
+### 5.6c Timer and vote budget (web)
+
+- Timer presets **3 / 5 / 8** minutes plus Custom whole minutes **1–60**  
+- Vote budget presets **1 / 2 / 3** (`DOT_PRESETS`) plus Custom (server allows 1–10)  
+- Keep these controls in phase tools; do not clutter the first board viewport  
 
 ### 5.7 Roadmap chart
 
@@ -225,9 +231,14 @@ Avoid decorative perpetual animations, glow stacks, and emoji as structure.
 
 ---
 
-## 11. File references
+## 11. Developer credit
+
+Site-wide attribution sits at the bottom of the shell (web) and at the end of home/create scrolls (mobile): soft ink text, hairline top border, and four icon links (LinkedIn mark, globe, GitHub, article document) opening in a new tab / system browser. Keep the credit quieter than product chrome; do not promote it into the hero.
+
+## 12. File references
 
 - Web tokens & components: `apps/web/src/app/globals.css`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
+- Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  
 - Mobile tokens: `apps/mobile/src/ui.js`  
 - Glyphs: `apps/web/src/components/retro-glyphs.tsx`

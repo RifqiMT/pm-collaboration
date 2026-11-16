@@ -1,6 +1,6 @@
 # TeamCompass — Architecture
 
-**Last updated:** 2026-11-12  
+**Last updated:** 2026-11-16  
 
 ---
 
@@ -123,19 +123,28 @@ Details: [API.md](./API.md).
 | `/new` | `NewRoomForm` |
 | `/r/[code]` | `RoomApp` → `RetroBoard` / `ReviewBoard` / `RoadmapBoard` |
 
-Supporting modules: `use-room.ts` (poll + serialized ops), `identity.ts`, `shared-field.tsx`, `icebreaker-panel.tsx`, `retro-ui.ts`, glyphs.
+Supporting modules: `use-room.ts` (poll + serialized ops), `identity.ts`, `shared-field.tsx`, `icebreaker-panel.tsx`, `retro-ui.ts`, glyphs, `credit-footer.tsx` (layout shell).
 
 ---
 
 ## 9. Mobile composition
 
-Single-entry `App.js` screens: home → create → room. API client in `src/api.js`. Visual tokens in `src/ui.js`. Configurable API base URL required for device ↔ host connectivity.
+Single-entry `App.js` screens: home → create → room. API client in `src/api.js`. Visual tokens in `src/ui.js`. Configurable API base URL required for device ↔ host connectivity. Credit footer on home/create. Facilitation chrome omits timer and vote-budget host controls.
 
 ---
 
 ## 10. Error architecture
 
-Domain failures throw `CadenceError` with `code` (e.g. `missing`, `host`, `phase`, `private`, `votes`, `limit`, `store`). HTTP layer maps `missing` → 404, other known domain codes → 400, unexpected → 500. Clients surface user-readable messages.
+Domain failures throw `CadenceError` with `code` (e.g. `missing`, `host`, `phase`, `private`, `votes`, `limit`, `store`). HTTP `fail()` in `http.ts` maps:
+
+| Condition | Status |
+| --- | --- |
+| `code === "missing"` | **404** |
+| `code === "store"` | **503** |
+| Other `CadenceError` | **400** |
+| Unexpected | **500** |
+
+`fail()` also duck-types errors named `CadenceError` with a string `code` when bundlers duplicate the class across packages. Full catalog: [API.md](./API.md).
 
 ---
 
@@ -144,8 +153,9 @@ Domain failures throw `CadenceError` with `code` (e.g. `missing`, `host`, `phase
 | Layer | Location |
 | --- | --- |
 | Core domain | `packages/core/src/*.test.ts` |
-| Web helpers | `retro-ui.test.ts`, `retro-glyphs.test.ts` |
-| Gaps | API/store E2E, full React component E2E, mobile automation |
+| Web helpers | `retro-ui.test.ts`, `retro-glyphs.test.ts`, `credit-footer.test.ts` |
+| Store / persistence | `apps/web/src/server/store.test.ts` |
+| Gaps | Full React component E2E, mobile automation |
 
 ---
 

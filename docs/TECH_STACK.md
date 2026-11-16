@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-12  
+**Last updated:** 2026-11-16  
 
 ---
 
@@ -111,6 +111,8 @@ npx expo start
 - Force backend: `CADENCE_STORE=file|supabase|redis`  
 - No auth provider (Clerk, Auth0, etc.)  
 - Env template: [`.env.example`](../.env.example) · deploy guide: [DEPLOYMENT.md](./DEPLOYMENT.md)  
+- Vercel monorepo build: `apps/web/vercel.json`  
+- React: web declares `^19.1.1` (lock often resolves 19.3.x); mobile pins `19.3.0`  
 
 ---
 

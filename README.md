@@ -37,12 +37,13 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Area | Capabilities |
 | --- | --- |
 | Rooms | Create/join by code, local identity, presence (20s), optional demo seed, max 40 people |
-| Retro | 34 templates, 18 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8, summary CSV |
+| Retro | 34 templates, 18 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8 + custom 1–60 min, summary CSV |
 | Review | Seeded checklist, multi-signer checks, goal, praise/change/question, ship·iterate·hold |
 | Roadmap | RICE / ICE / value÷complexity, complexity index, median & 3.5 guides, quadrants, insights |
 | Platforms | Next.js web + Expo mobile + shared TypeScript core |
+| Credit | Developer credit footer (web site-wide; mobile home/create) |
 
-Full product detail: [docs/PRODUCT.md](docs/PRODUCT.md) · Requirements: [docs/PRD.md](docs/PRD.md)
+Full product detail: [docs/product.md](docs/product.md) · Requirements: [docs/PRD.md](docs/PRD.md)
 
 ---
 
@@ -87,7 +88,7 @@ The host moves the room through six sections. Each section shows only its own wo
 5. **Actions** — Text, owner, done; can start from a note.  
 6. **Summary** — Collect notes, dots, actions, icebreaker answers; download CSV (includes section timings).  
 
-Each timed section has its own countdown (web presets 3 / 5 / 8 minutes) and stopwatch. Mobile joins the same phases and raise-hand controls; timer chrome is web-first.
+Each timed section has its own countdown (web presets 3 / 5 / 8 minutes, plus Custom 1–60) and stopwatch. Mobile joins the same phases and raise-hand controls; timer and vote-budget chrome are web-first.
 
 ### Sprint review
 
@@ -97,7 +98,7 @@ Shared checklist (increment, story, evidence, closing the loop), multi-signer ch
 
 Initiatives carry outcome, assumption, score inputs, complexity (technical · dependency · uncertainty), horizon, and owner. High complexity starts at **3.5**. Strong score + high complexity = **big bet**; strong + lower complexity = **do first**.
 
-Scoring variables and formulas: [docs/VARIABLES.md](docs/VARIABLES.md) · product detail: [docs/PRODUCT.md](docs/PRODUCT.md)
+Scoring variables and formulas: [docs/VARIABLES.md](docs/VARIABLES.md) · product detail: [docs/product.md](docs/product.md)
 
 ---
 
@@ -155,7 +156,7 @@ pm-collaboration/
 | Document | Description |
 | --- | --- |
 | [docs/00-INDEX.md](docs/00-INDEX.md) | Documentation map |
-| [docs/PRODUCT.md](docs/PRODUCT.md) | Full product documentation |
+| [docs/product.md](docs/product.md) | Full product documentation |
 | [docs/PRD.md](docs/PRD.md) | Product requirements |
 | [docs/personas/](docs/personas/) | User personas |
 | [docs/user-stories/](docs/user-stories/) | Epics, stories, acceptance criteria |

@@ -1,9 +1,9 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-12  
+**Status:** Current as of repository state 2026-11-16  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
-**Note:** On case-insensitive filesystems this path is also `docs/product.md`. There is a single product document—this one.
+**Canonical path:** `docs/product.md` (use this casing in links for case-sensitive hosts).
 
 ---
 
@@ -67,7 +67,7 @@ Primary users are agile product and engineering teams running time-boxed rituals
 | Dot voting | Default **3** votes per person (host sets **1–10**); lowering budget drops excess newest dots |
 | Actions | Body, owner, done flag; can be created from a note |
 | Raise hand | In Discuss, anyone can raise/lower a hand (ordered queue). Named notes from that person highlight; anonymous notes stay unattributed except to the raiser |
-| Timers | Per-section countdown; **web** UI presets **3 / 5 / 8** minutes; server allows 30–3600 seconds (mobile does not expose timer controls yet) |
+| Timers | Per-section countdown; **web** presets **3 / 5 / 8** minutes plus Custom **1–60** whole minutes; server clamps 30–3600 seconds (mobile has no timer chrome) |
 | Stopwatch | Accrues while a section is open; Summary has no timer/stopwatch UI |
 | Column glyphs | Header graphics grow as notes collect in that column |
 | Summary + CSV | Collects notes, votes, actions, icebreaker answers, and section timing; downloadable CSV |
@@ -97,8 +97,9 @@ Primary users are agile product and engineering teams running time-boxed rituals
 | Surface | Role |
 | --- | --- |
 | Web (`apps/web`) | Full UI, App Router pages, room API, persistence (`file` / `supabase` / `redis`) |
-| Mobile (`apps/mobile`) | Expo client for home / create / room for all three rituals (2s poll; raise hand; no timer chrome) |
+| Mobile (`apps/mobile`) | Expo client for home / create / room for all three rituals (2s poll; raise hand; no timer or vote-budget host chrome) |
 | Core (`packages/core`) | Types, ops, privacy presentation, scoring, content, demo seed, export |
+| Credit | Site-wide developer credit footer on web; home/create on mobile (`credit-footer`) |
 
 ---
 

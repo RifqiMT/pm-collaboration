@@ -15,3 +15,6 @@ apps/mobile/dist-web
 .DS_Store
 tsconfig.tsbuildinfo
 .vercel
+.env
+.env.*
+!.env.example

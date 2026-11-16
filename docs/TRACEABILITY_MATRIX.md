@@ -2,7 +2,7 @@
 
 **Document type:** Requirements ↔ Stories ↔ Implementation ↔ Verification  
 **Product:** TeamCompass (`@cadence/*`)  
-**Last updated:** 2026-11-12  
+**Last updated:** 2026-11-16  
 
 ---
 
@@ -45,7 +45,7 @@
 | FR-RET6 | Discuss walks | US-2.4 | `setDiscussionBy`, `focusGroup` | Discuss walk tests | Implemented |
 | FR-RET7 | Dot voting budget | US-2.5 | `vote`, `setVotesPerPerson` | Vote tests | Implemented |
 | FR-RET8 | Actions + owners | US-2.6 | action ops, Actions UI | Action tests | Implemented |
-| FR-RET9 | Timers + stopwatch | US-2.7 | `timers`, `stopwatchMs`, `PhaseTimer` | Timer/stopwatch tests | Implemented |
+| FR-RET9 | Timers + stopwatch | US-2.7 | `timers`, `stopwatchMs`, `PhaseTimer`, custom 1–60 min | Timer/stopwatch tests | Implemented |
 | FR-RET10 | Summary + CSV | US-2.8 | `retro-export.ts`, summary UI | `retro-export.test.ts` | Implemented |
 | FR-RET11 | Column glyphs | — | `retro-glyphs.tsx` | `retro-glyphs.test.ts` | Implemented |
 | FR-RET12 | Discuss raise hand | US-2.4b | `retro.raiseHand`, `raisedHands`, web+mobile Discuss UI | `room.test.ts` raise-hand cases | Implemented |
@@ -82,7 +82,7 @@
 
 | Req ID | Requirement (short) | Story | Implementation | Verification | Status |
 | --- | --- | --- | --- | --- | --- |
-| FR-P1 | Web UI + API | US-5.1 | `apps/web` | Manual smoke + vitest helpers | Implemented |
+| FR-P1 | Web UI + API | US-5.1 | `apps/web`, `credit-footer.tsx` | Manual smoke + vitest helpers + `credit-footer.test.ts` | Implemented |
 | FR-P2 | Mobile client | US-5.2 | `apps/mobile` | Manual Expo smoke | Implemented |
 | FR-P3 | Shared core | US-5.3 | `packages/core` | `npm test -w @cadence/core` | Implemented |
 | FR-P4 | HTTP API surface | US-5.1 | `app/api/rooms/**` | Manual / integration gap | Implemented (API tests thin) |

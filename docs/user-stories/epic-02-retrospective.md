@@ -96,12 +96,14 @@
 **Acceptance criteria**
 
 - [ ] Default votes per person is 3; host can set 1–10  
+- [ ] Web UI offers presets 1 / 2 / 3 plus Custom  
 - [ ] Voting uses desired state (`voting: true|false`)  
 - [ ] Exceeding budget returns `votes` error  
 - [ ] Lowering budget removes excess newest dots  
 - [ ] Notes are not editable during vote phase  
+- [ ] Mobile may omit host vote-budget controls; budget set from web still applies  
 
-**PRD:** FR-RET7 · **Code:** `retro.vote`, `retro.setVotesPerPerson`
+**PRD:** FR-RET7 · **Code:** `retro.vote`, `retro.setVotesPerPerson`, `DOT_PRESETS`
 
 ---
 
@@ -129,7 +131,8 @@
 
 **Acceptance criteria**
 
-- [ ] Web UI presets 3, 5, 8 minutes; custom within server 30–3600s  
+- [ ] Web UI presets 3, 5, 8 minutes plus Custom whole minutes 1–60  
+- [ ] Server still clamps timer seconds to 30–3600  
 - [ ] Stopwatch accrues while the section is active  
 - [ ] Summary has no timer/stopwatch controls  
 - [ ] Mobile may omit timer chrome; server timers still apply if started from web  

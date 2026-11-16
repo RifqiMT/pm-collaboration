@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-12 |
+| Last updated | 2026-11-16 |
 
 ---
 
@@ -188,7 +188,7 @@ Traceability to stories and code: [TRACEABILITY_MATRIX.md](./TRACEABILITY_MATRIX
 
 ## 10. References
 
-- [PRODUCT.md](./PRODUCT.md)  
+- [product.md](./product.md)  
 - [user-stories/](./user-stories/)  
 - [VARIABLES.md](./VARIABLES.md)  
 - [GUARDRAILS.md](./GUARDRAILS.md)  
