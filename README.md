@@ -40,6 +40,7 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Retro | 34 templates, 18 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8 + custom 1–60 min, summary CSV |
 | Review | Seeded checklist, multi-signer checks, goal, praise/change/question, ship·iterate·hold |
 | Roadmap | RICE / ICE / value÷complexity, complexity index, median & 3.5 guides, quadrants, insights |
+| Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` in core) |
 | Platforms | Next.js web + Expo mobile + shared TypeScript core |
 | Credit | Developer credit footer (web site-wide; mobile home/create) |
 
@@ -143,9 +144,9 @@ Details: [docs/TECH_STACK.md](docs/TECH_STACK.md)
 
 ```
 pm-collaboration/
-├── packages/core     # Room rules, privacy, scoring, export (unit tested)
-├── apps/web          # Next.js UI + room API + JSON store
-├── apps/mobile       # Expo iOS/Android client
+├── packages/core     # Room rules, privacy, scoring, glossary, export (unit tested)
+├── apps/web          # Next.js UI (/guide Definitions) + room API + store
+├── apps/mobile       # Expo iOS/Android client (home / guide / create / room)
 └── docs/             # Product documentation suite
 ```
 

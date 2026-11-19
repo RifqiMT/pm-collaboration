@@ -1,6 +1,6 @@
 # TeamCompass — Architecture
 
-**Last updated:** 2026-11-16  
+**Last updated:** 2026-11-18  
 
 ---
 
@@ -34,7 +34,7 @@ TeamCompass is a **monorepo** with a shared domain library and two clients that 
 
 | Path | Package | Responsibility |
 | --- | --- | --- |
-| `packages/core` | `@cadence/core` | Types, `createRoom`, `applyOp`, `presentRoom`, scoring, content, retro export, validation |
+| `packages/core` | `@cadence/core` | Types, `createRoom`, `applyOp`, `presentRoom`, scoring, content, glossary, retro export, validation |
 | `apps/web` | `@cadence/web` | Next.js App Router UI, API routes, JSON persistence, HTTP helpers |
 | `apps/mobile` | `@cadence/mobile` | Expo RN client (not in root workspaces; depends via `file:../../packages/core`) |
 
@@ -122,14 +122,15 @@ Details: [API.md](./API.md).
 | `/` | `HomeScreen` |
 | `/new` | `NewRoomForm` |
 | `/r/[code]` | `RoomApp` → `RetroBoard` / `ReviewBoard` / `RoadmapBoard` |
+| `/guide` | Definitions from `GLOSSARY` (`guide/page.tsx`) |
 
-Supporting modules: `use-room.ts` (poll + serialized ops), `identity.ts`, `shared-field.tsx`, `icebreaker-panel.tsx`, `retro-ui.ts`, glyphs, `credit-footer.tsx` (layout shell).
+Supporting modules: `use-room.ts` (poll + serialized ops), `identity.ts`, `shared-field.tsx`, `icebreaker-panel.tsx`, `retro-ui.ts`, glyphs, `credit-footer.tsx` (layout shell), `.guide-link` entry points.
 
 ---
 
 ## 9. Mobile composition
 
-Single-entry `App.js` screens: home → create → room. API client in `src/api.js`. Visual tokens in `src/ui.js`. Configurable API base URL required for device ↔ host connectivity. Credit footer on home/create. Facilitation chrome omits timer and vote-budget host controls.
+Single-entry `App.js` screens: home → guide → create → room. API client in `src/api.js`. Visual tokens in `src/ui.js`. Configurable API base URL required for device ↔ host connectivity. Credit footer on home/create. Facilitation chrome omits timer and vote-budget controls. Guide screen renders the same `GLOSSARY` as web.
 
 ---
 
@@ -152,7 +153,7 @@ Domain failures throw `CadenceError` with `code` (e.g. `missing`, `host`, `phase
 
 | Layer | Location |
 | --- | --- |
-| Core domain | `packages/core/src/*.test.ts` |
+| Core domain | `packages/core/src/*.test.ts` (incl. `glossary.test.ts`) |
 | Web helpers | `retro-ui.test.ts`, `retro-glyphs.test.ts`, `credit-footer.test.ts` |
 | Store / persistence | `apps/web/src/server/store.test.ts` |
 | Gaps | Full React component E2E, mobile automation |

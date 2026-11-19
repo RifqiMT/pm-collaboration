@@ -1,6 +1,6 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-16  
+**Status:** Current as of repository state 2026-11-18  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
 **Canonical path:** `docs/product.md` (use this casing in links for case-sensitive hosts).
@@ -64,7 +64,7 @@ Primary users are agile product and engineering teams running time-boxed rituals
 | Icebreaker | 18 games; host picks game; This or That supports host-written pairs (1–8) |
 | Private notes | During brainstorm, `presentRoom` strips others’ note bodies before leaving the server |
 | Discuss walks | Status walk (column) or author walk; board columns remain status categories. A person can raise a hand; their named notes are highlighted. Anonymous notes stay unattributed. |
-| Dot voting | Default **3** votes per person (host sets **1–10**); lowering budget drops excess newest dots |
+| Dot voting | Default **3** votes per person (budget **1–10** via web presets 1/2/3 or Custom); lowering budget drops excess newest dots. Any joined person can change the budget on web; mobile has no budget chrome |
 | Actions | Body, owner, done flag; can be created from a note |
 | Raise hand | In Discuss, anyone can raise/lower a hand (ordered queue). Named notes from that person highlight; anonymous notes stay unattributed except to the raiser |
 | Timers | Per-section countdown; **web** presets **3 / 5 / 8** minutes plus Custom **1–60** whole minutes; server clamps 30–3600 seconds (mobile has no timer chrome) |
@@ -91,14 +91,26 @@ Primary users are agile product and engineering teams running time-boxed rituals
 - Quadrants: do-first, big-bet, fill-in, reconsider  
 - Insights (e.g. thin confidence when RICE confidence &lt; 0.6)  
 - Ranked list with relative bar  
+- Inline link to roadmap Definitions (`/guide#guide-roadmap`)  
 
-### 3.5 Platforms
+### 3.5 Definitions (cross-cutting)
+
+Plain-English **variables**, **metrics**, and **formulas** for all three rituals, shared from `@cadence/core` `GLOSSARY` (27 entries across retro / review / roadmap groups).
+
+| Surface | Entry point |
+| --- | --- |
+| Web | `/guide` — linked from home, room chrome, and roadmap scoring model |
+| Mobile | Home → **Definitions** → `Guide` screen (same `GLOSSARY` copy) |
+
+Kinds: Variable (something the team enters) · Metric (a number the board calculates) · Formula (the math behind a metric). Engineering catalog remains [VARIABLES.md](./VARIABLES.md).
+
+### 3.6 Platforms
 
 | Surface | Role |
 | --- | --- |
-| Web (`apps/web`) | Full UI, App Router pages, room API, persistence (`file` / `supabase` / `redis`) |
-| Mobile (`apps/mobile`) | Expo client for home / create / room for all three rituals (2s poll; raise hand; no timer or vote-budget host chrome) |
-| Core (`packages/core`) | Types, ops, privacy presentation, scoring, content, demo seed, export |
+| Web (`apps/web`) | Full UI, App Router pages (`/`, `/new`, `/r/[code]`, `/guide`), room API, persistence (`file` / `supabase` / `redis`) |
+| Mobile (`apps/mobile`) | Expo client: home / guide / create / room (2s poll; raise hand; no timer or vote-budget chrome) |
+| Core (`packages/core`) | Types, ops, privacy, scoring, content, demo seed, export, **glossary** |
 | Credit | Site-wide developer credit footer on web; home/create on mobile (`credit-footer`) |
 
 ---
@@ -109,12 +121,13 @@ Primary users are agile product and engineering teams running time-boxed rituals
 2. **One room document, versioned.** Each successful op bumps `version`. Web polls ~1.5s visible / ~8s hidden; mobile polls ~2s. Clients ignore stale snapshots.  
 3. **Desired-state votes and checks.** Sending “voting: true” or “done: true” is idempotent; a double tap does not toggle away the first intent.  
 4. **Brainstorm privacy is server-side.** Hiding notes only in the browser is not considered private.  
-5. **Host authority.** Only the host changes phase, icebreaker selection/pairs/rounds, and discussion walk mode.  
+5. **Host authority.** Only the host changes phase, icebreaker selection/pairs/rounds, and discussion walk mode (not vote budget or timers).  
 6. **Last write wins** on the same field when two people edit concurrently.  
 7. **Text fields commit on blur or Enter** (single-line); failed saves restore previous text.  
-8. **Scoring math lives in core** so web and mobile cannot diverge on formulas.  
+8. **Scoring math and Definitions copy live in core** so web and mobile cannot diverge on formulas or glossary text.  
 9. **Hard limits** protect shared document stores (see §7 and [GUARDRAILS](./GUARDRAILS.md)).  
 10. **Raise hand** is Discuss-only desired state; the queue clears whenever the host changes phase.  
+11. **Host authority** covers phase, icebreaker, and discuss walk—not vote budget or section timers (any joined actor may change those on web).  
 
 Collaboration flow:
 

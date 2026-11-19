@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-16  
+**Last documentation refresh:** 2026-11-18  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -53,8 +53,11 @@ This index is the reading map for product, engineering, design, and leadership s
 | Scoring & quadrants | `packages/core/src/scoring.ts` |
 | Templates, icebreakers, review seed | `packages/core/src/content.ts` |
 | Demo seed data | `packages/core/src/demo.ts` |
+| In-app Definitions glossary | `packages/core/src/glossary.ts` |
 | Retro CSV export | `packages/core/src/retro-export.ts` |
 | Web UI & polling | `apps/web/src/components/` |
+| Definitions page | `apps/web/src/app/guide/page.tsx` (`/guide`) |
+| Mobile Definitions | `Guide` screen in `apps/mobile/App.js` |
 | Developer credit | `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `App.js` |
 | Room API & persistence | `apps/web/src/app/api/`, `apps/web/src/server/{store,persistence,http}.ts` |
 | Vercel project config | `apps/web/vercel.json` |

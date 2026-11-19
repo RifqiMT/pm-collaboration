@@ -19,7 +19,12 @@ export function HomeScreen() {
   return (
     <main className="home" id="main">
       <header className="topbar">
-        <span className="wordmark">TeamCompass</span>
+        <span className="wordmark-row">
+          <span className="wordmark">TeamCompass</span>
+          <Link href="/guide" className="guide-link">
+            Definitions
+          </Link>
+        </span>
         <form
           className="join"
           onSubmit={(event) => {

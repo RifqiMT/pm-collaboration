@@ -2,8 +2,10 @@
 
 **Purpose:** Exhaustive catalog of product and domain variables used across TeamCompass.  
 **Format:** Variable name · Friendly name · Definition · Formula / rule · Location · Example  
-**Source of truth:** `packages/core/src/{types,scoring,room,text,content,ids}.ts`, web/mobile clients  
-**Last updated:** 2026-11-16  
+**Source of truth:** `packages/core/src/{types,scoring,room,text,content,ids,glossary,retro-export}.ts`, web/mobile clients  
+**Last updated:** 2026-11-18  
+
+In-app Definitions for facilitators and contributors live in `packages/core/src/glossary.ts` (`GLOSSARY`) and render on web `/guide` and the mobile Guide screen. This file remains the **engineering** catalog (limits, sync, store env, CSV columns). Prefer updating `GLOSSARY` when changing user-facing wording; prefer updating this file when changing contracts.
 
 ---
 
@@ -14,7 +16,8 @@
 3. Use **Formula / rule** when changing scoring, limits, or sync.  
 4. Use **Location** to jump to implementation.  
 5. See **§10 Relationship chart** for how variables connect in flows.  
-6. Deploy/store env vars are in **§11** (file / Supabase / Redis).
+6. Deploy/store env vars are in **§11** (file / Supabase / Redis).  
+7. In-app glossary inventory is **§12**; retro CSV columns are **§13**.
 
 ---
 
@@ -87,9 +90,9 @@
 | --- | --- | --- | --- | --- | --- |
 | `templateId` | Retro template | Column shape for the board | One of 34 `RetroTemplateId` values | Create; `RetroState` | `start-stop-continue` |
 | `phase` | Retro section | Current facilitation section | `icebreak` \| `brainstorm` \| `vote` \| `discuss` \| `act` \| `summary`; UI order icebreak → brainstorm → **discuss** → vote → act → summary | Host `setPhase`; boards | `discuss` |
-| `votesPerPerson` | Dot budget | Dots each person may place | Integer **1–10**; default **3**; lowering drops newest excess. Web UI presets **1 / 2 / 3** (`DOT_PRESETS`) plus Custom | Vote tools (`retro-board.tsx`); mobile has no host budget control | `3` |
+| `votesPerPerson` | Dot budget | Dots each person may place | Integer **1–10**; default **3**; lowering drops newest excess. Web UI presets **1 / 2 / 3** (`DOT_PRESETS`) plus Custom. **Not host-gated** (any joined actor on web) | Vote tools (`retro-board.tsx`); mobile has no budget chrome | `3` |
 | `votes left` | Votes remaining | Dots still available to actor | `max(0, votesPerPerson - votesUsed)` | `room.ts` / UI | `1` |
-| `timers[phase]` | Section countdown end | ISO end time for section timer | Server clamps seconds **30–3600**. Web UI: presets **3 / 5 / 8** min plus Custom **1–60** whole minutes (`TIMER_MIN_MINUTES`/`TIMER_MAX_MINUTES`) | `startTimer` / `PhaseTimer` in `retro-board.tsx` | Custom 12 → 720s |
+| `timers[phase]` | Section countdown end | ISO end time for section timer | Server clamps seconds **30–3600**. Web UI: presets **3 / 5 / 8** min plus Custom **1–60** whole minutes. **Not host-gated** | `startTimer` / `PhaseTimer` in `retro-board.tsx` | Custom 12 → 720s |
 | `timerEndsAt` | Legacy timer mirror | Deprecated mirror of current phase timer | Kept for older clients | `RetroState` | — |
 | `stopwatchMs[phase]` | Section stopwatch | Accrued ms while section was active | Increases while section open; Summary has none | `sectionStopwatchMs` | `320000` |
 | `stopwatchRunningSince` | Stopwatch start | When current section stopwatch began | ISO or null | `RetroState` | — |
@@ -340,11 +343,95 @@ Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or
 
 ---
 
-## 12. Maintenance
+## 12. In-app glossary (`GLOSSARY`)
+
+| Field | Meaning |
+| --- | --- |
+| `GlossaryKind` | `variable` \| `metric` \| `formula` |
+| `GlossaryEntry` | `id`, `name`, `kind`, `plain`, optional `formula` / `example`, `where` |
+| `GlossaryGroup` | `id`, `title`, `intro`, `entries[]` |
+| Groups | `retro` · `review` · `roadmap` |
+| Location | `packages/core/src/glossary.ts`; web `apps/web/src/app/guide/page.tsx`; mobile `Guide` in `App.js` |
+
+### Entry inventory (id → friendly name → kind)
+
+| Group | Entry id | Friendly name | Kind |
+| --- | --- | --- | --- |
+| retro | `stopwatch` | Stopwatch | variable |
+| retro | `time-spent` | Time spent | metric |
+| retro | `timer` | Timer | variable |
+| retro | `time-left` | Time left | metric |
+| retro | `dot` | Dot | variable |
+| retro | `dots-left` | Dots left | metric |
+| retro | `vote-count` | Vote count | metric |
+| review | `checklist-item` | Checklist item | variable |
+| review | `checklist-bar` | Checklist bar | metric |
+| review | `evidence` | Evidence | variable |
+| review | `feedback` | Feedback | variable |
+| review | `release-decision` | Release decision | variable |
+| roadmap | `reach` | Reach | variable |
+| roadmap | `impact` | Impact | variable |
+| roadmap | `confidence` | Confidence | variable |
+| roadmap | `effort` | Effort | variable |
+| roadmap | `rice` | RICE score | formula |
+| roadmap | `ice-inputs` | ICE inputs | variable |
+| roadmap | `ice` | ICE score | formula |
+| roadmap | `value` | Business value | variable |
+| roadmap | `complexity-parts` | Complexity parts | variable |
+| roadmap | `complexity-index` | Complexity index | formula |
+| roadmap | `value-complexity` | Value divided by complexity | formula |
+| roadmap | `median-score` | Median score | metric |
+| roadmap | `high-complexity` | High complexity | metric |
+| roadmap | `quadrant` | Quadrant | metric |
+| roadmap | `rank` | Rank | metric |
+
+```mermaid
+flowchart LR
+  GLOSSARY[GLOSSARY in @cadence/core] --> WebGuide["/guide page"]
+  GLOSSARY --> MobileGuide[Mobile Guide screen]
+  WebGuide --> Users[Facilitators and contributors]
+  MobileGuide --> Users
+  VARIABLES[VARIABLES.md engineering catalog] -.->|contracts| CoreCode[types / scoring / room]
+  GLOSSARY -.->|plain English| CoreCode
+```
+
+---
+
+## 13. Retro CSV export columns
+
+Source: `packages/core/src/retro-export.ts` `CSV_HEADER`.
+
+| Column | Friendly name | Definition | Example |
+| --- | --- | --- | --- |
+| `section` | Export section | Row kind (e.g. note, action, icebreaker, timing) | `note` |
+| `room_code` | Room code | Six-character code | `K7M9QX` |
+| `room_title` | Room title | Room title at export | `Sprint 42 Retro` |
+| `template` | Template id | Retro template | `start-stop-continue` |
+| `column` | Column title | Note column name | `Start` |
+| `column_hint` | Column hint | Decision hint | `Keep doing` |
+| `text` | Body text | Note, action, or answer body | `Flaky deploy` |
+| `author` | Author name | Display name or blank if anonymous | `Jordan` |
+| `anonymous` | Anonymous flag | Whether the note was anonymous | `true` |
+| `votes` | Vote count | Dot count on the note | `3` |
+| `voters` | Voter names | People who dotted the note | `Maya; Jordan` |
+| `owner` | Action owner | Action assignee | `Maya` |
+| `done` | Action done | Whether the action is done | `false` |
+| `source_note` | Source note | Note text an action came from | `Flaky deploy` |
+| `game` | Icebreaker game | Game id/name for answers | `this-or-that` |
+| `round` | Icebreaker round | Round index | `1` |
+| `question` | Icebreaker question | Pair question or prompt | `Ship or polish?` |
+| `created_at` | Created at | ISO timestamp | `2026-11-18T…` |
+| `stopwatch_seconds` | Time spent | Whole seconds the section was open | `320` |
+| `timer_seconds` | Time left | Whole seconds left on countdown; empty if none; `0` if finished | `120` |
+
+---
+
+## 14. Maintenance
 
 When adding a variable:
 
 1. Add it to `types.ts` or the owning module.  
 2. Add a row to this document with all six columns.  
-3. Update the Mermaid chart if it participates in a cross-feature relationship.  
-4. Note the change in [CHANGELOG.md](./CHANGELOG.md).
+3. If it is user-facing, add or update a `GLOSSARY` entry and keep web/mobile in sync via core.  
+4. Update the Mermaid chart if it participates in a cross-feature relationship.  
+5. Note the change in [CHANGELOG.md](./CHANGELOG.md).

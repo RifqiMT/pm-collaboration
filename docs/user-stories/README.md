@@ -8,7 +8,7 @@ Stories are grouped by epic. Acceptance criteria are testable against the curren
 | E2 Retrospective | [epic-02-retrospective.md](./epic-02-retrospective.md) | Maya, Jordan |
 | E3 Sprint review | [epic-03-sprint-review.md](./epic-03-sprint-review.md) | Maya, Priya, Jordan |
 | E4 Roadmap | [epic-04-roadmap.md](./epic-04-roadmap.md) | Priya, Maya |
-| E5 Platforms & sync | [epic-05-platforms.md](./epic-05-platforms.md) | All |
+| E5 Platforms, sync & Definitions | [epic-05-platforms.md](./epic-05-platforms.md) | All |
 
 ### Story format
 

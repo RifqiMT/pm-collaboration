@@ -2,7 +2,7 @@
 
 **Audience:** Operators hosting `@cadence/web`  
 **Preferred model:** One Node process + local `rooms.json`  
-**Last updated:** 2026-11-16  
+**Last updated:** 2026-11-18  
 
 Mobile (`@cadence/mobile`) stays on Expo. Point the phone at your web origin after deploy.
 

@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-16  
+**Last updated:** 2026-11-18  
 
 ---
 
@@ -171,6 +171,13 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 - Vote budget presets **1 / 2 / 3** (`DOT_PRESETS`) plus Custom (server allows 1–10)  
 - Keep these controls in phase tools; do not clutter the first board viewport  
 
+### 5.6d Definitions (`/guide`)
+
+- Quiet `.guide-link` in wordmark rows (home, room) and roadmap scoring help  
+- Guide page: legend for Variable / Metric / Formula kinds, jump nav by ritual, entry cards with plain / formula / example / where  
+- Kind chips use semantic tones without competing with ritual boards  
+- Mobile Guide mirrors the same content hierarchy without the web jump chrome  
+
 ### 5.7 Roadmap chart
 
 - Plot score vs complexity  
@@ -233,12 +240,14 @@ Avoid decorative perpetual animations, glow stacks, and emoji as structure.
 
 ## 11. Developer credit
 
-Site-wide attribution sits at the bottom of the shell (web) and at the end of home/create scrolls (mobile): soft ink text, hairline top border, and four icon links (LinkedIn mark, globe, GitHub, article document) opening in a new tab / system browser. Keep the credit quieter than product chrome; do not promote it into the hero.
+Site-wide attribution sits at the bottom of the shell (web) and at the end of home/create scrolls (mobile): soft ink text, hairline top border, and four icon links (LinkedIn mark, globe, GitHub, article document) opening in a new tab / system browser. Keep the credit quieter than product chrome; do not promote it into the hero. Mobile Guide currently omits the credit footer (home/create retain it).
 
 ## 12. File references
 
-- Web tokens & components: `apps/web/src/app/globals.css`  
+- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.guide-link`)  
+- Definitions page: `apps/web/src/app/guide/page.tsx`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
 - Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  
 - Mobile tokens: `apps/mobile/src/ui.js`  
-- Glyphs: `apps/web/src/components/retro-glyphs.tsx`
+- Glyphs: `apps/web/src/components/retro-glyphs.tsx`  
+- Glossary source: `packages/core/src/glossary.ts`

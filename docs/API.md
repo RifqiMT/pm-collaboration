@@ -5,7 +5,7 @@
 **CORS:** `Access-Control-Allow-Origin: *`  
 **Caching:** `Cache-Control: no-store`  
 **Runtime:** Node.js (`force-dynamic`)  
-**Last updated:** 2026-11-16  
+**Last updated:** 2026-11-18  
 
 ---
 
@@ -113,9 +113,9 @@ Fails with `full` if participants ≥ 40.
 | `retro.guessIcebreaker` | `targetId`, `index` | Two truths |
 | `retro.revealIcebreaker` | — | |
 | `retro.nextIcebreakerRound` | `step` | Host only |
-| `retro.setVotesPerPerson` | `count` | 1–10 |
-| `retro.startTimer` | `seconds`, `phase?` | 30–3600 |
-| `retro.clearTimer` | `phase?` | |
+| `retro.setVotesPerPerson` | `count` | 1–10; **not** host-gated |
+| `retro.startTimer` | `seconds`, `phase?` | 30–3600; **not** host-gated |
+| `retro.clearTimer` | `phase?` | **not** host-gated |
 | `retro.focusCard` | `cardId \| null` | Discuss |
 | `retro.setDiscussionBy` | `by: status\|author` | Host only |
 | `retro.focusGroup` | `key` | Column id, author id, or `anonymous` |

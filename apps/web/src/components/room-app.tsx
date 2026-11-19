@@ -86,9 +86,14 @@ export function RoomApp({ code }: { code: string }) {
     <main className="room" id="main">
       <header className="room-bar">
         <div className="room-id">
-          <Link href="/" className="wordmark">
-            TeamCompass
-          </Link>
+          <span className="wordmark-row">
+            <Link href="/" className="wordmark">
+              TeamCompass
+            </Link>
+            <Link href="/guide" className="guide-link">
+              Definitions
+            </Link>
+          </span>
           <div className="room-heading">
             <p className="eyebrow">{ritual?.name}</p>
             <SharedField

@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-16 |
+| Last updated | 2026-11-18 |
 
 ---
 
@@ -119,6 +119,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-P3 | Shared core package for ops, privacy, scoring | Must |
 | FR-P4 | HTTP API: create, get, join, ops | Must |
 | FR-P5 | Clients poll for freshness | Must |
+| FR-P6 | Shared plain-English Definitions (`GLOSSARY`) on web `/guide` and mobile Guide | Should |
 
 ---
 
@@ -146,6 +147,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 6. Complexity ≥ 3.5 with score ≥ median maps to `big-bet`.  
 7. Retro CSV export includes notes, votes, actions, icebreaker answers, and section timings.  
 8. Mobile can complete create → join → mutate against a LAN-hosted web API.  
+9. Definitions on web `/guide` and mobile Guide render the same `GLOSSARY` entries from `@cadence/core`.  
 
 Traceability to stories and code: [TRACEABILITY_MATRIX.md](./TRACEABILITY_MATRIX.md).
 

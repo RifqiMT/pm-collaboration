@@ -15,7 +15,7 @@ alter table public.cadence_store enable row level security;
 
 -- Allows the anon key to read/write the document store.
 -- Anyone who has the anon key can mutate rooms (same trust model as open CORS).
--- Prefer SUPABASE_SERVICE_ROLE_KEY on Vercel and then drop this policy.
+-- Prefer SUPABASE_SECRET_KEY (or legacy SUPABASE_SERVICE_ROLE_KEY) on Vercel, then drop this policy.
 drop policy if exists "cadence_store_anon_all" on public.cadence_store;
 create policy "cadence_store_anon_all"
   on public.cadence_store

@@ -13,6 +13,7 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **Developer credit footer** on web (all pages) and mobile (home + create): “Developed, managed, and maintained by Rifqi Tjahyono” with LinkedIn, personal-website, [GitHub](https://github.com/RifqiMT/pm-collaboration), and [article](https://rifqi-tjahyono.com/%f0%9f%93%9d-sticky-note-chaos-to-team-clarity-reflect-together-review-progress-and-decide-what-comes-next-%f0%9f%a4%9d%f0%9f%a7%ad/) icon links.  
 - **Start from an example** loads a demo session: 10 notes in every column of every retrospective shape, a sprint review with evidence on every checklist item, and a 10-bet roadmap across all four quadrants.  
 - **Raise hand** in Discuss: ordered speaking queue; named notes highlight; anonymous authorship stays protected; queue clears on phase change (web + mobile).
+- **Definitions**: plain-English variables, metrics, and formulas for the retrospective, sprint review, and roadmap (`GLOSSARY` in `@cadence/core`). Web `/guide`; mobile Guide screen; linked from home, room chrome, and roadmap scoring help.
 
 ### Added — Engineering
 
@@ -20,13 +21,15 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - Optional Vercel path: **Supabase** document store (`cadence_store`) or Upstash Redis via `persistence.ts`.  
 - Room store backends: `file` (default) · `supabase` · `redis`.  
 - Store vitest coverage for backend selection and file create/join/op durability.  
-- Core tests for `retro.raiseHand` / `raisedHands` presentation.
+- Core tests for `retro.raiseHand` / `raisedHands` presentation.  
+- `packages/core/src/glossary.ts` + `glossary.test.ts` (unique ids; RICE example matches scorer).
 
 ### Documentation
 
 - Enterprise documentation suite under `docs/` (index, product, PRD, personas, user stories, variables with relationship charts, metrics/OKRs, design guidelines, traceability matrix, guardrails, architecture, tech stack, API, deployment).  
 - **2026-11-12 refresh:** documented raise-hand end-to-end; aligned store backends (`file`/`supabase`/`redis`) and Supabase key precedence; clarified web vs mobile poll/timer differences; corrected accent token notes.  
-- **2026-11-16 refresh:** API `store`→503 + full error catalog; web timer Custom 1–60 min and `DOT_PRESETS`; `persistence.ts` lock constants; credit footer inventory; `product.md` link casing; mobile vote-budget chrome gap; `vercel.json` and `sb_*` auth notes.
+- **2026-11-16 refresh:** API `store`→503 + full error catalog; web timer Custom 1–60 min and `DOT_PRESETS`; `persistence.ts` lock constants; credit footer inventory; `product.md` link casing; mobile vote-budget chrome gap; `vercel.json` and `sb_*` auth notes.  
+- **2026-11-18 refresh:** Definitions/glossary end-to-end (product, PRD FR-P6, stories, VARIABLES §12–13, architecture, design, traceability); clarified vote budget/timers are not host-gated; CSV export columns catalogued.
 
 ---
 

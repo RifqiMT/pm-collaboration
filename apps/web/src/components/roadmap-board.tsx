@@ -17,6 +17,7 @@ import {
   type RoomView,
   type ScoredInitiative,
 } from "@cadence/core";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SharedField } from "./shared-field";
 
@@ -113,6 +114,9 @@ export function RoadmapBoard({
           <p className="eyebrow">Scoring model</p>
           <strong>{framework.formula}</strong>
           <p>{framework.help}</p>
+          <Link className="guide-link" href="/guide#guide-roadmap">
+            Read every variable, metric, and formula
+          </Link>
         </div>
         <div className="framework-pills" role="tablist" aria-label="Scoring framework">
           {FRAMEWORKS.map((item) => (

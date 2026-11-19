@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-16  
+**Last updated:** 2026-11-18  
 
 ---
 
@@ -12,7 +12,7 @@
 | Web framework | Next.js **15.5.x** (App Router) | `@cadence/web` |
 | UI library | React **19.x** | Web + mobile |
 | Mobile | Expo **~58**, React Native **0.88** | `@cadence/mobile` |
-| Domain | `@cadence/core` pure TS | Vitest unit tests |
+| Domain | `@cadence/core` pure TS (incl. `glossary.ts`) | Vitest unit tests |
 | Storage | JSON file (preferred) / Supabase / Upstash Redis | Auto-select via env |
 | Font (web) | Instrument Sans (Google via `next/font`) | `--font-sans` |
 | Node | **≥ 20** | Root engines |
@@ -120,7 +120,7 @@ npx expo start
 
 | Tool | Use |
 | --- | --- |
-| Vitest | Domain + selected UI helper tests |
+| Vitest | Domain (room, scoring, export, glossary) + selected UI/store helper tests |
 | TypeScript | Core + web |
 | Manual / Expo | Mobile verification |
 

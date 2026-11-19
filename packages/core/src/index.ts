@@ -1,4 +1,5 @@
 export * from "./types";
+export * from "./glossary";
 export * from "./content";
 export * from "./scoring";
 export * from "./retro-export";

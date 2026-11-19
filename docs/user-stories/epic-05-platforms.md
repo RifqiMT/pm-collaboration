@@ -12,9 +12,10 @@
 
 **Acceptance criteria**
 
-- [ ] Home, create, and room routes render  
+- [ ] Home, create, room, and `/guide` routes render  
 - [ ] Ritual boards load for all three kinds  
 - [ ] Skip link and focus styles present  
+- [ ] Home and room chrome link to Definitions  
 
 **PRD:** FR-P1 · **Code:** `apps/web/src/app/**`, components
 
@@ -28,11 +29,29 @@
 
 **Acceptance criteria**
 
-- [ ] Home/create/room flows exist in Expo app  
+- [ ] Home / guide / create / room flows exist in Expo app  
 - [ ] Server base URL is configurable  
 - [ ] Ops apply through the same API  
 
 **PRD:** FR-P2 · **Code:** `apps/mobile/App.js`, `src/api.js`
+
+---
+
+## US-5.6 Open Definitions
+
+**As** Priya / Jordan  
+**I want** plain-English definitions of variables, metrics, and formulas  
+**So that** I understand the board without leaving the product  
+
+**Acceptance criteria**
+
+- [ ] Web `/guide` renders all `GLOSSARY` groups from `@cadence/core`  
+- [ ] Mobile Guide screen uses the same `GLOSSARY` data  
+- [ ] Entries show kind (variable / metric / formula), plain text, optional formula/example, and where  
+- [ ] Roadmap board can deep-link to `#guide-roadmap`  
+- [ ] `glossary.test.ts` guards unique ids and RICE example = 320  
+
+**PRD:** FR-P6 · **Code:** `glossary.ts`, `guide/page.tsx`, mobile `Guide`
 
 ---
 

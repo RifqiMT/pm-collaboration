@@ -2,7 +2,7 @@
 
 **Purpose:** Technical and business limitations that constrain product development.  
 **Audience:** Engineers, PMs, designers, security reviewers  
-**Last updated:** 2026-11-16  
+**Last updated:** 2026-11-18  
 
 Violating a hard guardrail without an approved architecture change is a product defect, not a stretch goal.
 
@@ -74,10 +74,11 @@ Violating a hard guardrail without an approved architecture change is a product 
 
 | Guardrail | Limitation | Implication |
 | --- | --- | --- |
-| **G-FAC-1 Host authority** | Phase, icebreaker, discuss mode | Product assumes a facilitator role |
+| **G-FAC-1 Host authority** | Phase, icebreaker, discuss mode (not vote budget or timers) | Product assumes a facilitator role; timer/budget controls are open to joined actors on web |
 | **G-FAC-2 Section isolation** | Each retro section shows its work | Resist “show everything always” feature requests |
 | **G-FAC-3 Summary is terminal collection** | No timer/stopwatch on Summary | Keep Summary for export/review, not timed work |
 | **G-FAC-4 One ritual per room** | `kind` fixed at create | No multi-ritual mashup room without redesign |
+| **G-FAC-5 Definitions single source** | `GLOSSARY` in `@cadence/core` | Do not fork plain-English copy into web-only or mobile-only strings |
 
 ---
 

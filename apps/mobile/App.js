@@ -19,6 +19,7 @@ import {
   discussionGroups,
   formatScore,
   scoreRoadmap,
+  GLOSSARY,
   retrospectiveCsv,
   retrospectiveExport,
   votesLeft,
@@ -210,8 +211,10 @@ export default function App() {
           onServer={saveServer}
           onCreate={(kind) => setScreen({ name: "create", kind })}
           onOpen={(code) => setScreen({ name: "room", code })}
+          onGuide={() => setScreen({ name: "guide" })}
         />
       ) : null}
+      {screen.name === "guide" ? <Guide onBack={() => setScreen({ name: "home" })} /> : null}
       {screen.name === "create" ? (
         <Create
           server={server}
@@ -237,7 +240,38 @@ export default function App() {
   );
 }
 
-function Home({ server, onServer, onCreate, onOpen }) {
+function Guide({ onBack }) {
+  return (
+    <ScrollView contentContainerStyle={styles.body}>
+      <Pressable onPress={onBack} hitSlop={8}>
+        <Text style={styles.back}>Back</Text>
+      </Pressable>
+      <Text style={styles.kicker}>Definitions</Text>
+      <Text style={styles.title}>Plain English</Text>
+      <Text style={styles.lede}>
+        A variable is something the team enters. A metric is a number the board calculates. A formula is the math for that number.
+      </Text>
+      {GLOSSARY.map((group) => (
+        <View key={group.id} style={{ gap: 10 }}>
+          <Text style={styles.cardTitle}>{group.title}</Text>
+          <Text style={styles.lede}>{group.intro}</Text>
+          {group.entries.map((entry) => (
+            <View key={entry.id} style={styles.card}>
+              <Text style={styles.kicker}>{entry.kind}</Text>
+              <Text style={styles.cardTitle}>{entry.name}</Text>
+              <Text style={{ color: colors.ink, fontSize: 16, lineHeight: 22 }}>{entry.plain}</Text>
+              {entry.formula ? <Text style={{ fontWeight: "700", marginTop: 6 }}>{entry.formula}</Text> : null}
+              {entry.example ? <Text style={styles.meta}>{entry.example}</Text> : null}
+              <Text style={styles.meta}>{entry.where}</Text>
+            </View>
+          ))}
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+function Home({ server, onServer, onCreate, onOpen, onGuide }) {
   const [draft, setDraft] = useState(server);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -276,6 +310,10 @@ function Home({ server, onServer, onCreate, onOpen }) {
           <Text style={styles.meta}>{ritual.steps.join("  ·  ")}</Text>
         </Pressable>
       ))}
+      <Pressable style={styles.card} onPress={onGuide}>
+        <Text style={styles.cardTitle}>Definitions</Text>
+        <Text style={styles.lede}>Variables, metrics, and formulas in plain English.</Text>
+      </Pressable>
       <View style={styles.card}>
         <Text style={styles.label}>Join with a code</Text>
         <TextInput
