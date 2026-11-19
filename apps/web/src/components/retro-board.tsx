@@ -4,6 +4,7 @@ import {
   discussionGroups,
   retrospectiveCsv,
   retrospectiveExport,
+  showAndTellMediaSources,
   RETRO_TEMPLATES,
   type ActionItem,
   type DiscussionGroup,
@@ -909,6 +910,7 @@ function SummaryPanel({ room }: { room: RoomView }) {
           {data.answers.map((answer) => (
             <li key={`${answer.author}-${answer.round}-${answer.createdAt}`}>
               <p>{answer.body}</p>
+              {answer.media ? <SummaryPicture media={answer.media} alt={answer.body} /> : null}
               <small>
                 {answer.question} · {answer.author}
               </small>
@@ -918,6 +920,12 @@ function SummaryPanel({ room }: { room: RoomView }) {
       </section>
     </section>
   );
+}
+
+function SummaryPicture({ media, alt }: { media: string; alt: string }) {
+  const src = showAndTellMediaSources(media)[0];
+  if (!src) return null;
+  return <img className="gif-preview" src={src} alt={alt || "Picture"} />;
 }
 
 function ActionsPanel({

@@ -28,20 +28,20 @@
 ## Behaviors in TeamCompass
 
 - Creates the room; becomes `hostId`  
-- Picks a shape via shelves/search (Classic → Food; 3/4/5 columns) and an icebreaker; may customize This or That pairs  
-- Advances phases; starts 3/5/8 minute timers (or Custom 1–60 on web)  
+- Picks a shape via shelves/search (Classic → Food; 3/4/5 columns) and an icebreaker (including Health Check or Travel Wishlist); may customize This or That pairs  
+- Advances phases; starts 3/5/8 minute timers (or Custom 1–60 on web)—timers are open to any joined person on web  
 - Chooses discuss walk (status vs author), focuses groups, and uses the raise-hand queue to manage speaking  
-- Sets vote budget; drives action assignment  
-- Opens Summary and downloads CSV  
+- Adjusts vote budget on web when needed (open to joined actors; not host-only); drives action assignment  
+- Opens Summary and downloads CSV (health answers export as Anonymous; travel as country names)  
 
 ## Needs from the product
 
 | Need | Product response |
 | --- | --- |
-| Host authority | Host-gated phase, icebreaker, discussion mode |
+| Host authority | Host-gated phase, icebreaker, discussion mode (timers/vote budget open on web) |
 | Clear sections | Each retro phase shows only that section’s work |
 | Timing | Per-section countdown + stopwatch |
-| Trustworthy privacy | Server-side brainstorm filtering |
+| Trustworthy privacy | Server-side brainstorm filtering; Health Check peer anonymization |
 | Closure | Actions + CSV; review ship/iterate/hold |
 
 ## Success looks like

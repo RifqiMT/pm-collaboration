@@ -36,7 +36,7 @@ export const ICEBREAKER_GROUPS = [
 
 export type IcebreakerGroup = (typeof ICEBREAKER_GROUPS)[number]["id"];
 
-export type IcebreakerMode = "word" | "choice" | "line" | "sprint" | "note" | "emoji" | "gif" | "draw" | "truths" | "pairs";
+export type IcebreakerMode = "word" | "choice" | "line" | "sprint" | "note" | "emoji" | "gif" | "draw" | "truths" | "pairs" | "scale" | "map";
 
 export interface IcebreakerGame {
   id: IcebreakerId;
@@ -51,6 +51,86 @@ export interface IcebreakerGame {
   rounds?: readonly [string, string][];
   questions?: readonly string[];
   seconds?: number;
+}
+
+export interface HealthQuestion {
+  title: string;
+  statement: string;
+}
+
+export const HEALTH_CHECK: readonly HealthQuestion[] = [
+  { title: "Appreciation", statement: "My colleagues appreciate my contribution to the team." },
+  { title: "Team Spirit", statement: "There is a trusting working atmosphere in our team." },
+  { title: "Transparency", statement: "Everyone in my team knows who is currently working on what." },
+  { title: "Recovery & Breaks", statement: "I have enough room for breaks in which I can draw new energy." },
+  { title: "Meeting culture", statement: "Our meetings are well structured, yet leave room for creativity and new ideas." },
+  { title: "Support", statement: "In my team, each team member passes on their individual knowledge and experience." },
+];
+
+const HEALTH_POINT_LABELS = [
+  "",
+  "Strongly disagree",
+  "Disagree",
+  "Slightly disagree",
+  "Neutral",
+  "Slightly agree",
+  "Agree",
+  "Strongly agree",
+] as const;
+
+export function healthPointLabel(point: number): string {
+  return HEALTH_POINT_LABELS[point] ?? "";
+}
+
+export function parseHealthScores(body: string): number[] | null {
+  const parts = body.split(",").map((part) => part.trim());
+  if (parts.length !== HEALTH_CHECK.length) return null;
+  const scores = parts.map((part) => Number(part));
+  if (scores.some((score) => !Number.isInteger(score) || score < 1 || score > 7)) return null;
+  return scores;
+}
+
+export function formatHealthScores(scores: readonly number[]): string {
+  return scores.join(",");
+}
+
+export function healthCheckExportText(body: string): string {
+  const scores = parseHealthScores(body);
+  if (!scores) return body;
+  return HEALTH_CHECK.map((question, index) => `${question.title}: ${healthPointLabel(scores[index] ?? 0)}`).join(". ");
+}
+
+/** Mean score for one Health Check question across shared answers. */
+export function healthCategoryAverage(
+  answers: readonly { body: string }[],
+  questionIndex: number,
+): number | null {
+  if (questionIndex < 0 || questionIndex >= HEALTH_CHECK.length) return null;
+  const values: number[] = [];
+  for (const answer of answers) {
+    const scores = parseHealthScores(answer.body);
+    const score = scores?.[questionIndex];
+    if (score != null) values.push(score);
+  }
+  if (values.length === 0) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+/** Mean of every shared Health Check score across people and questions. */
+export function healthOverallAverage(answers: readonly { body: string }[]): number | null {
+  const values: number[] = [];
+  for (const answer of answers) {
+    const scores = parseHealthScores(answer.body);
+    if (!scores) continue;
+    values.push(...scores);
+  }
+  if (values.length === 0) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+export function formatHealthAverage(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
 export const ICEBREAKERS: readonly IcebreakerGame[] = [
@@ -203,6 +283,25 @@ export const ICEBREAKERS: readonly IcebreakerGame[] = [
     seconds: 10,
   },
   {
+    id: "health-check",
+    name: "Health Check",
+    blurb: "Six questions, one scale.",
+    how: "Rate every statement from strongly disagree to strongly agree. The room sees how the answers spread, not who chose each point.",
+    prompt: "Health Check Questions (Scale)",
+    group: "connection",
+    mode: "scale",
+    questions: HEALTH_CHECK.map((question) => `${question.title}: ${question.statement}`),
+  },
+  {
+    id: "travel-wishlist",
+    name: "Travel Wishlist",
+    blurb: "Countries you want to visit.",
+    how: "Tap up to five countries on the map. Once everyone shares, a unified room map shows where wishlists overlap.",
+    prompt: "Which countries are on your travel wishlist?",
+    group: "connection",
+    mode: "map",
+  },
+  {
     id: "two-truths",
     name: "Two Truths and a Lie",
     blurb: "Three statements. The room guesses the false one.",
@@ -216,7 +315,7 @@ export const ICEBREAKERS: readonly IcebreakerGame[] = [
     id: "show-and-tell",
     name: "Desk Show-and-Tell",
     blurb: "One nearby object.",
-    how: "Everyone names one nearby object and briefly explains its significance.",
+    how: "Everyone names one nearby object, adds a picture or GIF if they want, and briefly explains its significance.",
     prompt: "Pick something on your desk that tells us a little about you.",
     placeholder: "A chipped mug from launch week",
     group: "connection",
@@ -360,6 +459,49 @@ export function previewMediaCandidates(input: string): string[] {
     return [href(url)];
   }
   return [];
+}
+
+/** Largest picture or GIF stored with a Desk Show-and-Tell answer. */
+export const SHOW_MEDIA_MAX = 70_000;
+
+const SHOW_MEDIA_MARK = /^(.*?)\s*\[\[media:([^\]]+)\]\]\s*$/;
+const SHOW_DATA_MEDIA = /^data:image\/(gif|png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+export function formatShowAndTell(text: string, media: string): string {
+  const caption = text.trim();
+  const picture = media.trim();
+  if (!picture) return caption;
+  return `${caption} [[media:${picture}]]`;
+}
+
+export function showAndTellParts(body: string): { text: string; media: string } {
+  const match = SHOW_MEDIA_MARK.exec(body.trim());
+  if (!match) return { text: body.trim(), media: "" };
+  return { text: (match[1] ?? "").trim(), media: (match[2] ?? "").trim() };
+}
+
+/** Caption plus a link. A stored picture stays out of the CSV as raw data. */
+export function showAndTellExportText(body: string): string {
+  const { text, media } = showAndTellParts(body);
+  if (!media) return text;
+  if (media.startsWith("data:")) return text ? `${text} (picture attached)` : "Picture attached";
+  return text ? `${text} ${media}` : media;
+}
+
+export function showAndTellMediaSources(media: string): string[] {
+  if (!media) return [];
+  if (media.startsWith("data:image/")) return SHOW_DATA_MEDIA.test(media) ? [media] : [];
+  return previewMediaCandidates(media);
+}
+
+export function acceptedShowMedia(media: string): "ok" | "large" | "type" {
+  if (!media) return "ok";
+  if (media.startsWith("data:")) {
+    if (media.length > SHOW_MEDIA_MAX) return "large";
+    return SHOW_DATA_MEDIA.test(media) ? "ok" : "type";
+  }
+  if (media.length > LIMITS.icebreakerGif) return "large";
+  return previewMediaCandidates(media).length > 0 ? "ok" : "type";
 }
 
 /** Stable shuffle of 0,1,2 for a viewer so the lie is not given away by position. */

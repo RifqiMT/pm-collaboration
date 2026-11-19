@@ -31,12 +31,14 @@
 
 **Acceptance criteria**
 
-- [ ] Host selects among 18 icebreakers  
+- [ ] Host selects among 20 icebreakers  
 - [ ] Participants submit answers within game-specific limits  
 - [ ] This or That supports host-written pairs (1–8) with distinct sides  
 - [ ] Two truths supports guess/reveal flows  
+- [ ] Health Check requires six scores from 1–7; peers see anonymized spreads/averages (not named authors); CSV author is Anonymous  
+- [ ] Travel Wishlist accepts one to five countries from the shared catalog; web map + flags; CSV/summary use country names  
 
-**PRD:** FR-RET4, FR-RET5 · **Code:** `icebreaker-panel.tsx`, icebreaker ops
+**PRD:** FR-RET4, FR-RET5 · **Code:** `ICEBREAKERS`, `HEALTH_CHECK`, `countries.ts`, `icebreaker-panel.tsx`, `travel-map.tsx`, mobile icebreaker screens, icebreaker ops
 
 ---
 
@@ -99,13 +101,13 @@
 
 **Acceptance criteria**
 
-- [ ] Default votes per person is 3; host can set 1–10  
+- [ ] Default votes per person is 3; any joined person can set 1–10 on web (not host-gated)  
 - [ ] Web UI offers presets 1 / 2 / 3 plus Custom  
 - [ ] Voting uses desired state (`voting: true|false`)  
 - [ ] Exceeding budget returns `votes` error  
 - [ ] Lowering budget removes excess newest dots  
 - [ ] Notes are not editable during vote phase  
-- [ ] Mobile may omit host vote-budget controls; budget set from web still applies  
+- [ ] Mobile may omit vote-budget chrome; budget set from web still applies  
 
 **PRD:** FR-RET7 · **Code:** `retro.vote`, `retro.setVotesPerPerson`, `DOT_PRESETS`
 

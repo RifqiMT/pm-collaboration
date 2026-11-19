@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-19 |
+| Last updated | 2026-11-19 (evening — Health Check + Travel Wishlist) |
 
 ---
 
@@ -50,7 +50,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 
 | Persona | Role in rituals | Doc |
 | --- | --- | --- |
-| Maya — Facilitator / Scrum Master | Host, phases, timers, icebreaker | [persona-facilitator.md](./personas/persona-facilitator.md) |
+| Maya — Facilitator / Scrum Master | Host phases + icebreaker; timers/vote budget open on web | [persona-facilitator.md](./personas/persona-facilitator.md) |
 | Jordan — Contributor / IC | Notes, votes, checklist, feedback | [persona-contributor.md](./personas/persona-contributor.md) |
 | Priya — Stakeholder / Product Lead | Review decision, roadmap scoring | [persona-stakeholder.md](./personas/persona-stakeholder.md) |
 
@@ -78,7 +78,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-RET1 | Host advances through icebreak, brainstorm, discuss, vote, act, summary | Must |
 | FR-RET2 | 62 templates at create, grouped into 8 shelves, searchable/filterable by shelf and column count | Must |
 | FR-RET3 | Brainstorm privacy: only own notes visible until discuss | Must |
-| FR-RET4 | Icebreaker games (18) with host selection | Must |
+| FR-RET4 | Icebreaker games (20) with host selection, including Health Check (anonymous 1–7 scale) and Travel Wishlist (1–5 countries / 175 catalog) | Must |
 | FR-RET5 | This or That host-custom pairs (1–8) | Should |
 | FR-RET6 | Discuss status or author walk | Must |
 | FR-RET7 | Dot vote with configurable budget 1–10 (default 3) | Must |

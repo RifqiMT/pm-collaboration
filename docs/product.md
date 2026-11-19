@@ -1,6 +1,6 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-19  
+**Status:** Current as of repository state 2026-11-19 (evening — Health Check + Travel Wishlist)  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
 **Canonical path:** `docs/product.md` (use this casing in links for case-sensitive hosts).
@@ -61,8 +61,10 @@ Primary users are agile product and engineering teams running time-boxed rituals
 | Capability | Detail |
 | --- | --- |
 | Templates | **62** shapes in eight shelves (Classic 13 · Film 10 · Series 9 · Anime 5 · Games 9 · Sport 14 · Music 1 · Food 1). Listed A–Z per shelf. Column counts are **3, 4, or 5**. Search (`searchRetroTemplates`) matches name, blurb, column title, column count (`4`, `five columns`), or shelf. Filters narrow by shelf and column count on web and mobile create flows. |
-| Icebreaker | 18 games; host picks game; This or That supports host-written pairs (1–8) |
+| Icebreaker | **20** games; host picks game; This or That supports host-written pairs (1–8). **Health Check** (`scale`): six statements scored 1–7; peers see anonymized spreads and averages, not who chose each point. **Travel Wishlist** (`map`): 1–5 countries from a 175-country catalog; web interactive map with flag chips; mobile uses the same country list |
 | Private notes | During brainstorm, `presentRoom` strips others’ note bodies before leaving the server |
+| Health Check privacy | For other viewers, `presentRoom` replaces the answer author’s id with a synthetic `health-…` id so scores stay unattributed; CSV export author is `Anonymous` |
+| Travel Wishlist | Body stores ISO country codes (comma-separated); summary/CSV expand to country **names**; web `travel-map.tsx` + `public/flags/*.svg` |
 | Discuss walks | Status walk (column) or author walk; board columns remain status categories. A person can raise a hand; their named notes are highlighted. Anonymous notes stay unattributed. |
 | Dot voting | Default **3** votes per person (budget **1–10** via web presets 1/2/3 or Custom); lowering budget drops excess newest dots. Any joined person can change the budget on web; mobile has no budget chrome |
 | Actions | Body, owner, done flag; can be created from a note |
@@ -110,7 +112,7 @@ Kinds: Variable (something the team enters) · Metric (a number the board calcul
 | --- | --- |
 | Web (`apps/web`) | Full UI, App Router pages (`/`, `/new`, `/r/[code]`, `/guide`), room API, persistence (`file` / `supabase` / `redis`) |
 | Mobile (`apps/mobile`) | Expo client: home / guide / create / room (2s poll; raise hand; no timer or vote-budget chrome) |
-| Core (`packages/core`) | Types, ops, privacy, scoring, content, demo seed, export, **glossary** |
+| Core (`packages/core`) | Types, ops, privacy, scoring, content, **countries** (travel catalog), demo seed, export, **glossary** |
 | Credit | Site-wide developer credit footer on web; home/create on mobile (`credit-footer`) |
 
 ---
@@ -128,6 +130,8 @@ Kinds: Variable (something the team enters) · Metric (a number the board calcul
 9. **Hard limits** protect shared document stores (see §7 and [GUARDRAILS](./GUARDRAILS.md)).  
 10. **Raise hand** is Discuss-only desired state; the queue clears whenever the host changes phase.  
 11. **Host authority** covers phase, icebreaker, and discuss walk—not vote budget or section timers (any joined actor may change those on web).  
+12. **Health Check anonymity** is a peer-facing presentation rule: scores stay in the room document, but other clients never receive the real author id; CSV author is `Anonymous`.  
+13. **Travel Wishlist** stores ISO country codes only from `TRAVEL_COUNTRIES` (max 5); export and summary expand codes to names.  
 
 Collaboration flow:
 

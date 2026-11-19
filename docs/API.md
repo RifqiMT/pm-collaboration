@@ -5,7 +5,7 @@
 **CORS:** `Access-Control-Allow-Origin: *`  
 **Caching:** `Cache-Control: no-store`  
 **Runtime:** Node.js (`force-dynamic`)  
-**Last updated:** 2026-11-19  
+**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
 
 ---
 
@@ -107,9 +107,9 @@ Fails with `full` if participants ≥ 40.
 | `type` | Fields | Notes |
 | --- | --- | --- |
 | `retro.setPhase` | `phase` | Host only |
-| `retro.setIcebreaker` | `game` | Host only |
+| `retro.setIcebreaker` | `game` (`IcebreakerId`, 20 values incl. `health-check`, `travel-wishlist`) | Host only |
 | `retro.setIcebreakerPairs` | `pairs[]` | Host only; This or That |
-| `retro.answerIcebreaker` | `body`, `round?` | |
+| `retro.answerIcebreaker` | `body`, `round?` — Health Check: six `1–7` ints joined by `,`; Travel Wishlist: 1–5 ISO codes joined by `,` | Validated per `IcebreakerMode` (`scale` / `map` / …) |
 | `retro.guessIcebreaker` | `targetId`, `index` | Two truths |
 | `retro.revealIcebreaker` | — | |
 | `retro.nextIcebreakerRound` | `step` | Host only |

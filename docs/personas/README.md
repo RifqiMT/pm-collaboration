@@ -8,4 +8,5 @@ These personas describe the people TeamCompass serves in sprint rituals. They ar
 | Jordan — Contributor | [persona-contributor.md](./persona-contributor.md) | Notes, votes, checklist, feedback |
 | Priya — Stakeholder | [persona-stakeholder.md](./persona-stakeholder.md) | Review decision, roadmap scoring |
 
-**Shared context:** Trusted team network, no accounts, six-character room codes, web primary / mobile secondary.
+**Shared context:** Trusted team network, no accounts, six-character room codes, web primary / mobile secondary.  
+**Last aligned to product:** 2026-11-19 (Health Check + Travel Wishlist icebreakers; host gates vs open timer/vote-budget chrome).

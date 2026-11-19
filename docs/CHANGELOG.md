@@ -15,7 +15,9 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **Raise hand** in Discuss: ordered speaking queue; named notes highlight; anonymous authorship stays protected; queue clears on phase change (web + mobile).
 - **Definitions**: plain-English variables, metrics, and formulas for the retrospective, sprint review, and roadmap (`GLOSSARY` in `@cadence/core`). Web `/guide`; mobile Guide screen; linked from home, room chrome, and roadmap scoring help.
 - **62 retrospective shapes** across eight shelves (Classic 13 · Film 10 · Series 9 · Anime 5 · Games 9 · Sport 14 · Music 1 · Food 1). Newer themes include TACO, 4Ps, Marie Kondo, KALM, ALC, Digimon, Star Trek, F1, MotoGP, World Cup, Super Mario, Mario Kart, Pac-Man, Pizza, Cricket, Basketball, Field Hockey, Tennis, Volleyball, Table Tennis, Baseball, Rugby, Golf, Olympics, eSports, DOTA, Resident Evil, and Assassin's Creed. Demo seed writes ten theme-specific notes per column.
-- **Shape picker**: shapes listed A–Z inside each shelf. `searchRetroTemplates` matches name, blurb, column title, column count (`4`, `five columns`), or shelf. Shelf and column-count filters on web and mobile create flows.
+- **Shape picker** on create: searchable shelves, column-count filters (3 / 4 / 5), A–Z lists, and live column titles/hints before create (web + mobile).
+- **Health Check** icebreaker: six statements rated from strongly disagree to strongly agree (1–7). The room sees the spread of answers and averages, not who chose each point. Web and mobile.
+- **Travel Wishlist** icebreaker: pick up to five countries on the map from a 175-country catalog. Each selected country shows a rounded flag. Names stay with the wishlist. The summary and CSV use country names. Web interactive map; mobile uses the same country list.
 
 ### Added — Engineering
 
@@ -26,7 +28,9 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - Core tests for `retro.raiseHand` / `raisedHands` presentation.  
 - `packages/core/src/glossary.ts` + `glossary.test.ts` (unique ids; RICE example matches scorer).  
 - `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`, `retroColumnCounts`, and template coverage tests for all 62 shapes.  
-- Shape-finder UI styles (`.shape-finder*`) and glyph coverage for new templates.
+- Shape-finder UI styles (`.shape-finder*`) and glyph coverage for new templates.  
+- `IcebreakerMode` extended with `scale` and `map`; `HEALTH_CHECK` helpers + `health-check.test.ts`; `countries.ts` (175 countries, wishlist parse/format/export); health peer anonymization in `presentRoom`; CSV transforms for health / travel / show-and-tell.  
+- Web: `travel-map.tsx`, `world-map-paths.ts`, `public/flags/*.svg` (~175), `.health-*` / `.wish-map*` CSS. Mobile: `HealthCheckMobile` / `TravelWishlistMobile`.
 
 ### Documentation
 
@@ -34,7 +38,8 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **2026-11-12 refresh:** documented raise-hand end-to-end; aligned store backends (`file`/`supabase`/`redis`) and Supabase key precedence; clarified web vs mobile poll/timer differences; corrected accent token notes.  
 - **2026-11-16 refresh:** API `store`→503 + full error catalog; web timer Custom 1–60 min and `DOT_PRESETS`; `persistence.ts` lock constants; credit footer inventory; `product.md` link casing; mobile vote-budget chrome gap; `vercel.json` and `sb_*` auth notes.  
 - **2026-11-18 refresh:** Definitions/glossary end-to-end (product, PRD FR-P6, stories, VARIABLES §12–13, architecture, design, traceability); clarified vote budget/timers are not host-gated; CSV export columns catalogued.  
-- **2026-11-19 refresh:** 62-template shelves + shape picker documented; CSV §13 examples match export writers; glossary timer/dot copy no longer claims host-only; DESIGN shape-finder section; suite stamps updated.
+- **2026-11-19 refresh:** 62-template shelves + shape picker documented; CSV §13 examples match export writers; glossary timer/dot copy no longer claims host-only; DESIGN shape-finder section; suite stamps updated.  
+- **2026-11-19 evening refresh:** documented Health Check + Travel Wishlist end-to-end (product, VARIABLES body contracts + charts, DESIGN health/map, ARCHITECTURE/INDEX source map, stories AC, guardrail privacy, metrics, TRACEABILITY); restored Shape picker CHANGELOG product bullet; aligned remaining “18 icebreakers” → **20**.
 
 ---
 
@@ -44,7 +49,7 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 
 - **TeamCompass** branded collaboration rooms for three rituals: Retrospective, Sprint review, Roadmap.  
 - Six-character room codes; no accounts; local identity persistence.  
-- Retrospective: classic + pop templates (expanded later to 62 shapes), 18 icebreakers (including host-custom This or That pairs), private brainstorm, discuss walks, dot voting, actions, per-section timers/stopwatches, Summary + CSV export.  
+- Retrospective: classic + pop templates (expanded later to 62 shapes), 20 icebreakers (including host-custom This or That pairs, a six-question health check, and a travel wishlist map), private brainstorm, discuss walks, dot voting, actions, per-section timers/stopwatches, Summary + CSV export.  
 - Sprint review: seeded checklist, multi-signer checks, feedback kinds, ship/iterate/hold decision.  
 - Roadmap: RICE, ICE, value÷complexity; complexity index; median + 3.5 guides; quadrants and insights.  
 - Demo room seeding for exploration.

@@ -12,6 +12,19 @@ import {
   resolvedThisOrThatPairs,
   thisOrThatGame,
   previewMediaCandidates,
+  acceptedShowMedia,
+  formatShowAndTell,
+  HEALTH_CHECK,
+  healthPointLabel,
+  parseHealthScores,
+  TRAVEL_COUNTRIES,
+  TRAVEL_WISHLIST_MAX,
+  countryByCode,
+  countryFlagEmoji,
+  parseTravelWishlist,
+  travelWishlistExportText,
+  showAndTellMediaSources,
+  showAndTellParts,
   columnMark,
   RETRO_TEMPLATES,
   RETRO_TEMPLATE_GROUPS,
@@ -959,6 +972,7 @@ function SummaryMobile({ room }) {
         {data.answers.map((answer) => (
           <View key={`${answer.author}-${answer.round}-${answer.createdAt}`}>
             <Text>{answer.body}</Text>
+            <ShowPicture media={answer.media} alt={answer.body} />
             <Text style={styles.meta}>
               {answer.question} · {answer.author}
             </Text>
@@ -1214,6 +1228,15 @@ function IcePlay({ game, round, answers, mine, actorId, nameOf, send }) {
   if (game.mode === "draw") {
     return <Text style={styles.meta}>Drawing is shared from the web room. {answers.length} drawing{answers.length === 1 ? "" : "s"} so far.</Text>;
   }
+  if (game.id === "show-and-tell") {
+    return <ShowAndTellMobile answers={answers} mine={mine} nameOf={nameOf} send={send} />;
+  }
+  if (game.mode === "scale") {
+    return <HealthCheckMobile answers={answers} mine={mine} send={send} />;
+  }
+  if (game.mode === "map") {
+    return <TravelWishlistMobile answers={answers} mine={mine} nameOf={nameOf} send={send} />;
+  }
   if (game.mode === "choice" || game.mode === "pairs" || game.mode === "note" || game.mode === "emoji") {
     const choices = game.mode === "emoji" ? game.choices ?? [] : icebreakerChoices(game, round);
     return (
@@ -1373,6 +1396,253 @@ function IcePlay({ game, round, answers, mine, actorId, nameOf, send }) {
               <GifPreview body={answer.body} />
             </View>
           ))}
+    </View>
+  );
+}
+
+function TravelWishlistMobile({ answers, mine, nameOf, send }) {
+  const [codes, setCodes] = useState(parseTravelWishlist(mine?.body ?? "") ?? []);
+  const codesRef = useRef(codes);
+  const [query, setQuery] = useState("");
+  const [note, setNote] = useState("");
+  useEffect(() => {
+    const next = parseTravelWishlist(mine?.body ?? "") ?? [];
+    codesRef.current = next;
+    setCodes(next);
+  }, [mine?.body]);
+  const needle = query.trim().toLocaleLowerCase();
+  const countries = needle
+    ? TRAVEL_COUNTRIES.filter((country) => country.name.toLocaleLowerCase().includes(needle))
+    : TRAVEL_COUNTRIES;
+  function toggle(code) {
+    const current = codesRef.current;
+    if (current.includes(code)) {
+      const next = current.filter((item) => item !== code);
+      codesRef.current = next;
+      setCodes(next);
+      setNote("");
+      return;
+    }
+    if (current.length >= TRAVEL_WISHLIST_MAX) {
+      setNote("Five countries is the wishlist limit. Remove one to add another.");
+      return;
+    }
+    const next = [...current, code];
+    codesRef.current = next;
+    setCodes(next);
+    setNote("");
+  }
+  const ready = codes.length > 0;
+  return (
+    <View style={{ gap: 10 }}>
+      <Text style={styles.meta}>Choose up to five countries.</Text>
+      <TextInput
+        style={styles.input}
+        value={query}
+        placeholder="Find a country"
+        onChangeText={setQuery}
+      />
+      <ScrollView style={{ maxHeight: 240 }} keyboardShouldPersistTaps="handled">
+        <View style={styles.row}>
+          {(countries).map((country) => (
+            <Pressable
+              key={country.code}
+              style={[styles.chip, codes.includes(country.code) ? styles.chipOn : null]}
+              onPress={() => toggle(country.code)}
+            >
+              <Text style={codes.includes(country.code) ? styles.chipTextOn : styles.chipText}>
+              {codes.includes(country.code) ? `${countryFlagEmoji(country.code)} ` : ""}
+              {country.name}
+            </Text>
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
+      {codes.length > 0 ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {codes.map((code) => (
+            <View
+              key={code}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 6,
+                backgroundColor: "#12141a",
+                borderRadius: 999,
+                paddingLeft: 4,
+                paddingRight: 10,
+                paddingVertical: 4,
+              }}
+            >
+              <Text style={{ fontSize: 16, lineHeight: 20 }}>{countryFlagEmoji(code)}</Text>
+              <Text style={{ color: "#ffffff", fontWeight: "600" }}>{countryByCode(code)?.name ?? code}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+      {note ? <Text style={styles.error}>{note}</Text> : null}
+      <Pressable
+        style={styles.button}
+        disabled={!ready}
+        onPress={() => {
+          if (!ready) return;
+          void send({ type: "retro.answerIcebreaker", body: codes.join(",") });
+        }}
+      >
+        <Text style={styles.buttonText}>{mine ? "Update" : "Share"}</Text>
+      </Pressable>
+      {mine ? (
+        answers.map((answer) => (
+          <Text key={answer.id}>
+            {answer.id === mine.id ? "You" : nameOf(answer.authorId)}: {travelWishlistExportText(answer.body)}
+          </Text>
+        ))
+      ) : (
+        <Text style={styles.meta}>Share your wishlist to see where everyone else wants to go.</Text>
+      )}
+    </View>
+  );
+}
+
+function HealthCheckMobile({ answers, mine, send }) {
+  const saved = parseHealthScores(mine?.body ?? "");
+  const [scores, setScores] = useState(saved ?? HEALTH_CHECK.map(() => null));
+  useEffect(() => {
+    setScores(parseHealthScores(mine?.body ?? "") ?? HEALTH_CHECK.map(() => null));
+  }, [mine?.body]);
+  const ready = scores.every((score) => score != null);
+  const points = [1, 2, 3, 4, 5, 6, 7];
+  const colors = ["#f7c7c4", "#f6c48a", "#f8d7a1", "#f3e38a", "#d5e7a4", "#b7e3a4", "#8fd69a"];
+  return (
+    <View style={{ gap: 10 }}>
+      {HEALTH_CHECK.map((question, index) => (
+        <View key={question.title} style={[styles.card, { gap: 8 }]}>
+          <Text>
+            {question.title}: {question.statement}
+          </Text>
+          <View style={{ flexDirection: "row", gap: 6 }}>
+            {points.map((point) => (
+              <Pressable
+                key={point}
+                accessibilityLabel={healthPointLabel(point)}
+                onPress={() => setScores((current) => current.map((value, valueIndex) => (valueIndex === index ? point : value)))}
+                style={{
+                  flex: 1,
+                  minHeight: 36,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: colors[point - 1],
+                  borderWidth: scores[index] === point ? 2 : 0,
+                  borderColor: "#1c1f26",
+                }}
+              >
+                <Text>{point === 1 ? "👎" : point === 7 ? "👍" : ""}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <Text style={styles.meta}>Strongly disagree</Text>
+            <Text style={styles.meta}>Strongly agree</Text>
+          </View>
+          {mine ? (
+            <Text style={styles.meta}>
+              {points
+                .map((point) => {
+                  const count = answers.filter((answer) => parseHealthScores(answer.body)?.[index] === point).length;
+                  return String(count);
+                })
+                .join("  ")}
+            </Text>
+          ) : null}
+        </View>
+      ))}
+      <Pressable
+        style={styles.button}
+        disabled={!ready}
+        onPress={() => {
+          if (!ready) return;
+          void send({ type: "retro.answerIcebreaker", body: scores.join(",") });
+        }}
+      >
+        <Text style={styles.buttonText}>{mine ? "Update" : "Share"}</Text>
+      </Pressable>
+      {mine ? null : <Text style={styles.meta}>Share your ratings to see how the room answered.</Text>}
+    </View>
+  );
+}
+
+function ShowPicture({ media, alt }) {
+  const src = showAndTellMediaSources(media || "")[0];
+  if (!src) return null;
+  return (
+    <Image
+      source={{ uri: src }}
+      style={{ width: "100%", height: 200, borderRadius: 12, backgroundColor: "#ffffff" }}
+      resizeMode="contain"
+      accessibilityLabel={alt || "Picture"}
+    />
+  );
+}
+
+function ShowAndTellMobile({ answers, mine, nameOf, send }) {
+  const saved = showAndTellParts(mine?.body ?? "");
+  const [text, setText] = useState(saved.text);
+  const [link, setLink] = useState(saved.media.startsWith("data:") ? "" : saved.media);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const next = showAndTellParts(mine?.body ?? "");
+    setText(next.text);
+    setLink(next.media.startsWith("data:") ? "" : next.media);
+    setError("");
+  }, [mine?.body]);
+
+  return (
+    <View style={{ gap: 8 }}>
+      <TextInput style={styles.input} value={text} placeholder="A chipped mug from launch week" onChangeText={setText} maxLength={180} />
+      <TextInput
+        style={styles.input}
+        value={link}
+        placeholder="Picture or GIF https link"
+        autoCapitalize="none"
+        autoCorrect={false}
+        onChangeText={(value) => {
+          setLink(value);
+          setError("");
+        }}
+        maxLength={400}
+      />
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <ShowPicture media={link.trim() || (saved.media.startsWith("data:") ? saved.media : "")} alt={text} />
+      <Pressable
+        style={styles.button}
+        onPress={async () => {
+          const caption = text.trim();
+          if (!caption) return;
+          const picture = link.trim() || (saved.media.startsWith("data:") && !link ? saved.media : "");
+          const verdict = acceptedShowMedia(picture);
+          if (verdict !== "ok") {
+            setError(verdict === "large" ? "That picture is too large. Paste an https link instead." : "Paste an https link to a picture or GIF.");
+            return;
+          }
+          setError("");
+          await send({ type: "retro.answerIcebreaker", body: formatShowAndTell(caption, picture) });
+        }}
+      >
+        <Text style={styles.buttonText}>{mine ? "Update" : "Share"}</Text>
+      </Pressable>
+      {answers.length === 0 ? <Text style={styles.meta}>No one has shared yet. You can go first.</Text> : null}
+      {answers.map((answer) => {
+        const parts = showAndTellParts(answer.body);
+        return (
+          <View key={answer.id} style={{ gap: 4 }}>
+            <Text>
+              {parts.text} · {nameOf(answer.authorId)}
+            </Text>
+            <ShowPicture media={parts.media} alt={parts.text} />
+          </View>
+        );
+      })}
     </View>
   );
 }

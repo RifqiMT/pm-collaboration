@@ -6,7 +6,17 @@ import {
   icebreakerById,
   icebreakerChoices,
   icebreakerHead,
+  acceptedShowMedia,
+  formatShowAndTell,
+  HEALTH_CHECK,
+  formatHealthAverage,
+  healthCategoryAverage,
+  healthOverallAverage,
+  healthPointLabel,
+  parseHealthScores,
   previewMediaCandidates,
+  showAndTellMediaSources,
+  showAndTellParts,
   pairQuestion,
   resolvedThisOrThatPairs,
   thisOrThatGame,
@@ -17,6 +27,11 @@ import {
   type RoomView,
 } from "@cadence/core";
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+
+const TravelMap = dynamic(() => import("./travel-map").then((mod) => mod.TravelMap), {
+  loading: () => <p className="muted">Loading the map…</p>,
+});
 
 export function IcebreakerPanel({
   room,
@@ -39,10 +54,12 @@ export function IcebreakerPanel({
   const nameOf = (id: string) => room.participants.find((person) => person.id === id)?.name ?? "Someone";
   const prompt = game.questions?.[round] ?? game.prompt;
 
+  const group = ICEBREAKER_GROUPS.find((item) => item.id === game.group);
+
   return (
     <section className="icebox" aria-label="Icebreaker">
       <header className="ice-hero">
-        <div>
+        <div className="ice-hero-copy">
           <p className="eyebrow">Before the retro</p>
           <h2>Icebreaker</h2>
           <p>
@@ -51,43 +68,25 @@ export function IcebreakerPanel({
               : "Join the game the host chose. Notes stay closed until the host starts."}
           </p>
         </div>
-        <div className="ice-selected" aria-label="Selected game">
-          <span className="eyebrow">Now playing</span>
-          <strong>{game.name}</strong>
-          <small>{game.blurb}</small>
-        </div>
+        {host ? (
+          <IcebreakerPicker
+            selectedId={retro.icebreaker}
+            selected={game}
+            groupLabel={group?.label}
+            groupMinutes={group?.minutes}
+            onSelect={(next) => void send({ type: "retro.setIcebreaker", game: next })}
+          />
+        ) : (
+          <div className="ice-selected" aria-label="Selected game">
+            <span className="eyebrow">Now playing</span>
+            <strong>{game.name}</strong>
+            <small>{game.blurb}</small>
+            {group ? <em>{group.label} · {group.minutes}</em> : null}
+          </div>
+        )}
       </header>
 
-      {host ? (
-        <div className="ice-groups">
-          {ICEBREAKER_GROUPS.map((group) => (
-            <div key={group.id} className="ice-group">
-              <p>
-                {group.label}
-                <span>{group.minutes}</span>
-              </p>
-              <div className="ice-games" role="tablist" aria-label={group.label}>
-                {ICEBREAKERS.filter((item) => item.group === group.id).map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={retro.icebreaker === item.id}
-                    className={retro.icebreaker === item.id ? "ice-game on" : "ice-game"}
-                    title={item.blurb}
-                    onClick={() => void send({ type: "retro.setIcebreaker", game: item.id })}
-                  >
-                    <strong>{item.name}</strong>
-                    <span>{item.blurb}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="ice-guest-note">Only the host can choose the icebreaker.</p>
-      )}
+      {host ? null : <p className="ice-guest-note">Only the host can choose the icebreaker.</p>}
 
       <div className="ice-stage">
         {game.id === "this-or-that" ? (
@@ -135,6 +134,106 @@ export function IcebreakerPanel({
         )}
       </footer>
     </section>
+  );
+}
+
+function IcebreakerPicker({
+  selectedId,
+  selected,
+  groupLabel,
+  groupMinutes,
+  onSelect,
+}: {
+  selectedId: string;
+  selected: IcebreakerGame;
+  groupLabel?: string;
+  groupMinutes?: string;
+  onSelect: (game: IcebreakerGame["id"]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const listId = "icebreaker-picker-list";
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className={`ice-picker${open ? " open" : ""}`} ref={rootRef}>
+      <button
+        type="button"
+        className="ice-picker-trigger"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listId}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="ice-picker-copy">
+          <span className="eyebrow">Choose a game</span>
+          <strong>{selected.name}</strong>
+          <small>{selected.blurb}</small>
+          {groupLabel && groupMinutes ? (
+            <em>
+              {groupLabel} · {groupMinutes}
+            </em>
+          ) : null}
+        </span>
+        <span className="ice-picker-caret" aria-hidden="true" />
+      </button>
+
+      {open ? (
+        <div className="ice-picker-menu" id={listId} role="listbox" aria-label="Icebreaker games">
+          {ICEBREAKER_GROUPS.map((group) => {
+            const games = ICEBREAKERS.filter((item) => item.group === group.id);
+            return (
+              <div key={group.id} className="ice-picker-group" role="group" aria-label={group.label}>
+                <div className="ice-picker-group-head">
+                  <span>{group.label}</span>
+                  <em>{group.minutes}</em>
+                </div>
+                <ul>
+                  {games.map((item) => {
+                    const active = item.id === selectedId;
+                    return (
+                      <li key={item.id}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={active}
+                          className={active ? "on" : ""}
+                          onClick={() => {
+                            onSelect(item.id);
+                            setOpen(false);
+                          }}
+                        >
+                          <span className="ice-picker-option-copy">
+                            <strong>{item.name}</strong>
+                            <span>{item.blurb}</span>
+                          </span>
+                          {active ? <span className="ice-picker-check" aria-hidden="true">✓</span> : null}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -556,6 +655,19 @@ function Play({
   }
   if (game.mode === "emoji") return <EmojiCheck answers={answers} mine={mine} game={game} nameOf={nameOf} send={send} />;
   if (game.mode === "gif") return <GifShare answers={answers} mine={mine} nameOf={nameOf} send={send} />;
+  if (game.id === "show-and-tell") return <ShowAndTell answers={answers} mine={mine} nameOf={nameOf} send={send} />;
+  if (game.mode === "scale") return <HealthCheck answers={answers} mine={mine} send={send} />;
+  if (game.mode === "map") {
+    return (
+      <TravelMap
+        answers={answers}
+        mine={mine}
+        nameOf={nameOf}
+        send={send}
+        participantIds={participantIds}
+      />
+    );
+  }
   if (game.mode === "draw") return <DrawShare seconds={game.seconds ?? 60} answers={answers} mine={mine} nameOf={nameOf} send={send} />;
   if (game.mode === "truths") {
     return (
@@ -591,8 +703,26 @@ function Choices({
   const selected = mine ? icebreakerHead(mine.body) : { head: "", note: "" };
   const [note, setNote] = useState(selected.note);
   useEffect(() => setNote(selected.note), [selected.note, game.id]);
-  const layout =
-    game.id === "energy" ? "feelings meter" : game.mode === "pairs" ? "pair-vote" : "feelings";
+
+  if (game.id === "energy") {
+    return (
+      <EnergyMeter
+        choices={choices}
+        answers={answers}
+        selected={selected}
+        note={note}
+        placeholder={game.placeholder ?? "A short note, if you want one"}
+        nameOf={nameOf}
+        onNoteChange={setNote}
+        onPick={(choice, extra) => {
+          const body = extra ? `${choice} — ${extra}` : choice;
+          void send({ type: "retro.answerIcebreaker", body });
+        }}
+      />
+    );
+  }
+
+  const layout = game.mode === "pairs" ? "pair-vote" : "feelings";
 
   return (
     <>
@@ -601,6 +731,8 @@ function Choices({
           const picked = answers.filter((answer) => icebreakerHead(answer.body).head === choice);
           const chosen = selected.head === choice;
           const pairMode = game.mode === "pairs";
+          const countLabel = `${picked.length} ${picked.length === 1 ? "person" : "people"}`;
+          const names = picked.map((answer) => nameOf(answer.authorId)).join(", ");
           return (
             <button
               key={choice}
@@ -618,12 +750,10 @@ function Choices({
                   {chosen ? "✓" : index === 0 ? "A" : "B"}
                 </span>
               ) : null}
-              <span className={pairMode ? "pair-option-copy" : undefined}>
+              <span className={pairMode ? "pair-option-copy" : "feelings-copy"}>
                 <strong>{choice}</strong>
-                <small>
-                  {picked.length} {picked.length === 1 ? "person" : "people"}
-                </small>
-                {picked.length > 0 && !pairMode ? <em>{picked.map((answer) => nameOf(answer.authorId)).join(", ")}</em> : null}
+                <small>{countLabel}</small>
+                {picked.length > 0 && !pairMode ? <em>{names}</em> : null}
                 {pairMode && picked.length > 0 ? (
                   <span className="pair-live">
                     {picked.slice(0, 4).map((answer) => (
@@ -670,6 +800,531 @@ function Choices({
   );
 }
 
+function EnergyMeter({
+  choices,
+  answers,
+  selected,
+  note,
+  placeholder,
+  nameOf,
+  onNoteChange,
+  onPick,
+}: {
+  choices: readonly string[];
+  answers: IcebreakerAnswer[];
+  selected: { head: string; note: string };
+  note: string;
+  placeholder: string;
+  nameOf: (id: string) => string;
+  onNoteChange: (value: string) => void;
+  onPick: (choice: string, note: string) => void;
+}) {
+  const scores = answers
+    .map((answer) => Number(icebreakerHead(answer.body).head))
+    .filter((value) => Number.isInteger(value) && value >= 1 && value <= 5);
+  const average = scores.length === 0 ? null : scores.reduce((sum, value) => sum + value, 0) / scores.length;
+  const peak = Math.max(1, ...choices.map((choice) => answers.filter((answer) => icebreakerHead(answer.body).head === choice).length));
+  const mineLabel = selected.head ? `Your energy · ${selected.head}` : "Choose your energy";
+
+  return (
+    <div className="energy-board">
+      <div className="energy-summary">
+        <div className="energy-summary-copy">
+          <p className="eyebrow">Your rating</p>
+          <strong>{mineLabel}</strong>
+          <span>{scores.length === 0 ? "Waiting for the first rating." : `${scores.length} ${scores.length === 1 ? "person has" : "people have"} rated`}</span>
+        </div>
+        <div className={`energy-avg${average == null ? " empty" : ""}`} aria-live="polite">
+          <span className="eyebrow">Room avg</span>
+          <strong>{average == null ? "—" : formatHealthAverage(average)}</strong>
+          <small>/ 5</small>
+        </div>
+      </div>
+
+      <div className="energy-scale" role="radiogroup" aria-label="Energy from 1 to 5">
+        {choices.map((choice) => {
+          const picked = answers.filter((answer) => icebreakerHead(answer.body).head === choice);
+          const chosen = selected.head === choice;
+          const share = Math.round((picked.length / peak) * 100);
+          return (
+            <button
+              key={choice}
+              type="button"
+              role="radio"
+              aria-checked={chosen}
+              className={`energy-option${chosen ? " on" : ""}`}
+              data-level={choice}
+              onClick={() => onPick(choice, note.trim())}
+            >
+              <span className="energy-option-score">{choice}</span>
+              <span className="energy-option-bar" aria-hidden="true">
+                <i style={{ height: `${Math.max(picked.length > 0 ? 18 : 8, share)}%` }} />
+              </span>
+              <small>
+                {picked.length}
+                <span className="sr"> {picked.length === 1 ? "person" : "people"}</span>
+              </small>
+            </button>
+          );
+        })}
+      </div>
+      <div className="energy-ends">
+        <span>Low</span>
+        <span>High</span>
+      </div>
+
+      {answers.length > 0 ? (
+        <ul className="energy-people" aria-label="Who rated what">
+          {choices.map((choice) => {
+            const picked = answers.filter((answer) => icebreakerHead(answer.body).head === choice);
+            if (picked.length === 0) return null;
+            return (
+              <li key={choice}>
+                <strong>{choice}</strong>
+                <span>{picked.map((answer) => nameOf(answer.authorId)).join(", ")}</span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
+      <form
+        className="energy-note"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!selected.head) return;
+          onPick(selected.head, note.trim());
+        }}
+      >
+        <label className="field" htmlFor="energy-note-input">
+          <span className="field-label">
+            <span>Optional note</span>
+          </span>
+          <span className="field-shell">
+            <input
+              id="energy-note-input"
+              className="field-control"
+              value={note}
+              onChange={(event) => onNoteChange(event.target.value)}
+              placeholder={placeholder}
+              maxLength={140}
+              disabled={!selected.head}
+            />
+          </span>
+        </label>
+        <button type="submit" className="btn tiny" disabled={!selected.head}>
+          {selected.note === note.trim() ? "Saved" : "Save note"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function HealthCheck({
+  answers,
+  mine,
+  send,
+}: {
+  answers: IcebreakerAnswer[];
+  mine: IcebreakerAnswer | undefined;
+  send: (op: Op) => Promise<boolean>;
+}) {
+  const saved = parseHealthScores(mine?.body ?? "");
+  const [scores, setScores] = useState<(number | null)[]>(saved ?? HEALTH_CHECK.map(() => null));
+  useEffect(() => {
+    setScores(parseHealthScores(mine?.body ?? "") ?? HEALTH_CHECK.map(() => null));
+  }, [mine?.body]);
+  const answered = scores.filter((score) => score != null).length;
+  const ready = answered === HEALTH_CHECK.length;
+  const revealed = Boolean(mine);
+  const sharedCount = answers.length;
+  const roomAverage = revealed ? healthOverallAverage(answers) : null;
+  const progress = answered / HEALTH_CHECK.length;
+
+  return (
+    <form
+      className="health-check"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!ready) return;
+        void send({ type: "retro.answerIcebreaker", body: scores.join(",") });
+      }}
+    >
+      <div className="health-summary">
+        <div className="health-progress" aria-label={`${answered} of ${HEALTH_CHECK.length} rated`}>
+          <div className="health-progress-copy">
+            <span>
+              {answered} of {HEALTH_CHECK.length} rated
+            </span>
+            <strong>{Math.round(progress * 100)}%</strong>
+          </div>
+          <div className="health-progress-bar" aria-hidden="true">
+            <i style={{ width: `${progress * 100}%` }} />
+          </div>
+        </div>
+
+        {revealed && roomAverage != null ? (
+          <div className="health-room-average" aria-live="polite">
+            <span className="eyebrow">Room average</span>
+            <strong>{formatHealthAverage(roomAverage)}</strong>
+            <small>
+              / 7 · {sharedCount} {sharedCount === 1 ? "response" : "responses"}
+            </small>
+            <div className="health-avg-meter" aria-hidden="true">
+              <i style={{ width: `${(roomAverage / 7) * 100}%` }} data-level={Math.round(roomAverage)} />
+            </div>
+          </div>
+        ) : (
+          <div className="health-room-average empty">
+            <span className="eyebrow">Room average</span>
+            <strong>—</strong>
+            <small>Appears after you share</small>
+          </div>
+        )}
+      </div>
+
+      <ol className="health-list">
+        {HEALTH_CHECK.map((question, index) => {
+          const counts = healthPointCounts(answers, index);
+          const mineScore = scores[index];
+          const categoryAverage = revealed ? healthCategoryAverage(answers, index) : null;
+          return (
+            <li key={question.title} className={`health-card${mineScore != null ? " rated" : ""}`}>
+              <header className="health-card-head">
+                <div className="health-card-title">
+                  <p className="eyebrow">{question.title}</p>
+                  <p>{question.statement}</p>
+                </div>
+                {categoryAverage != null ? (
+                  <div className="health-card-avg" aria-label={`${question.title} average ${formatHealthAverage(categoryAverage)} of 7`}>
+                    <span>Avg</span>
+                    <strong>{formatHealthAverage(categoryAverage)}</strong>
+                  </div>
+                ) : mineScore != null ? (
+                  <div className="health-card-avg yours" aria-label={`Your rating ${healthPointLabel(mineScore)}`}>
+                    <span>Yours</span>
+                    <strong>{mineScore}</strong>
+                  </div>
+                ) : null}
+              </header>
+
+              <div className="health-scale" role="radiogroup" aria-label={question.title}>
+                {HEALTH_POINTS.map((point) => {
+                  const selected = mineScore === point;
+                  const count = counts[point - 1] ?? 0;
+                  return (
+                    <button
+                      key={point}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      aria-label={`${healthPointLabel(point)}${revealed ? `, ${count} ${count === 1 ? "person" : "people"}` : ""}`}
+                      className={`health-point health-${point}${selected ? " on" : ""}`}
+                      onClick={() =>
+                        setScores((current) => current.map((value, valueIndex) => (valueIndex === index ? point : value)))
+                      }
+                    >
+                      <span className="health-point-mark" aria-hidden="true">
+                        {point}
+                      </span>
+                      {revealed ? <small>{count}</small> : null}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="health-ends">
+                <span>Strongly disagree</span>
+                <span>Strongly agree</span>
+              </div>
+
+              {mineScore != null ? (
+                <p className="health-pick">
+                  Your pick · <strong>{healthPointLabel(mineScore)}</strong>
+                  {categoryAverage != null ? (
+                    <>
+                      {" "}
+                      · Room avg <strong>{formatHealthAverage(categoryAverage)}</strong>
+                    </>
+                  ) : null}
+                </p>
+              ) : (
+                <p className="health-pick muted">Choose a rating for this category</p>
+              )}
+
+              {categoryAverage != null ? (
+                <div className="health-avg-meter" aria-hidden="true">
+                  <i style={{ width: `${(categoryAverage / 7) * 100}%` }} data-level={Math.round(categoryAverage)} />
+                </div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="health-actions">
+        <button type="submit" className="btn primary" disabled={!ready}>
+          {mine ? "Update ratings" : "Share ratings"}
+        </button>
+        {revealed ? (
+          <p className="muted">Averages update as people share their ratings.</p>
+        ) : (
+          <p className="muted">Share your ratings to unlock room averages and counts.</p>
+        )}
+      </div>
+    </form>
+  );
+}
+
+const HEALTH_POINTS = [1, 2, 3, 4, 5, 6, 7] as const;
+
+function healthPointCounts(answers: IcebreakerAnswer[], questionIndex: number): number[] {
+  const counts = [0, 0, 0, 0, 0, 0, 0];
+  for (const answer of answers) {
+    const scores = parseHealthScores(answer.body);
+    const score = scores?.[questionIndex];
+    if (score) counts[score - 1] = (counts[score - 1] ?? 0) + 1;
+  }
+  return counts;
+}
+
+function ShowAndTell({
+  answers,
+  mine,
+  nameOf,
+  send,
+}: {
+  answers: IcebreakerAnswer[];
+  mine: IcebreakerAnswer | undefined;
+  nameOf: (id: string) => string;
+  send: (op: Op) => Promise<boolean>;
+}) {
+  const saved = showAndTellParts(mine?.body ?? "");
+  const [text, setText] = useState(saved.text);
+  const [link, setLink] = useState(saved.media.startsWith("data:") ? "" : saved.media);
+  const [fileData, setFileData] = useState(saved.media.startsWith("data:") ? saved.media : "");
+  const [error, setError] = useState("");
+  const [reading, setReading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const next = showAndTellParts(mine?.body ?? "");
+    setText(next.text);
+    setLink(next.media.startsWith("data:") ? "" : next.media);
+    setFileData(next.media.startsWith("data:") ? next.media : "");
+    setError("");
+  }, [mine?.body]);
+
+  const picture = link.trim() || fileData;
+
+  async function onFile(file: File | undefined) {
+    if (!file) return;
+    setError("");
+    setReading(true);
+    try {
+      const data = await pictureFromFile(file);
+      setFileData(data);
+      setLink("");
+    } catch (fileError) {
+      console.error("[cadence] show-and-tell picture failed", {
+        message: fileError instanceof Error ? fileError.message : "unknown",
+      });
+      setError(fileError instanceof Error ? fileError.message : "Could not use that picture.");
+    } finally {
+      setReading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="ice-answers">
+      <form
+        className="show-tell-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const caption = text.trim();
+          if (!caption) return;
+          const verdict = acceptedShowMedia(picture);
+          if (verdict === "large") {
+            setError("That picture is too large. Paste an https link instead.");
+            return;
+          }
+          if (verdict === "type") {
+            setError("Paste an https link to a picture or GIF.");
+            return;
+          }
+          setError("");
+          void send({ type: "retro.answerIcebreaker", body: formatShowAndTell(caption, picture) });
+        }}
+      >
+        <div className="ice-answer-form">
+          <label className="ice-answer-field" htmlFor="show-tell-caption">
+            <span className="ice-answer-label">What are you sharing?</span>
+            <input
+              id="show-tell-caption"
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              placeholder="A chipped mug from launch week"
+              maxLength={180}
+            />
+          </label>
+          <button type="submit" className="btn primary" disabled={text.trim().length === 0 || reading}>
+            {mine ? "Update" : "Share"}
+          </button>
+        </div>
+        <div className="show-media">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/gif,image/png,image/jpeg,image/webp"
+            aria-label="Picture or GIF file"
+            onChange={(event) => void onFile(event.target.files?.[0])}
+          />
+          <button type="button" className="btn tiny" disabled={reading} onClick={() => fileRef.current?.click()}>
+            {reading ? "Reading…" : "Picture or GIF"}
+          </button>
+          <input
+            value={link}
+            onChange={(event) => {
+              setLink(event.target.value);
+              setFileData("");
+              setError("");
+            }}
+            aria-label="Picture or GIF link"
+            placeholder="Or paste an https link"
+            maxLength={400}
+          />
+          {picture ? (
+            <button
+              type="button"
+              className="btn tiny"
+              onClick={() => {
+                setLink("");
+                setFileData("");
+                setError("");
+              }}
+            >
+              Remove
+            </button>
+          ) : null}
+        </div>
+        {error ? (
+          <p className="pair-note" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <ShowPicture media={picture} alt={text.trim() || "Picture preview"} />
+      </form>
+
+      <div className="ice-answers-board">
+        <header>
+          <p className="eyebrow">Room shares</p>
+          <strong>
+            {answers.length} {answers.length === 1 ? "share" : "shares"}
+          </strong>
+        </header>
+        {answers.length === 0 ? (
+          <div className="ice-answers-empty">
+            <p>No one has shared yet</p>
+            <span>Add a caption and optional picture.</span>
+          </div>
+        ) : (
+          <ul className="shout-list">
+            {answers.map((answer, index) => {
+              const parts = showAndTellParts(answer.body);
+              return (
+                <li
+                  key={answer.id}
+                  className={answer.authorId === mine?.authorId ? "mine" : ""}
+                  style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+                >
+                  <span className="ice-chip-avatar" aria-hidden="true">
+                    {initials(nameOf(answer.authorId))}
+                  </span>
+                  <div className="ice-chip-copy">
+                    <p>
+                      <strong>{parts.text}</strong>
+                    </p>
+                    <ShowPicture media={parts.media} alt={parts.text} />
+                    <small>{nameOf(answer.authorId)}</small>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ShowPicture({ media, alt }: { media: string; alt: string }) {
+  const sources = showAndTellMediaSources(media);
+  const src = sources[0];
+  if (!src) return null;
+  if (src.startsWith("data:")) return <img className="gif-preview" src={src} alt={alt || "Picture"} />;
+  return <MediaPreview url={media} alt={alt || "Picture"} />;
+}
+
+function pictureFromFile(file: File): Promise<string> {
+  const type = file.type.toLowerCase();
+  if (type === "image/gif") {
+    if (file.size > 48_000) return Promise.reject(new Error("That GIF is too large. Paste an https link instead."));
+    return readPicture(file).then((data) => {
+      if (!data.startsWith("data:image/gif;base64,") || data.length > 70_000) {
+        throw new Error("That GIF is too large. Paste an https link instead.");
+      }
+      return data;
+    });
+  }
+  if (type !== "image/png" && type !== "image/jpeg" && type !== "image/webp") {
+    return Promise.reject(new Error("Use a GIF, PNG, JPEG, or WebP picture."));
+  }
+  return readPicture(file).then(
+    (data) =>
+      new Promise<string>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+          const max = 480;
+          const scale = Math.min(1, max / Math.max(image.width, image.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          const context = canvas.getContext("2d");
+          if (!context) {
+            reject(new Error("Could not prepare that picture."));
+            return;
+          }
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          let quality = 0.72;
+          let jpeg = canvas.toDataURL("image/jpeg", quality);
+          while (jpeg.length > 70_000 && quality > 0.4) {
+            quality = Math.round((quality - 0.1) * 10) / 10;
+            jpeg = canvas.toDataURL("image/jpeg", quality);
+          }
+          if (jpeg.length > 70_000) {
+            reject(new Error("That picture is too large. Paste an https link instead."));
+            return;
+          }
+          resolve(jpeg);
+        };
+        image.onerror = () => reject(new Error("Could not read that picture."));
+        image.src = data;
+      }),
+  );
+}
+
+function readPicture(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read that file."));
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject(new Error("Could not read that file."));
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function Lines({
   game,
   answers,
@@ -684,48 +1339,86 @@ function Lines({
   send: (op: Op) => Promise<boolean>;
 }) {
   const words = game.mode === "word";
+  const association = game.id === "word-association";
   return (
-    <>
+    <div className="ice-answers">
       <AnswerForm
         key={`${game.id}-${mine?.body ?? ""}`}
         initial={mine?.body ?? ""}
         placeholder={game.placeholder ?? ""}
-        label={words ? "Your word" : "Your answer"}
+        label="Your answer"
         maxLength={words ? 24 : 180}
         submitLabel={mine ? "Update" : "Share"}
         onSubmit={(body) => send({ type: "retro.answerIcebreaker", body })}
       />
-      {game.id === "word-association" ? (
-        <p className="chain">Sprint{answers.map((answer) => ` → ${answer.body}`).join("")}</p>
-      ) : null}
-      {answers.length === 0 ? <p className="muted">No one has shared yet. You can go first.</p> : null}
-      {words && game.id !== "word-association" ? (
-        <ul className="word-cloud">
-          {answers.map((answer) => (
-            <li key={answer.id} className={answer.authorId === mine?.authorId ? "mine" : ""}>
-              <strong>{answer.body}</strong>
-              <small>{nameOf(answer.authorId)}</small>
-            </li>
-          ))}
-        </ul>
-      ) : game.id === "word-association" ? null : (
-        <ul className="shout-list">
-          {answers.map((answer) => {
-            const parts = game.mode === "sprint" ? icebreakerHead(answer.body) : { head: answer.body, note: "" };
-            return (
-              <li key={answer.id} className={answer.authorId === mine?.authorId ? "mine" : ""}>
-                <p>
-                  <strong>{parts.head}</strong>
-                  {parts.note ? ` — ${parts.note}` : ""}
-                </p>
-                <SharedMedia body={answer.body} />
-                <small>{nameOf(answer.authorId)}</small>
-              </li>
-            );
-          })}
-        </ul>
+
+      {association ? (
+        <div className="ice-chain" aria-label="Word association chain">
+          <header>
+            <p className="eyebrow">Chain so far</p>
+            <strong>
+              {answers.length} {answers.length === 1 ? "link" : "links"}
+            </strong>
+          </header>
+          {answers.length === 0 ? (
+            <div className="ice-answers-empty">
+              <p>Chain starts with Sprint</p>
+              <span>Add the next word.</span>
+            </div>
+          ) : (
+            <p className="chain">
+              <span>Sprint</span>
+              {answers.map((answer) => (
+                <span key={answer.id}>
+                  <i aria-hidden="true">→</i>
+                  <strong>{answer.body}</strong>
+                </span>
+              ))}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="ice-answers-board">
+          <header>
+            <p className="eyebrow">Room answers</p>
+            <strong>
+              {answers.length} {answers.length === 1 ? "share" : "shares"}
+            </strong>
+          </header>
+          {answers.length === 0 ? (
+            <div className="ice-answers-empty">
+              <p>No one has shared yet</p>
+              <span>You can go first.</span>
+            </div>
+          ) : (
+            <ul className="shout-list">
+              {answers.map((answer, index) => {
+                const parts = game.mode === "sprint" ? icebreakerHead(answer.body) : { head: answer.body, note: "" };
+                return (
+                  <li
+                    key={answer.id}
+                    className={answer.authorId === mine?.authorId ? "mine" : ""}
+                    style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+                  >
+                    <span className="ice-chip-avatar" aria-hidden="true">
+                      {initials(nameOf(answer.authorId))}
+                    </span>
+                    <div className="ice-chip-copy">
+                      <p>
+                        <strong>{parts.head}</strong>
+                        {parts.note ? <span className="ice-chip-note"> — {parts.note}</span> : null}
+                      </p>
+                      <SharedMedia body={answer.body} />
+                      <small>{nameOf(answer.authorId)}</small>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -751,37 +1444,76 @@ function EmojiCheck({
   }, [current, mine?.body]);
 
   return (
-    <>
+    <div className="ice-answers">
       <div className="emoji-pick" role="group" aria-label="Emoji">
         {(game.choices ?? []).map((item) => (
-          <button key={item} type="button" className={emoji === item ? "on" : ""} aria-pressed={emoji === item} onClick={() => setEmoji(item)}>
+          <button
+            key={item}
+            type="button"
+            className={emoji === item ? "on" : ""}
+            aria-pressed={emoji === item}
+            onClick={() => setEmoji(item)}
+          >
             {item}
           </button>
         ))}
       </div>
       <form
-        className="composer inline"
+        className="ice-answer-form"
         onSubmit={(event) => {
           event.preventDefault();
           if (!emoji || !sentence.trim()) return;
           void send({ type: "retro.answerIcebreaker", body: `${emoji} ${sentence.trim()}` });
         }}
       >
-        <input value={sentence} onChange={(event) => setSentence(event.target.value)} aria-label="One sentence" placeholder={game.placeholder} maxLength={160} />
-        <button type="submit" className="btn tiny primary" disabled={!emoji || sentence.trim().length === 0}>
+        <label className="ice-answer-field" htmlFor="emoji-sentence-input">
+          <span className="ice-answer-label">One sentence</span>
+          <input
+            id="emoji-sentence-input"
+            value={sentence}
+            onChange={(event) => setSentence(event.target.value)}
+            placeholder={game.placeholder}
+            maxLength={160}
+          />
+        </label>
+        <button type="submit" className="btn primary" disabled={!emoji || sentence.trim().length === 0}>
           {mine ? "Update" : "Share"}
         </button>
       </form>
-      <ul className="shout-list">
-        {answers.map((answer) => (
-          <li key={answer.id} className={answer.authorId === mine?.authorId ? "mine" : ""}>
-            <p>{answer.body}</p>
-            <SharedMedia body={answer.body} />
-            <small>{nameOf(answer.authorId)}</small>
-          </li>
-        ))}
-      </ul>
-    </>
+      <div className="ice-answers-board">
+        <header>
+          <p className="eyebrow">Room check-ins</p>
+          <strong>
+            {answers.length} {answers.length === 1 ? "share" : "shares"}
+          </strong>
+        </header>
+        {answers.length === 0 ? (
+          <div className="ice-answers-empty">
+            <p>No one has shared yet</p>
+            <span>Pick an emoji and add a sentence.</span>
+          </div>
+        ) : (
+          <ul className="shout-list">
+            {answers.map((answer, index) => (
+              <li
+                key={answer.id}
+                className={answer.authorId === mine?.authorId ? "mine" : ""}
+                style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+              >
+                <span className="ice-chip-avatar" aria-hidden="true">
+                  {initials(nameOf(answer.authorId))}
+                </span>
+                <div className="ice-chip-copy">
+                  <p>{answer.body}</p>
+                  <SharedMedia body={answer.body} />
+                  <small>{nameOf(answer.authorId)}</small>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -805,9 +1537,9 @@ function GifShare({
   }, [saved.head, saved.note]);
 
   return (
-    <>
+    <div className="ice-answers">
       <form
-        className="composer"
+        className="show-tell-form"
         onSubmit={(event) => {
           event.preventDefault();
           const link = url.trim();
@@ -816,19 +1548,54 @@ function GifShare({
           void send({ type: "retro.answerIcebreaker", body: note ? `${link} — ${note}` : link });
         }}
       >
-        <input value={url} onChange={(event) => setUrl(event.target.value)} aria-label="GIF link" placeholder="https://" maxLength={400} />
-        <input value={caption} onChange={(event) => setCaption(event.target.value)} aria-label="Caption" placeholder="A short caption" maxLength={140} />
-        <button type="submit" className="btn tiny primary" disabled={url.trim().length === 0}>
-          {mine ? "Update" : "Share"}
-        </button>
+        <div className="ice-answer-form">
+          <label className="ice-answer-field" htmlFor="gif-link-input">
+            <span className="ice-answer-label">GIF link</span>
+            <input
+              id="gif-link-input"
+              value={url}
+              onChange={(event) => setUrl(event.target.value)}
+              placeholder="https://"
+              maxLength={400}
+            />
+          </label>
+          <button type="submit" className="btn primary" disabled={url.trim().length === 0}>
+            {mine ? "Update" : "Share"}
+          </button>
+        </div>
+        <label className="ice-answer-field" htmlFor="gif-caption-input">
+          <span className="ice-answer-label">Caption</span>
+          <input
+            id="gif-caption-input"
+            value={caption}
+            onChange={(event) => setCaption(event.target.value)}
+            placeholder="A short caption"
+            maxLength={140}
+          />
+        </label>
         <MediaPreview url={url.trim()} alt={caption.trim() || "GIF preview"} />
       </form>
-      <div className="gif-grid">
-        {answers.map((answer) => (
-          <GifCard key={answer.id} body={answer.body} name={nameOf(answer.authorId)} mine={answer.authorId === mine?.authorId} />
-        ))}
+      <div className="ice-answers-board">
+        <header>
+          <p className="eyebrow">Room GIFs</p>
+          <strong>
+            {answers.length} {answers.length === 1 ? "share" : "shares"}
+          </strong>
+        </header>
+        {answers.length === 0 ? (
+          <div className="ice-answers-empty">
+            <p>No GIFs yet</p>
+            <span>Paste a link to go first.</span>
+          </div>
+        ) : (
+          <div className="gif-grid">
+            {answers.map((answer) => (
+              <GifCard key={answer.id} body={answer.body} name={nameOf(answer.authorId)} mine={answer.authorId === mine?.authorId} />
+            ))}
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -1439,6 +2206,7 @@ function AnswerForm({
 }) {
   const [text, setText] = useState(initial);
   const [pending, setPending] = useState(false);
+  const inputId = "ice-answer-input";
 
   useEffect(() => {
     setText(initial);
@@ -1446,18 +2214,32 @@ function AnswerForm({
 
   return (
     <form
-      className="composer inline"
+      className="ice-answer-form"
       onSubmit={async (event) => {
         event.preventDefault();
         const body = text.trim();
         if (!body || pending) return;
         setPending(true);
-        await onSubmit(body);
-        setPending(false);
+        try {
+          await onSubmit(body);
+        } finally {
+          setPending(false);
+        }
       }}
     >
-      <input value={text} onChange={(event) => setText(event.target.value)} aria-label={label} placeholder={placeholder} maxLength={maxLength} />
-      <button type="submit" className="btn tiny primary" disabled={pending || text.trim().length === 0}>
+      <label className="ice-answer-field" htmlFor={inputId}>
+        <span className="ice-answer-label">{label}</span>
+        <input
+          id={inputId}
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+          placeholder={placeholder}
+          maxLength={maxLength}
+          autoComplete="off"
+          spellCheck={maxLength > 40}
+        />
+      </label>
+      <button type="submit" className="btn primary" disabled={pending || text.trim().length === 0}>
         {pending ? "Sharing…" : submitLabel}
       </button>
     </form>

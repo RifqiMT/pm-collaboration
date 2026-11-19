@@ -5,6 +5,11 @@ import {
   createReviewState,
   icebreakerById,
   icebreakerChoices,
+  acceptedShowMedia,
+  formatHealthScores,
+  formatShowAndTell,
+  parseHealthScores,
+  showAndTellParts,
   pairQuestion,
   storedThisOrThatPairs,
   thisOrThatGame,
@@ -12,6 +17,7 @@ import {
   type IcebreakerGame,
 } from "./content";
 import { demoActions, demoNotesForColumns, demoReviewContent, demoRoadmapContent } from "./demo";
+import { formatTravelWishlist, parseTravelWishlist } from "./countries";
 import { createId } from "./ids";
 import {
   asBoolean,
@@ -986,6 +992,9 @@ function presentAnswers(retro: RetroState, actorId: string | null) {
         copy.displayOrder = [0, 1, 2];
       }
     }
+    if (answer.game === "health-check" && answer.authorId !== actorId) {
+      copy.authorId = `health-${answer.id}`;
+    }
     return [copy];
   });
 }
@@ -1061,10 +1070,42 @@ function normalizeIcebreaker(game: IcebreakerGame, round: number, input: string)
     }
     return { body: note ? `${head} — ${note}` : head };
   }
+  if (game.mode === "map") {
+    const cleaned = cleanLine(input, 40, "Wishlist");
+    const codes = parseTravelWishlist(cleaned);
+    if (!codes) throw new CadenceError("Pick one to five countries from the map.", "choice");
+    return { body: formatTravelWishlist(codes) };
+  }
+  if (game.mode === "scale") {
+    const cleaned = cleanLine(input, 40, "Health check");
+    const scores = parseHealthScores(cleaned);
+    if (!scores) {
+      throw new CadenceError("Rate every question from strongly disagree to strongly agree.", "choice");
+    }
+    return { body: formatHealthScores(scores) };
+  }
   if (game.mode === "draw") return { body: normalizeDrawing(input) };
   if (game.mode === "truths") return normalizeTruths(input);
+  if (game.id === "show-and-tell") return normalizeShowAndTell(input);
   const limit = game.id === "shout-out" ? LIMITS.icebreakerShout : LIMITS.icebreakerLine;
   return { body: cleanLine(input, limit, game.name) };
+}
+
+function normalizeShowAndTell(input: string): { body: string } {
+  const cleaned = cleanLine(input, LIMITS.icebreakerShow, "Desk show-and-tell");
+  const { text, media } = showAndTellParts(cleaned);
+  const caption = cleanLine(text, LIMITS.icebreakerLine, "Object");
+  if (caption.includes("[[media:")) {
+    throw new CadenceError("Describe the object in words. Add the picture with the picture control.", "text");
+  }
+  const verdict = acceptedShowMedia(media);
+  if (verdict === "large") {
+    throw new CadenceError("That picture is too large. Paste an https link instead.", "limit");
+  }
+  if (verdict === "type") {
+    throw new CadenceError("Paste an https link to a picture or GIF.", "text");
+  }
+  return { body: formatShowAndTell(caption, media) };
 }
 
 function normalizeDrawing(input: string): string {

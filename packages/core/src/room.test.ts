@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { columnMark, previewMediaCandidates, RETRO_TEMPLATE_GROUPS, RETRO_TEMPLATES, RITUALS, retroColumnCounts, searchRetroTemplates, truthDisplayOrder } from "./content";
 import { formatScore, formulaLine, scoreInitiative, scoreRoadmap } from "./scoring";
+import { retrospectiveExport } from "./retro-export";
 import {
   applyOp,
   checklistProgress,
@@ -435,6 +436,71 @@ describe("retrospective", () => {
     room = applyOp(room, { type: "retro.setIcebreaker", game: "draw" }, HOST, NOW);
     room = applyOp(room, { type: "retro.answerIcebreaker", body: "d:10,10 20,20" }, HOST, NOW);
     expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "a sketch" }, HOST, NOW)).toThrow(/draw/i);
+  });
+
+  it("keeps a picture or GIF with a desk show-and-tell answer", () => {
+    let room = retroRoom();
+    room = applyOp(room, { type: "retro.setIcebreaker", game: "show-and-tell" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "A chipped mug — launch week" }, HOST, NOW);
+    expect(room.retro?.icebreakerAnswers.at(-1)?.body).toBe("A chipped mug — launch week");
+
+    const picture = "https://example.com/sprint/photo.png?size=large";
+    room = applyOp(
+      room,
+      { type: "retro.answerIcebreaker", body: `A chipped mug — launch week [[media:${picture}]]` },
+      HOST,
+      NOW,
+    );
+    expect(room.retro?.icebreakerAnswers.at(-1)?.body).toContain(picture);
+    expect(room.retro?.icebreakerAnswers.at(-1)?.body.startsWith("A chipped mug — launch week")).toBe(true);
+
+    const gif = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: `A plant [[media:${gif}]]` }, HOST, NOW);
+    expect(room.retro?.icebreakerAnswers.at(-1)?.body).toContain(gif);
+
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "A mug [[media:http://example.com/a.gif]]" }, HOST, NOW)).toThrow(/https/);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "A mug [[media:https://example.com/notes]]" }, HOST, NOW)).toThrow(/picture or GIF/);
+    expect(() =>
+      applyOp(room, { type: "retro.answerIcebreaker", body: "A mug [[media:data:image/svg+xml;base64,PHN2Zy8+]]" }, HOST, NOW),
+    ).toThrow(/picture or GIF/);
+  });
+
+  it("rates every health check question and hides who chose each point", () => {
+    let room = retroRoom();
+    room = joinRoom(room, { id: "person_alexdemo01", name: "Alex Rivera" }, NOW).room;
+    room = applyOp(room, { type: "retro.setIcebreaker", game: "health-check" }, HOST, NOW);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "1,2,3" }, HOST, NOW)).toThrow(/every question/);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "1,2,3,4,5,8" }, HOST, NOW)).toThrow(/strongly/);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "7,6,5,4,3,2" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "1,1,1,1,1,1" }, "person_alexdemo01", NOW);
+    expect(room.retro?.icebreakerAnswers.filter((answer) => answer.game === "health-check")).toHaveLength(2);
+
+    const guestView = presentRoom(room, "person_alexdemo01", NOW);
+    const hostAnswer = guestView.retro?.icebreakerAnswers.find((answer) => answer.body === "7,6,5,4,3,2");
+    const ownAnswer = guestView.retro?.icebreakerAnswers.find((answer) => answer.authorId === "person_alexdemo01");
+    expect(hostAnswer?.authorId.startsWith("health-")).toBe(true);
+    expect(ownAnswer?.body).toBe("1,1,1,1,1,1");
+    const exported = retrospectiveExport(guestView);
+    expect(exported?.answers.every((answer) => answer.author === "Anonymous")).toBe(true);
+    expect(exported?.answers.some((answer) => answer.body.includes("Appreciation: Strongly agree"))).toBe(true);
+  });
+
+  it("keeps a travel wishlist of countries chosen on the map", () => {
+    let room = retroRoom();
+    room = joinRoom(room, { id: "person_alexdemo01", name: "Alex Rivera" }, NOW).room;
+    room = applyOp(room, { type: "retro.setIcebreaker", game: "travel-wishlist" }, HOST, NOW);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "ZZ" }, HOST, NOW)).toThrow(/countries/);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "JP,JP" }, HOST, NOW)).toThrow(/countries/);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "JP,IT,NZ,FR,BR,DE" }, HOST, NOW)).toThrow(/countries/);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "NZ,JP" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "IT" }, "person_alexdemo01", NOW);
+    const guestView = presentRoom(room, "person_alexdemo01", NOW);
+    const hostAnswer = guestView.retro?.icebreakerAnswers.find((answer) => answer.body === "NZ,JP");
+    expect(hostAnswer?.authorId).toBe(HOST);
+    const exported = retrospectiveExport(guestView);
+    const hostRow = exported?.answers.find((answer) => answer.author === "Rifqi");
+    expect(hostRow?.body).toBe("New Zealand, Japan");
+    expect(exported?.answers.find((answer) => answer.author === "Alex Rivera")?.body).toBe("Italy");
   });
 
   it("lets the host rewrite This or That pairs", () => {

@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-19  
+**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
 
 ---
 
@@ -159,6 +159,22 @@ Hover (pointer devices): stronger border + `--shadow-lift`; ritual cards lift `-
 
 Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on text alone.
 
+### 5.6a Health Check (`scale`)
+
+- Container `.health-check` with summary meters (`.health-summary`, `.health-progress*`, `.health-room-average`, `.health-avg-meter`)  
+- Each statement is a `.health-card` with a 1–7 `.health-scale` of `.health-point` controls  
+- Level fills use calm warm→cool greens (`.health-1` … `.health-7`); selected points use `.health-point.on`  
+- Room averages show spread, not individual attribution—never label peers by name on the scale  
+- Mobile mirrors the same statements and 1–7 semantics without inventing alternate colors  
+
+### 5.6a2 Travel Wishlist (`map`)
+
+- Stage `.wish-map-stage` (`.unified` when the room map is shared) with toolbar `.wish-map-toolbar`  
+- SVG world map `.wish-map` paths: `.mine` / `.room` / `.both` plus heat classes `.heat-1`…`.heat-5` and `.heat-mine`  
+- Selected countries show rounded flag chips (SVG under `public/flags/` or flag emoji on mobile)  
+- Cap visual noise: at most five pins per person; heat communicates overlap, not decoration  
+- Keep map fills in the ink/sea family—avoid neon heatmaps  
+
 ### 5.6b Discuss raise hand
 
 - Toggle control and ordered queue in Discuss chrome (`.hand-raise`, `.hand-toggle`)  
@@ -251,11 +267,13 @@ Site-wide attribution sits at the bottom of the shell (web) and at the end of ho
 
 ## 12. File references
 
-- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.guide-link` / `.shape-finder*`)  
+- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.guide-link` / `.shape-finder*` / `.health-*` / `.wish-map*`)  
 - Shape picker: `apps/web/src/components/new-room-form.tsx`, mobile create in `App.js`  
+- Icebreakers: `icebreaker-panel.tsx`, `travel-map.tsx`, `world-map-paths.ts`, `apps/web/public/flags/`  
 - Definitions page: `apps/web/src/app/guide/page.tsx`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
 - Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  
 - Mobile tokens: `apps/mobile/src/ui.js`  
 - Glyphs: `apps/web/src/components/retro-glyphs.tsx`  
-- Glossary source: `packages/core/src/glossary.ts`
+- Glossary source: `packages/core/src/glossary.ts`  
+- Travel catalog: `packages/core/src/countries.ts`

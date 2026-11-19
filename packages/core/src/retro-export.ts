@@ -1,4 +1,5 @@
-import { RETRO_TEMPLATES, icebreakerById, thisOrThatGame } from "./content";
+import { RETRO_TEMPLATES, healthCheckExportText, icebreakerById, showAndTellExportText, showAndTellParts, thisOrThatGame } from "./content";
+import { travelWishlistExportText } from "./countries";
 import { sectionStopwatchMs } from "./room";
 import type { IcebreakerAnswer, RetroCardView, RetroPhase, RoomView } from "./types";
 
@@ -36,6 +37,7 @@ export interface RetroExportAnswer {
   author: string;
   body: string;
   createdAt: string;
+  media?: string;
 }
 
 export interface RetroExportTiming {
@@ -234,8 +236,16 @@ function answerRow(
     game: game.name,
     round: answer.round,
     question: game.questions?.[answer.round] ?? game.prompt,
-    author: person(answer.authorId) || "Someone",
-    body: answer.body,
+    author: answer.game === "health-check" ? "Anonymous" : person(answer.authorId) || "Someone",
+    body:
+      answer.game === "show-and-tell"
+        ? showAndTellExportText(answer.body)
+        : answer.game === "health-check"
+          ? healthCheckExportText(answer.body)
+          : answer.game === "travel-wishlist"
+            ? travelWishlistExportText(answer.body)
+            : answer.body,
+    media: answer.game === "show-and-tell" ? showAndTellParts(answer.body).media : "",
     createdAt: answer.createdAt,
   };
 }

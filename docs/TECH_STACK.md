@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-19  
+**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
 
 ---
 
@@ -120,7 +120,7 @@ npx expo start
 
 | Tool | Use |
 | --- | --- |
-| Vitest | Domain (room, scoring, export, glossary) + selected UI/store helper tests |
+| Vitest | Domain (room, scoring, export, glossary, health-check averages) + selected UI/store helper tests |
 | TypeScript | Core + web |
 | Manual / Expo | Mobile verification |
 
@@ -136,5 +136,6 @@ Recommended before merge: `npm test` and a two-browser smoke of create → join 
 4. Local file backend: one writer process. Vercel: require Supabase or Redis (see DEPLOYMENT.md).  
 5. Document new `LIMITS` and formulas in [VARIABLES.md](./VARIABLES.md).  
 6. Preserve brainstorm privacy in `presentRoom` when changing card views.  
+7. Keep Health Check peer anonymization and Travel Wishlist catalog (`countries.ts` + flag assets) in sync when extending icebreakers.  
 
 See also: [ARCHITECTURE.md](./ARCHITECTURE.md), [GUARDRAILS.md](./GUARDRAILS.md).

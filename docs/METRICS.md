@@ -1,7 +1,7 @@
 # TeamCompass — Product Metrics & OKRs
 
 **Audience:** Product team, engineering leads, facilitators of internal adoption  
-**Last updated:** 2026-11-19  
+**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
 **Note:** TeamCompass MVP does not yet ship an analytics pipeline. Metrics below define what to measure when instrumentation is added, plus qualitative proxies available today from `rooms.json` and meeting outcomes.
 
 ---
@@ -41,6 +41,10 @@
 | `checklist_required_progress` | Required checklist progress | Required items with ≥1 signer / required items | at decision time | ≥ 80% when shipping | review state |
 | `roadmap_scored_share` | Scored initiatives share | Initiatives with non-default meaningful inputs | heuristic or “edited after create” | ≥ 60% in workshops | patches |
 | `framework_mix` | Framework mix | Distribution of RICE/ICE/value-complexity | `count by framework` | No forced target | roadmap state |
+| `icebreaker_completion_rate` | Icebreaker completion | Participants with ≥1 answer for the active game / participants when leaving Icebreaker | ratio | ≥ 80% in live retros | `icebreakerAnswers` |
+| `health_check_share` | Health Check adoption | Retros that select `health-check` / retros that run an icebreaker | ratio | Inform connection-game mix; no hard target | `retro.icebreaker` |
+| `travel_wishlist_share` | Travel Wishlist adoption | Retros that select `travel-wishlist` / icebreaker retros | ratio | Inform connection-game mix; no hard target | `retro.icebreaker` |
+| `health_room_average` | Room health average (qualitative) | `healthOverallAverage` when Health Check is used | mean of shared 1–7 scores | Track trend only; never attribute to individuals | shared answers only |
 
 ### 2.3 Reliability & experience
 

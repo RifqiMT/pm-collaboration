@@ -2,8 +2,8 @@
 
 **Purpose:** Exhaustive catalog of product and domain variables used across TeamCompass.  
 **Format:** Variable name · Friendly name · Definition · Formula / rule · Location · Example  
-**Source of truth:** `packages/core/src/{types,scoring,room,text,content,ids,glossary,retro-export}.ts`, web/mobile clients  
-**Last updated:** 2026-11-19  
+**Source of truth:** `packages/core/src/{types,scoring,room,text,content,countries,ids,glossary,retro-export}.ts`, web/mobile clients  
+**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
 
 In-app Definitions for facilitators and contributors live in `packages/core/src/glossary.ts` (`GLOSSARY`) and render on web `/guide` and the mobile Guide screen. This file remains the **engineering** catalog (limits, sync, store env, CSV columns). Prefer updating `GLOSSARY` when changing user-facing wording; prefer updating this file when changing contracts.
 
@@ -67,6 +67,7 @@ In-app Definitions for facilitators and contributors live in `packages/core/src/
 | `LIMITS.icebreakerLine` | Max line answer | Default icebreaker line length | 180 | many games | — |
 | `LIMITS.icebreakerDrawing` | Max drawing payload | Drawing serialization length | 6000 | draw game | `d:…` |
 | `LIMITS.icebreakerGif` | Max GIF URL length | HTTPS GIF URL head length | 400 | gif game | — |
+| `LIMITS.icebreakerShow` | Max show-and-tell payload | Caption + optional `[[media:…]]` body length | **70_200** | Desk show-and-tell | Object + image URL |
 | `LIMITS.notes` | Max review feedback | Feedback list cap | 100 | `review.addFeedback` | — |
 | `LIMITS.itemsPerSection` | Max checklist items / section | Custom + seeded items per section | 30 | `review.addItem` | — |
 | `LIMITS.initiatives` | Max initiatives | Roadmap bets per room | 40 | `roadmap.addInitiative` | — |
@@ -112,10 +113,22 @@ In-app Definitions for facilitators and contributors live in `packages/core/src/
 | `discussedGroupKey` | Focused group | Current column, author, or `anonymous` | Validated against board | `focusGroup` | column id |
 | `raisedHands` | Speaking queue | Ordered participant ids with hand raised in Discuss | Discuss phase only; desired-state via `retro.raiseHand`; cleared when phase changes; presentation filters to current participants | `RetroState`; `retro-board.tsx`; mobile Discuss | `["person_alex…", "person_host…"]` |
 | Hand highlight rule | Note speaking highlight | Whether a note visually shows as “speaking” | Named notes: author id ∈ `raisedHands`. Anonymous notes: highlight only for the raiser’s own (`mine`) note | `handUp()` in web + mobile | Anonymous note of raiser highlighted for them only |
-| `icebreaker` | Icebreaker game | Active warm-up game id | One of 18 `IcebreakerId` | Host picker | `this-or-that` |
+| `icebreaker` | Icebreaker game | Active warm-up game id | One of **20** `IcebreakerId` values (incl. `health-check`, `travel-wishlist`) | Host picker | `health-check` |
+| `IcebreakerMode` | Icebreaker interaction mode | How answers are entered/validated | `word` \| `choice` \| `line` \| `sprint` \| `note` \| `emoji` \| `gif` \| `draw` \| `truths` \| `pairs` \| **`scale`** \| **`map`** | `content.ts` `IcebreakerGame.mode` | `scale` |
+| `HEALTH_CHECK` | Health Check questions | Six fixed team-health statements | Titles: Appreciation, Team Spirit, Transparency, Recovery & Breaks, Meeting culture, Support | `content.ts`; web/mobile Health Check UI | `Appreciation: My colleagues…` |
+| Health score body | Health Check answer body | Comma-separated integer scores | Exactly **6** integers, each **1–7** (strongly disagree → strongly agree); `parseHealthScores` / `formatHealthScores` | `normalizeIcebreaker` (`scale`); `answerIcebreaker` | `7,5,7,4,6,5` |
+| `healthCategoryAverage` | Category average | Mean score for one question across shared answers | `sum(scores[i]) / n` over parseable shared answers; `null` if none | `content.ts`; health UI | `6` for Appreciation |
+| `healthOverallAverage` | Room health average | Mean of every shared score across people and questions | `sum(all scores) / count`; `null` if none | `content.ts`; health summary | `5` |
+| `formatHealthAverage` | Display average | Rounded display string for averages | Round to 1 decimal; drop trailing `.0` | Health UI | `5.3` |
+| Health peer privacy | Anonymized health author | Hide who submitted each health score to peers | `presentRoom` sets `authorId` to `health-${answer.id}` for non-authors; CSV author → `Anonymous` | `room.ts`; `retro-export.ts` | `health-ans_…` |
+| `TRAVEL_COUNTRIES` | Travel country catalog | Countries pinable on the wishlist map | **175** `{ code, name }` entries | `countries.ts`; web map + mobile picker | `JP` → Japan |
+| `TRAVEL_WISHLIST_MAX` | Max wishlist pins | Upper bound on countries per person | Constant **5** | `countries.ts`; map UI | `5` |
+| Travel wishlist body | Wishlist answer body | Ordered unique ISO country codes | 1–5 known codes, comma-separated, no duplicates; `parseTravelWishlist` / `formatTravelWishlist` | `normalizeIcebreaker` (`map`); body max cleaned length 40 | `JP,IS,NZ` |
+| `travelWishlistExportText` | Wishlist export text | Human-readable country names for summary/CSV | Codes → `name` joined with `", "` | `countries.ts`; `retro-export.ts` | `Japan, Iceland, New Zealand` |
+| `countryFlagEmoji` / flags | Country flag visuals | Flag presentation on wishlist chips | Emoji from ISO code; web also uses `apps/web/public/flags/{code}.svg` (~175) | `countries.ts`; `travel-map.tsx` | `🇯🇵` / `jp.svg` |
 | `icebreakerRound` | Icebreaker round | Round index for multi-round games | Integer advanced by host | Ops | `2` |
 | `icebreakerPairs` | Custom pairs | Host-written This or That pairs | 1–8 pairs; sides distinct; question derived | Host editor | left/right labels |
-| `icebreakerAnswers` | Icebreaker answers | Submissions for the game | Cap 240; game-specific body rules | Panel | — |
+| `icebreakerAnswers` | Icebreaker answers | Submissions for the game | Cap 240; game-specific body rules (`scale`/`map`/etc.) | Panel; `icebreaker-panel.tsx`; mobile | — |
 | `ActionItem.body` | Action text | Follow-up work item | Max 500 | Actions panel | `Fix flaky deploy` |
 | `ActionItem.ownerId` | Action owner | Assignee participant or null | Must be in room if set | Assign control | `person_…` |
 | `ActionItem.done` | Action done | Completion flag | Desired boolean | Checkbox | `false` |
@@ -258,6 +271,8 @@ flowchart TB
     actions[actions]
     timers[timers / stopwatch]
     icebreaker[icebreaker + answers]
+    health[HEALTH_CHECK scale 1-7]
+    travel[TRAVEL_COUNTRIES map 1-5]
     raisedHands[raisedHands]
   end
 
@@ -268,6 +283,11 @@ flowchart TB
   raisedHands -->|discuss highlight| cards
   hostId -->|gates| phase
   hostId -->|gates| icebreaker
+  icebreaker --> health
+  icebreaker --> travel
+  health -->|anonymous peers| presentRoom[presentRoom]
+  travel --> travelMap[travel-map / mobile picker]
+  travel --> CSV[CSV country names]
 
   subgraph review [Sprint review]
     goal[goal]
@@ -402,13 +422,27 @@ flowchart LR
   Search --> MobileCreate[Mobile create]
   WebCreate --> templateId[Room.retro.templateId]
   MobileCreate --> templateId
+  ICEBREAKERS[ICEBREAKERS 20] --> Scale[health-check scale]
+  ICEBREAKERS --> MapMode[travel-wishlist map]
+  Scale --> HealthFns[parse/format/averages]
+  MapMode --> Countries[countries.ts 175]
+  Countries --> Flags[public/flags + emoji]
 ```
+
+### Icebreaker body contracts (quick reference)
+
+| Game id | Mode | Stored `body` | Export `text` transform | Peer authorship |
+| --- | --- | --- | --- | --- |
+| `health-check` | `scale` | Six ints `1–7` joined by `,` | `Title: label` sentences via `healthCheckExportText` | Synthetic id in room view; CSV `Anonymous` |
+| `travel-wishlist` | `map` | 1–5 ISO codes joined by `,` | Country names via `travelWishlistExportText` | Normal display name |
+| `show-and-tell` | (line+media) | Caption + optional `[[media:url]]` (≤ `LIMITS.icebreakerShow`) | Caption via `showAndTellExportText`; media kept on in-memory export object only (**not** a CSV column) | Normal display name |
+| Other games | per mode | Game-specific | Usually raw `body` | Normal display name |
 
 ---
 
 ## 13. Retro CSV export columns
 
-Source: `packages/core/src/retro-export.ts` `CSV_HEADER`.
+Source: `packages/core/src/retro-export.ts` `CSV_HEADER` (**20** columns; no `media` column).
 
 | Column | Friendly name | Definition | Example |
 | --- | --- | --- | --- |
@@ -418,17 +452,17 @@ Source: `packages/core/src/retro-export.ts` `CSV_HEADER`.
 | `template` | Template name | Retro template **display name** (not id) | `Start, stop, continue` |
 | `column` | Column title | Note column name | `Start` |
 | `column_hint` | Column hint | Decision hint | `Keep doing` |
-| `text` | Body text | Note, action, or answer body | `Flaky deploy` |
-| `author` | Author name | Display name; anonymous notes → `Anonymous` | `Jordan` |
+| `text` | Body text | Note, action, or **transformed** icebreaker body | Health: `Appreciation: Agree. …`; Travel: `Japan, Iceland` |
+| `author` | Author name | Display name; anonymous notes → `Anonymous`; **health-check → `Anonymous`** | `Jordan` |
 | `anonymous` | Anonymous flag | Whether the note was anonymous | `yes` / `no` |
 | `votes` | Vote count | Dot count on the note | `3` |
 | `voters` | Voter names | People who dotted the note | `Maya; Jordan` |
 | `owner` | Action owner | Action assignee | `Maya` |
 | `done` | Action done | Whether the action is done | `yes` / `no` |
 | `source_note` | Source note | Note text an action came from | `Flaky deploy` |
-| `game` | Icebreaker game | Game **display name** | `This or That` |
+| `game` | Icebreaker game | Game **display name** | `Health Check` |
 | `round` | Icebreaker round | Round index | `1` |
-| `question` | Icebreaker question | Pair question or prompt | `Ship or polish?` |
+| `question` | Icebreaker question | Pair question or prompt | `Health Check Questions (Scale)` |
 | `created_at` | Created at | ISO timestamp | `2026-11-18T…` |
 | `stopwatch_seconds` | Time spent | Whole seconds the section was open | `320` |
 | `timer_seconds` | Time left | Whole seconds left on countdown; empty if none; `0` if finished | `120` |

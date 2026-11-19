@@ -87,7 +87,9 @@ export type IcebreakerId =
   | "two-truths"
   | "show-and-tell"
   | "shout-out"
-  | "gratitude";
+  | "gratitude"
+  | "health-check"
+  | "travel-wishlist";
 
 export type ColumnTone = "good" | "bad" | "idea" | "neutral";
 
@@ -396,6 +398,7 @@ export const LIMITS = {
   icebreakerLine: 180,
   icebreakerDrawing: 6000,
   icebreakerGif: 400,
+  icebreakerShow: 70_200,
   notes: 100,
   itemsPerSection: 30,
   initiatives: 40,
