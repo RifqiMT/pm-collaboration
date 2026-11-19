@@ -1,6 +1,6 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-18  
+**Status:** Current as of repository state 2026-11-19  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
 **Canonical path:** `docs/product.md` (use this casing in links for case-sensitive hosts).
@@ -27,7 +27,7 @@ People join with a **six-character room code**. There are **no accounts**. Every
 | --- | --- |
 | Fast room start | Create a ritual room in seconds; share a short code |
 | Psychological safety in retros | Notes stay private on the server during brainstorm |
-| Facilitation control | Host gates phase, icebreaker, discussion walk, and timers |
+| Facilitation control | Host gates phase, icebreaker, and discussion walk; timers and vote budget are open on web |
 | Decision clarity | Review ends in ship / iterate / hold with notes |
 | Honest roadmap math | Score and complexity sit on the same card; quadrants explain trade-offs |
 | Cross-device parity | Web and mobile share `@cadence/core` rules and the same room document |
@@ -60,7 +60,7 @@ Primary users are agile product and engineering teams running time-boxed rituals
 
 | Capability | Detail |
 | --- | --- |
-| Templates | 8 classic + 26 pop-culture shapes (34 total) from `RETRO_TEMPLATES` |
+| Templates | **62** shapes in eight shelves (Classic 13 · Film 10 · Series 9 · Anime 5 · Games 9 · Sport 14 · Music 1 · Food 1). Listed A–Z per shelf. Column counts are **3, 4, or 5**. Search (`searchRetroTemplates`) matches name, blurb, column title, column count (`4`, `five columns`), or shelf. Filters narrow by shelf and column count on web and mobile create flows. |
 | Icebreaker | 18 games; host picks game; This or That supports host-written pairs (1–8) |
 | Private notes | During brainstorm, `presentRoom` strips others’ note bodies before leaving the server |
 | Discuss walks | Status walk (column) or author walk; board columns remain status categories. A person can raise a hand; their named notes are highlighted. Anonymous notes stay unattributed. |

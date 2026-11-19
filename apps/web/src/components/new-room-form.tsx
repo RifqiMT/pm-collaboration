@@ -1,6 +1,6 @@
 "use client";
 
-import { RETRO_TEMPLATES, RITUALS, type RetroTemplateId, type RoomKind } from "@cadence/core";
+import { RETRO_TEMPLATE_GROUPS, RETRO_TEMPLATES, RITUALS, retroColumnCounts, searchRetroTemplates, type RetroTemplateGroup, type RetroTemplateId, type RoomKind } from "@cadence/core";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -12,8 +12,6 @@ const titles: Record<RoomKind, string> = {
   review: "Sprint review",
   roadmap: "Roadmap bets",
 };
-
-const templateIds = Object.keys(RETRO_TEMPLATES) as RetroTemplateId[];
 
 const stepHint: Record<Exclude<RoomKind, "retro">, Record<string, string>> = {
   review: {
@@ -42,17 +40,21 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
   const [name, setName] = useState("");
   const [title, setTitle] = useState(titles[initialKind]);
   const [templateId, setTemplateId] = useState<RetroTemplateId>("start-stop-continue");
+  const [shapeQuery, setShapeQuery] = useState("");
+  const [shapeGroup, setShapeGroup] = useState<RetroTemplateGroup | "">("");
+  const [shapeColumns, setShapeColumns] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const ritual = RITUALS.find((item) => item.kind === kind) ?? RITUALS[0]!;
   const selectedTemplate = RETRO_TEMPLATES[templateId];
-  const groups = useMemo(
+  const columnCounts = useMemo(() => retroColumnCounts(), []);
+  const visibleTemplates = useMemo(
     () =>
-      [
-        ["classic", "Classic", "The usual shapes for a sprint retro."],
-        ["pop", "Pop culture", "The same ritual, told through a story the team already knows."],
-      ] as const,
-    [],
+      searchRetroTemplates(shapeQuery, {
+        group: shapeGroup || undefined,
+        columns: shapeColumns ?? undefined,
+      }),
+    [shapeQuery, shapeGroup, shapeColumns],
   );
 
   useEffect(() => {
@@ -216,18 +218,176 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
               <h2>Choose a shape</h2>
               <p>Pick the columns the team writes on. Notes can still move later.</p>
             </header>
-            {groups.map(([group, groupTitle, note]) => {
-              const shapes = templateIds.filter((id) => (RETRO_TEMPLATES[id].group ?? "classic") === group);
+
+            <div className="shape-finder" aria-label="Filter shapes">
+              <div className={`shape-finder-top${shapeQuery ? " has-query" : ""}`}>
+                <label className="shape-search" htmlFor="shape-search-input">
+                  <span className="shape-search-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" width="18" height="18" focusable="false">
+                      <circle cx="8.5" cy="8.5" r="5.25" fill="none" stroke="currentColor" strokeWidth="1.7" />
+                      <path
+                        d="M12.4 12.4 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                  <span className="shape-search-field">
+                    <span className="shape-search-label">Search shapes</span>
+                    <input
+                      id="shape-search-input"
+                      className="shape-search-input"
+                      value={shapeQuery}
+                      onChange={(event) => setShapeQuery(event.target.value)}
+                      placeholder="Name, column, or theme"
+                      aria-label="Search retrospective shapes"
+                      maxLength={80}
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                  </span>
+                  {shapeQuery ? (
+                    <button
+                      type="button"
+                      className="shape-search-clear"
+                      aria-label="Clear search"
+                      onClick={() => setShapeQuery("")}
+                    >
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  ) : null}
+                  <p className="shape-finder-count" aria-live="polite">
+                    <strong>{visibleTemplates.length}</strong>
+                    <span>{visibleTemplates.length === 1 ? "match" : "matches"}</span>
+                  </p>
+                </label>
+              </div>
+
+              <div className="shape-filters">
+                <div className="shape-filter-block">
+                  <span className="shape-filter-label" id="shape-theme-label">
+                    Theme
+                  </span>
+                  <div className="shape-chip-row" role="group" aria-labelledby="shape-theme-label">
+                    <button
+                      type="button"
+                      className={shapeGroup === "" ? "shape-chip on" : "shape-chip"}
+                      aria-pressed={shapeGroup === ""}
+                      onClick={() => setShapeGroup("")}
+                    >
+                      All
+                    </button>
+                    {RETRO_TEMPLATE_GROUPS.map((group) => (
+                      <button
+                        key={group.id}
+                        type="button"
+                        className={shapeGroup === group.id ? "shape-chip on" : "shape-chip"}
+                        aria-pressed={shapeGroup === group.id}
+                        onClick={() => setShapeGroup((current) => (current === group.id ? "" : group.id))}
+                      >
+                        {group.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="shape-filter-block columns">
+                  <span className="shape-filter-label" id="shape-columns-label">
+                    Columns
+                  </span>
+                  <div className="shape-segment" role="group" aria-labelledby="shape-columns-label">
+                    <button
+                      type="button"
+                      className={shapeColumns == null ? "on" : ""}
+                      aria-pressed={shapeColumns == null}
+                      onClick={() => setShapeColumns(null)}
+                    >
+                      Any
+                    </button>
+                    {columnCounts.map((count) => (
+                      <button
+                        key={count}
+                        type="button"
+                        className={shapeColumns === count ? "on" : ""}
+                        aria-pressed={shapeColumns === count}
+                        onClick={() => setShapeColumns((current) => (current === count ? null : count))}
+                      >
+                        {count}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {shapeQuery || shapeGroup || shapeColumns != null ? (
+                <div className="shape-active">
+                  <div className="shape-active-tags">
+                    {shapeQuery ? (
+                      <button type="button" className="shape-tag" onClick={() => setShapeQuery("")}>
+                        “{shapeQuery.trim()}”
+                        <span aria-hidden="true">×</span>
+                      </button>
+                    ) : null}
+                    {shapeGroup ? (
+                      <button type="button" className="shape-tag" onClick={() => setShapeGroup("")}>
+                        {RETRO_TEMPLATE_GROUPS.find((group) => group.id === shapeGroup)?.title ?? shapeGroup}
+                        <span aria-hidden="true">×</span>
+                      </button>
+                    ) : null}
+                    {shapeColumns != null ? (
+                      <button type="button" className="shape-tag" onClick={() => setShapeColumns(null)}>
+                        {shapeColumns} columns
+                        <span aria-hidden="true">×</span>
+                      </button>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    className="shape-reset"
+                    onClick={() => {
+                      setShapeQuery("");
+                      setShapeGroup("");
+                      setShapeColumns(null);
+                    }}
+                  >
+                    Clear all
+                  </button>
+                </div>
+              ) : null}
+            </div>
+
+            {visibleTemplates.length === 0 ? (
+              <div className="shape-empty">
+                <p>No shapes match</p>
+                <span>Try another theme, column count, or clear the search.</span>
+                <button
+                  type="button"
+                  className="btn tiny"
+                  onClick={() => {
+                    setShapeQuery("");
+                    setShapeGroup("");
+                    setShapeColumns(null);
+                  }}
+                >
+                  Show all shapes
+                </button>
+              </div>
+            ) : null}
+            {RETRO_TEMPLATE_GROUPS.map((group) => {
+              const shapes = visibleTemplates.filter((id) => (RETRO_TEMPLATES[id].group ?? "classic") === group.id);
+              if (shapes.length === 0) return null;
               return (
-                <div key={group} className="shape-group">
+                <div key={group.id} className="shape-group">
                   <header className="shape-group-head">
                     <div>
-                      <h3>{groupTitle}</h3>
-                      <p>{note}</p>
+                      <h3>{group.title}</h3>
+                      <p>{group.note}</p>
                     </div>
                     <span className="shape-group-count">{shapes.length}</span>
                   </header>
-                  <div className="shape-grid" role="radiogroup" aria-label={`${groupTitle} retrospective shapes`}>
+                  <div className="shape-grid" role="radiogroup" aria-label={`${group.title} retrospective shapes`}>
                     {shapes.map((id, index) => {
                       const template = RETRO_TEMPLATES[id];
                       const selected = templateId === id;

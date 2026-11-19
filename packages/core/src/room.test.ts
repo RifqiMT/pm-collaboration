@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { columnMark, previewMediaCandidates, RETRO_TEMPLATES, RITUALS, truthDisplayOrder } from "./content";
+import { columnMark, previewMediaCandidates, RETRO_TEMPLATE_GROUPS, RETRO_TEMPLATES, RITUALS, retroColumnCounts, searchRetroTemplates, truthDisplayOrder } from "./content";
 import { formatScore, formulaLine, scoreInitiative, scoreRoadmap } from "./scoring";
 import {
   applyOp,
@@ -70,36 +70,83 @@ describe("retrospective themes", () => {
       "avatar",
       "sherlock",
       "squid-game",
+      "taco",
+      "4ps",
+      "digimon",
+      "star-trek",
+      "f1",
+      "motogp",
+      "world-cup",
+      "mario",
+      "marie-kondo",
+      "kalm",
+      "alc",
+      "mario-kart",
+      "pacman",
+      "pizza",
+      "cricket",
+      "basketball",
+      "field-hockey",
+      "tennis",
+      "volleyball",
+      "table-tennis",
+      "baseball",
+      "rugby",
+      "golf",
+      "olympics",
+      "esports",
+      "dota",
+      "resident-evil",
+      "assassins-creed",
     ]);
-    const pop = ids.filter((id) => RETRO_TEMPLATES[id].group === "pop");
-    expect(pop).toEqual([
-      "star-wars",
-      "superhero",
-      "arcade",
-      "premiere",
-      "quest",
+    const grouped = (group: string) => ids.filter((id) => (RETRO_TEMPLATES[id].group ?? "classic") === group);
+    expect(RETRO_TEMPLATE_GROUPS.map((group) => group.id)).toEqual([
+      "classic",
+      "film",
+      "series",
+      "anime",
+      "games",
+      "sport",
+      "music",
+      "food",
+    ]);
+    expect(grouped("classic")).toEqual([
+      "start-stop-continue",
+      "4ls",
+      "mad-sad-glad",
+      "sailboat",
+      "rose-bud-thorn",
+      "went-well",
+      "daki",
+      "starfish",
+      "taco",
+      "4ps",
+      "marie-kondo",
+      "kalm",
+      "alc",
+    ]);
+    expect(grouped("film")).toEqual(["star-wars", "superhero", "premiere", "heist", "noir", "wizarding", "marvel", "dc", "harry-potter", "lotr"]);
+    expect(grouped("series")).toEqual(["streaming", "breaking-bad", "criminal-minds", "ncis", "stranger-things", "avatar", "sherlock", "squid-game", "star-trek"]);
+    expect(grouped("anime")).toEqual(["pokemon", "one-piece", "naruto", "bleach", "digimon"]);
+    expect(grouped("games")).toEqual(["arcade", "quest", "mario", "mario-kart", "pacman", "esports", "dota", "resident-evil", "assassins-creed"]);
+    expect(grouped("sport")).toEqual([
       "race",
-      "pokemon",
-      "heist",
-      "noir",
-      "concert",
-      "wizarding",
-      "streaming",
-      "marvel",
-      "dc",
-      "harry-potter",
-      "breaking-bad",
-      "criminal-minds",
-      "ncis",
-      "one-piece",
-      "naruto",
-      "bleach",
-      "lotr",
-      "stranger-things",
-      "avatar",
-      "sherlock",
-      "squid-game",
+      "f1",
+      "motogp",
+      "world-cup",
+      "cricket",
+      "basketball",
+      "field-hockey",
+      "tennis",
+      "volleyball",
+      "table-tennis",
+      "baseball",
+      "rugby",
+      "golf",
+      "olympics",
     ]);
+    expect(grouped("music")).toEqual(["concert"]);
+    expect(grouped("food")).toEqual(["pizza"]);
     for (const templateId of ids) {
       const room = createRoom(
         { code: "THEME1", kind: "retro", title: "Themes", hostId: HOST, hostName: "Rifqi", templateId },
@@ -128,6 +175,48 @@ describe("retrospective themes", () => {
     expect(view.retro?.columns[0]?.title).toBe(RETRO_TEMPLATES.pokemon.columns[0]!.title);
     expect(view.retro?.columns[0]?.hint).toBe(RETRO_TEMPLATES.pokemon.columns[0]!.hint);
     expect(room.retro?.columns[0]?.title).toBe("Old name");
+  });
+});
+
+describe("retrospective template order", () => {
+  it("lists shapes A to Z and finds them by name or column", () => {
+    const all = searchRetroTemplates("");
+    expect(all).toHaveLength(62);
+    expect(all.indexOf("4ls")).toBeLessThan(all.indexOf("4ps"));
+    expect(all.indexOf("4ps")).toBeLessThan(all.indexOf("daki"));
+    expect(all.indexOf("star-trek")).toBeLessThan(all.indexOf("star-wars"));
+    expect(all.indexOf("f1")).toBeLessThan(all.indexOf("world-cup"));
+    expect(searchRetroTemplates("  digimon ")).toEqual(["digimon"]);
+    expect(searchRetroTemplates("Offside")).toEqual(["world-cup"]);
+    expect(searchRetroTemplates("warp").sort()).toEqual(["mario", "star-trek"]);
+    expect(searchRetroTemplates("DAKI")).toEqual(["daki"]);
+    expect(searchRetroTemplates("Pacman")).toEqual(["pacman"]);
+    expect(searchRetroTemplates("DOTA")).toEqual(["dota"]);
+    expect(searchRetroTemplates("Assassin Creeds")).toEqual(["assassins-creed"]);
+    expect(searchRetroTemplates("Field Hockey")).toEqual(["field-hockey"]);
+    expect(searchRetroTemplates("eSports")).toEqual(["esports"]);
+    expect(searchRetroTemplates("no-such-shape")).toEqual([]);
+  });
+
+  it("finds shapes by column count and theme shelf", () => {
+    expect(retroColumnCounts()).toEqual([3, 4, 5]);
+    expect(searchRetroTemplates("Film")).toEqual(searchRetroTemplates("", { group: "film" }));
+    expect(searchRetroTemplates("film").every((id) => RETRO_TEMPLATES[id].group === "film")).toBe(true);
+    expect(searchRetroTemplates("classic")).toContain("daki");
+    expect(searchRetroTemplates("classic")).not.toContain("pizza");
+    expect(searchRetroTemplates("food")).toEqual(["pizza"]);
+    for (const count of [3, 4, 5]) {
+      const found = searchRetroTemplates(String(count));
+      expect(found.length).toBeGreaterThan(0);
+      expect(found.every((id) => RETRO_TEMPLATES[id].columns.length === count)).toBe(true);
+      expect(searchRetroTemplates(`${count} columns`)).toEqual(found);
+      expect(searchRetroTemplates("", { columns: count })).toEqual(found);
+    }
+    expect(searchRetroTemplates("five columns").every((id) => RETRO_TEMPLATES[id].columns.length === 5)).toBe(true);
+    expect(searchRetroTemplates("four")).toEqual(searchRetroTemplates("4"));
+    expect(searchRetroTemplates("brake", { group: "sport", columns: 4 })).toEqual(["motogp"]);
+    expect(searchRetroTemplates("pizza", { group: "film" })).toEqual([]);
+    expect(searchRetroTemplates("Offside", { columns: 5 })).toEqual(["world-cup"]);
   });
 });
 
@@ -764,6 +853,40 @@ describe("roadmap scoring", () => {
         expect(notes, `${templateId}/${column.id}`).toHaveLength(10);
         expect(new Set(notes.map((card) => card.body)).size, `${templateId}/${column.id}`).toBe(10);
         expect(notes.every((card) => card.body.length > 24), `${templateId}/${column.id}`).toBe(true);
+        if (
+          templateId === "digimon" ||
+          templateId === "star-trek" ||
+          templateId === "f1" ||
+          templateId === "motogp" ||
+          templateId === "world-cup" ||
+          templateId === "mario" ||
+          templateId === "taco" ||
+          templateId === "4ps" ||
+          templateId === "marie-kondo" ||
+          templateId === "kalm" ||
+          templateId === "alc" ||
+          templateId === "mario-kart" ||
+          templateId === "pacman" ||
+          templateId === "pizza" ||
+          templateId === "cricket" ||
+          templateId === "basketball" ||
+          templateId === "field-hockey" ||
+          templateId === "tennis" ||
+          templateId === "volleyball" ||
+          templateId === "table-tennis" ||
+          templateId === "baseball" ||
+          templateId === "rugby" ||
+          templateId === "golf" ||
+          templateId === "olympics" ||
+          templateId === "esports" ||
+          templateId === "dota" ||
+          templateId === "resident-evil" ||
+          templateId === "assassins-creed"
+        ) {
+          expect(notes.some((card) => /Keep that\. It is|Stop it\. That is/.test(card.body)), `${templateId}/${column.id}`).toBe(
+            false,
+          );
+        }
       }
       expect(room.retro?.actions.length).toBeGreaterThanOrEqual(4);
     }

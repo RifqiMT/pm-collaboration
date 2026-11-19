@@ -45,7 +45,7 @@ export const GLOSSARY: GlossaryGroup[] = [
         id: "timer",
         name: "Timer",
         kind: "variable",
-        plain: "The timer counts down. The host starts it at 3, 5, or 8 minutes, or types a custom length from 1 to 60 minutes. Summary has no timer. The icebreaker has no timer.",
+        plain: "The timer counts down. Anyone in the room can start it at 3, 5, or 8 minutes, or type a custom length from 1 to 60 minutes. Summary has no timer. The icebreaker has no timer.",
         where: "The Timer control on Notes, Discuss, Vote, and Actions.",
       },
       {
@@ -59,7 +59,7 @@ export const GLOSSARY: GlossaryGroup[] = [
         id: "dot",
         name: "Dot",
         kind: "variable",
-        plain: "A dot is one vote on a note. Each person starts with 3 dots. The host can change that budget to any whole number from 1 to 10. Lowering the budget removes the extra dots.",
+        plain: "A dot is one vote on a note. Each person starts with 3 dots. Anyone in the room can change that budget to any whole number from 1 to 10. Lowering the budget removes the extra dots.",
         where: "The Vote section.",
       },
       {

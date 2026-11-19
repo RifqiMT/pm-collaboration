@@ -14,6 +14,9 @@ import {
   previewMediaCandidates,
   columnMark,
   RETRO_TEMPLATES,
+  RETRO_TEMPLATE_GROUPS,
+  retroColumnCounts,
+  searchRetroTemplates,
   RITUALS,
   checklistProgress,
   discussionGroups,
@@ -351,6 +354,16 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
   const [name, setName] = useState("");
   const [title, setTitle] = useState(ritual.name);
   const [templateId, setTemplateId] = useState("start-stop-continue");
+  const [shapeQuery, setShapeQuery] = useState("");
+  const [shapeGroup, setShapeGroup] = useState("");
+  const [shapeColumns, setShapeColumns] = useState(null);
+  const visibleShapes =
+    kind === "retro"
+      ? searchRetroTemplates(shapeQuery, {
+          group: shapeGroup || undefined,
+          columns: shapeColumns == null ? undefined : shapeColumns,
+        })
+      : [];
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -389,16 +402,65 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
       <TextInput style={styles.input} value={name} onChangeText={setName} maxLength={40} />
       <Text style={styles.label}>Session title</Text>
       <TextInput style={styles.input} value={title} onChangeText={setTitle} maxLength={80} />
+      {kind === "retro" ? (
+        <View style={{ gap: 8 }}>
+          <Text style={styles.label}>Search shapes</Text>
+          <TextInput
+            style={styles.input}
+            value={shapeQuery}
+            onChangeText={setShapeQuery}
+            maxLength={80}
+            placeholder="Name, column, count, or theme"
+            autoCorrect={false}
+          />
+          <Text style={styles.label}>Theme</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            <Pressable style={[styles.chip, shapeGroup === "" ? styles.chipOn : null]} onPress={() => setShapeGroup("")}>
+              <Text style={shapeGroup === "" ? styles.chipTextOn : styles.chipText}>All</Text>
+            </Pressable>
+            {RETRO_TEMPLATE_GROUPS.map((group) => (
+              <Pressable
+                key={group.id}
+                style={[styles.chip, shapeGroup === group.id ? styles.chipOn : null]}
+                onPress={() => setShapeGroup(group.id)}
+              >
+                <Text style={shapeGroup === group.id ? styles.chipTextOn : styles.chipText}>{group.title}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <Text style={styles.label}>Columns</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            <Pressable
+              style={[styles.chip, shapeColumns == null ? styles.chipOn : null]}
+              onPress={() => setShapeColumns(null)}
+            >
+              <Text style={shapeColumns == null ? styles.chipTextOn : styles.chipText}>Any</Text>
+            </Pressable>
+            {retroColumnCounts().map((count) => (
+              <Pressable
+                key={count}
+                style={[styles.chip, shapeColumns === count ? styles.chipOn : null]}
+                onPress={() => setShapeColumns(count)}
+              >
+                <Text style={shapeColumns === count ? styles.chipTextOn : styles.chipText}>{String(count)}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      ) : null}
+      {kind === "retro" && visibleShapes.length === 0 ? (
+        <Text style={styles.meta}>No shape matches that search.</Text>
+      ) : null}
       {kind === "retro"
-        ? [
-            ["classic", "Classic"],
-            ["pop", "Pop culture"],
-          ].map(([group, label]) => (
-            <View key={group} style={{ gap: 12 }}>
-              <Text style={styles.kicker}>{label}</Text>
-              {Object.entries(RETRO_TEMPLATES)
-                .filter(([, template]) => (template.group ?? "classic") === group)
-                .map(([id, template]) => (
+        ? RETRO_TEMPLATE_GROUPS.map((group) => {
+            const shapes = visibleShapes.filter((id) => (RETRO_TEMPLATES[id].group ?? "classic") === group.id);
+            if (shapes.length === 0) return null;
+            return (
+            <View key={group.id} style={{ gap: 12 }}>
+              <Text style={styles.kicker}>{group.title}</Text>
+              {shapes.map((id) => {
+                const template = RETRO_TEMPLATES[id];
+                return (
                   <Pressable
                     key={id}
                     style={[styles.card, templateId === id ? { borderColor: colors.ink, borderWidth: 1.5 } : null]}
@@ -412,9 +474,11 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
                       {template.columns.map((column) => `${columnMark(id, column.id)} ${column.title}`).join("   ")}
                     </Text>
                   </Pressable>
-                ))}
+                );
+              })}
             </View>
-          ))
+            );
+          })
         : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Pressable style={styles.button} disabled={pending} onPress={() => create(false)}>

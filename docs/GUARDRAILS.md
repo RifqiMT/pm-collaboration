@@ -2,7 +2,7 @@
 
 **Purpose:** Technical and business limitations that constrain product development.  
 **Audience:** Engineers, PMs, designers, security reviewers  
-**Last updated:** 2026-11-18  
+**Last updated:** 2026-11-19  
 
 Violating a hard guardrail without an approved architecture change is a product defect, not a stretch goal.
 

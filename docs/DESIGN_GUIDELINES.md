@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-18  
+**Last updated:** 2026-11-19  
 
 ---
 
@@ -171,7 +171,14 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 - Vote budget presets **1 / 2 / 3** (`DOT_PRESETS`) plus Custom (server allows 1–10)  
 - Keep these controls in phase tools; do not clutter the first board viewport  
 
-### 5.6d Definitions (`/guide`)
+### 5.6d Shape picker (create retro)
+
+- Create flow uses a **shape finder**: search field, shelf chips (Classic → Food), column-count chips (3 / 4 / 5), and A–Z lists per shelf  
+- Prefer calm chip chrome (`.shape-finder*`, `.shape-chip*`) that does not compete with the ritual hero  
+- Selected shape shows its column titles/hints so facilitators see the decision language before create  
+- Mobile create mirrors search + shelf/column filters without inventing a second taxonomy  
+
+### 5.6e Definitions (`/guide`)
 
 - Quiet `.guide-link` in wordmark rows (home, room) and roadmap scoring help  
 - Guide page: legend for Variable / Metric / Formula kinds, jump nav by ritual, entry cards with plain / formula / example / where  
@@ -244,7 +251,8 @@ Site-wide attribution sits at the bottom of the shell (web) and at the end of ho
 
 ## 12. File references
 
-- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.guide-link`)  
+- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.guide-link` / `.shape-finder*`)  
+- Shape picker: `apps/web/src/components/new-room-form.tsx`, mobile create in `App.js`  
 - Definitions page: `apps/web/src/app/guide/page.tsx`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
 - Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  

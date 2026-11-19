@@ -1,7 +1,7 @@
 # TeamCompass — Product Metrics & OKRs
 
 **Audience:** Product team, engineering leads, facilitators of internal adoption  
-**Last updated:** 2026-11-18  
+**Last updated:** 2026-11-19  
 **Note:** TeamCompass MVP does not yet ship an analytics pipeline. Metrics below define what to measure when instrumentation is added, plus qualitative proxies available today from `rooms.json` and meeting outcomes.
 
 ---

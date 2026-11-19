@@ -7,15 +7,19 @@
 ## US-2.1 Choose a template
 
 **As** Maya  
-**I want** classic and pop-culture column templates  
+**I want** column templates grouped by format and by the kind of story  
 **So that** the board matches the team’s energy and still maps to keep/stop/try decisions  
 
 **Acceptance criteria**
 
-- [ ] All 34 `RetroTemplateId` values create correct columns  
+- [ ] All 62 `RetroTemplateId` values create correct columns (3, 4, or 5 columns)  
 - [ ] Column hints describe the decision each column represents  
+- [ ] Eight shelves: Classic, Film, Series, Anime, Games, Sport, Music, Food  
+- [ ] Picker lists each shelf A–Z; search matches name, blurb, column title, column count, or shelf  
+- [ ] Shelf and column-count filters work on web and mobile create flows  
+- [ ] Glyphs cover every template  
 
-**PRD:** FR-RET2 · **Code:** `content.ts` `RETRO_TEMPLATES`, create form
+**PRD:** FR-RET2 · **Code:** `RETRO_TEMPLATES`, `searchRetroTemplates`, `new-room-form.tsx`, mobile create, `retro-glyphs.tsx`
 
 ---
 

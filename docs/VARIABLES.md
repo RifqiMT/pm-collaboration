@@ -3,7 +3,7 @@
 **Purpose:** Exhaustive catalog of product and domain variables used across TeamCompass.  
 **Format:** Variable name · Friendly name · Definition · Formula / rule · Location · Example  
 **Source of truth:** `packages/core/src/{types,scoring,room,text,content,ids,glossary,retro-export}.ts`, web/mobile clients  
-**Last updated:** 2026-11-18  
+**Last updated:** 2026-11-19  
 
 In-app Definitions for facilitators and contributors live in `packages/core/src/glossary.ts` (`GLOSSARY`) and render on web `/guide` and the mobile Guide screen. This file remains the **engineering** catalog (limits, sync, store env, CSV columns). Prefer updating `GLOSSARY` when changing user-facing wording; prefer updating this file when changing contracts.
 
@@ -88,7 +88,10 @@ In-app Definitions for facilitators and contributors live in `packages/core/src/
 
 | Variable name | Friendly name | Definition | Formula / rule | Location | Example |
 | --- | --- | --- | --- | --- | --- |
-| `templateId` | Retro template | Column shape for the board | One of 34 `RetroTemplateId` values | Create; `RetroState` | `start-stop-continue` |
+| `templateId` | Retro template | Column shape for the board | One of **62** `RetroTemplateId` values; each has `name`, `blurb`, optional `group`, `columns[]` | Create; `RetroState` | `mario-kart` |
+| `RetroTemplateGroup` | Theme shelf | Shelf that groups shapes in the picker | `classic` \| `film` \| `series` \| `anime` \| `games` \| `sport` \| `music` \| `food` (counts 13/10/9/5/9/14/1/1) | `RETRO_TEMPLATE_GROUPS`; create picker | `sport` |
+| `searchRetroTemplates` | Shape search | Ordered template ids matching query/filters | Matches name, blurb, column titles, shelf title/id; column-count queries like `4` / `five columns`; filters `{ group?, columns? }` | `content.ts`; web `new-room-form`; mobile create | `searchRetroTemplates("Offside")` → `["world-cup"]` |
+| `retroColumnCounts` | Available column counts | Distinct column lengths across templates | Sorted unique lengths → **[3, 4, 5]** | `content.ts`; column-count filter chips | `[3,4,5]` |
 | `phase` | Retro section | Current facilitation section | `icebreak` \| `brainstorm` \| `vote` \| `discuss` \| `act` \| `summary`; UI order icebreak → brainstorm → **discuss** → vote → act → summary | Host `setPhase`; boards | `discuss` |
 | `votesPerPerson` | Dot budget | Dots each person may place | Integer **1–10**; default **3**; lowering drops newest excess. Web UI presets **1 / 2 / 3** (`DOT_PRESETS`) plus Custom. **Not host-gated** (any joined actor on web) | Vote tools (`retro-board.tsx`); mobile has no budget chrome | `3` |
 | `votes left` | Votes remaining | Dots still available to actor | `max(0, votesPerPerson - votesUsed)` | `room.ts` / UI | `1` |
@@ -393,6 +396,12 @@ flowchart LR
   MobileGuide --> Users
   VARIABLES[VARIABLES.md engineering catalog] -.->|contracts| CoreCode[types / scoring / room]
   GLOSSARY -.->|plain English| CoreCode
+  Shelves[RETRO_TEMPLATE_GROUPS] --> Templates[RETRO_TEMPLATES 62]
+  Templates --> Search[searchRetroTemplates]
+  Search --> WebCreate[Web new-room-form]
+  Search --> MobileCreate[Mobile create]
+  WebCreate --> templateId[Room.retro.templateId]
+  MobileCreate --> templateId
 ```
 
 ---
@@ -406,18 +415,18 @@ Source: `packages/core/src/retro-export.ts` `CSV_HEADER`.
 | `section` | Export section | Row kind (e.g. note, action, icebreaker, timing) | `note` |
 | `room_code` | Room code | Six-character code | `K7M9QX` |
 | `room_title` | Room title | Room title at export | `Sprint 42 Retro` |
-| `template` | Template id | Retro template | `start-stop-continue` |
+| `template` | Template name | Retro template **display name** (not id) | `Start, stop, continue` |
 | `column` | Column title | Note column name | `Start` |
 | `column_hint` | Column hint | Decision hint | `Keep doing` |
 | `text` | Body text | Note, action, or answer body | `Flaky deploy` |
-| `author` | Author name | Display name or blank if anonymous | `Jordan` |
-| `anonymous` | Anonymous flag | Whether the note was anonymous | `true` |
+| `author` | Author name | Display name; anonymous notes → `Anonymous` | `Jordan` |
+| `anonymous` | Anonymous flag | Whether the note was anonymous | `yes` / `no` |
 | `votes` | Vote count | Dot count on the note | `3` |
 | `voters` | Voter names | People who dotted the note | `Maya; Jordan` |
 | `owner` | Action owner | Action assignee | `Maya` |
-| `done` | Action done | Whether the action is done | `false` |
+| `done` | Action done | Whether the action is done | `yes` / `no` |
 | `source_note` | Source note | Note text an action came from | `Flaky deploy` |
-| `game` | Icebreaker game | Game id/name for answers | `this-or-that` |
+| `game` | Icebreaker game | Game **display name** | `This or That` |
 | `round` | Icebreaker round | Round index | `1` |
 | `question` | Icebreaker question | Pair question or prompt | `Ship or polish?` |
 | `created_at` | Created at | ISO timestamp | `2026-11-18T…` |

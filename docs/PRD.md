@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-18 |
+| Last updated | 2026-11-19 |
 
 ---
 
@@ -76,7 +76,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | ID | Requirement | Priority |
 | --- | --- | --- |
 | FR-RET1 | Host advances through icebreak, brainstorm, discuss, vote, act, summary | Must |
-| FR-RET2 | 34 templates available at create | Must |
+| FR-RET2 | 62 templates at create, grouped into 8 shelves, searchable/filterable by shelf and column count | Must |
 | FR-RET3 | Brainstorm privacy: only own notes visible until discuss | Must |
 | FR-RET4 | Icebreaker games (18) with host selection | Must |
 | FR-RET5 | This or That host-custom pairs (1–8) | Should |

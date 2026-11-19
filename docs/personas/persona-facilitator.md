@@ -28,7 +28,7 @@
 ## Behaviors in TeamCompass
 
 - Creates the room; becomes `hostId`  
-- Picks template and icebreaker; may customize This or That pairs  
+- Picks a shape via shelves/search (Classic → Food; 3/4/5 columns) and an icebreaker; may customize This or That pairs  
 - Advances phases; starts 3/5/8 minute timers (or Custom 1–60 on web)  
 - Chooses discuss walk (status vs author), focuses groups, and uses the raise-hand queue to manage speaking  
 - Sets vote budget; drives action assignment  

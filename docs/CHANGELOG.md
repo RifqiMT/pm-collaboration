@@ -14,6 +14,8 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **Start from an example** loads a demo session: 10 notes in every column of every retrospective shape, a sprint review with evidence on every checklist item, and a 10-bet roadmap across all four quadrants.  
 - **Raise hand** in Discuss: ordered speaking queue; named notes highlight; anonymous authorship stays protected; queue clears on phase change (web + mobile).
 - **Definitions**: plain-English variables, metrics, and formulas for the retrospective, sprint review, and roadmap (`GLOSSARY` in `@cadence/core`). Web `/guide`; mobile Guide screen; linked from home, room chrome, and roadmap scoring help.
+- **62 retrospective shapes** across eight shelves (Classic 13 · Film 10 · Series 9 · Anime 5 · Games 9 · Sport 14 · Music 1 · Food 1). Newer themes include TACO, 4Ps, Marie Kondo, KALM, ALC, Digimon, Star Trek, F1, MotoGP, World Cup, Super Mario, Mario Kart, Pac-Man, Pizza, Cricket, Basketball, Field Hockey, Tennis, Volleyball, Table Tennis, Baseball, Rugby, Golf, Olympics, eSports, DOTA, Resident Evil, and Assassin's Creed. Demo seed writes ten theme-specific notes per column.
+- **Shape picker**: shapes listed A–Z inside each shelf. `searchRetroTemplates` matches name, blurb, column title, column count (`4`, `five columns`), or shelf. Shelf and column-count filters on web and mobile create flows.
 
 ### Added — Engineering
 
@@ -22,14 +24,17 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - Room store backends: `file` (default) · `supabase` · `redis`.  
 - Store vitest coverage for backend selection and file create/join/op durability.  
 - Core tests for `retro.raiseHand` / `raisedHands` presentation.  
-- `packages/core/src/glossary.ts` + `glossary.test.ts` (unique ids; RICE example matches scorer).
+- `packages/core/src/glossary.ts` + `glossary.test.ts` (unique ids; RICE example matches scorer).  
+- `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`, `retroColumnCounts`, and template coverage tests for all 62 shapes.  
+- Shape-finder UI styles (`.shape-finder*`) and glyph coverage for new templates.
 
 ### Documentation
 
 - Enterprise documentation suite under `docs/` (index, product, PRD, personas, user stories, variables with relationship charts, metrics/OKRs, design guidelines, traceability matrix, guardrails, architecture, tech stack, API, deployment).  
 - **2026-11-12 refresh:** documented raise-hand end-to-end; aligned store backends (`file`/`supabase`/`redis`) and Supabase key precedence; clarified web vs mobile poll/timer differences; corrected accent token notes.  
 - **2026-11-16 refresh:** API `store`→503 + full error catalog; web timer Custom 1–60 min and `DOT_PRESETS`; `persistence.ts` lock constants; credit footer inventory; `product.md` link casing; mobile vote-budget chrome gap; `vercel.json` and `sb_*` auth notes.  
-- **2026-11-18 refresh:** Definitions/glossary end-to-end (product, PRD FR-P6, stories, VARIABLES §12–13, architecture, design, traceability); clarified vote budget/timers are not host-gated; CSV export columns catalogued.
+- **2026-11-18 refresh:** Definitions/glossary end-to-end (product, PRD FR-P6, stories, VARIABLES §12–13, architecture, design, traceability); clarified vote budget/timers are not host-gated; CSV export columns catalogued.  
+- **2026-11-19 refresh:** 62-template shelves + shape picker documented; CSV §13 examples match export writers; glossary timer/dot copy no longer claims host-only; DESIGN shape-finder section; suite stamps updated.
 
 ---
 
@@ -39,7 +44,7 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 
 - **TeamCompass** branded collaboration rooms for three rituals: Retrospective, Sprint review, Roadmap.  
 - Six-character room codes; no accounts; local identity persistence.  
-- Retrospective: 34 templates (classic + pop culture), 18 icebreakers (including host-custom This or That pairs), private brainstorm, discuss walks, dot voting, actions, per-section timers/stopwatches, Summary + CSV export.  
+- Retrospective: classic + pop templates (expanded later to 62 shapes), 18 icebreakers (including host-custom This or That pairs), private brainstorm, discuss walks, dot voting, actions, per-section timers/stopwatches, Summary + CSV export.  
 - Sprint review: seeded checklist, multi-signer checks, feedback kinds, ship/iterate/hold decision.  
 - Roadmap: RICE, ICE, value÷complexity; complexity index; median + 3.5 guides; quadrants and insights.  
 - Demo room seeding for exploration.

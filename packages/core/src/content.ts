@@ -386,12 +386,26 @@ export function icebreakerHead(body: string): { head: string; note: string } {
   return { head: match[1], note: (match[2] ?? "").trim() };
 }
 
+export type RetroTemplateGroup = "classic" | "film" | "series" | "anime" | "games" | "sport" | "music" | "food";
+
+/** Picker shelves, in the order a host scans them. Shapes inside a shelf stay A to Z. */
+export const RETRO_TEMPLATE_GROUPS: readonly { id: RetroTemplateGroup; title: string; note: string }[] = [
+  { id: "classic", title: "Classic", note: "Formats teams already use to decide what to keep, stop, and try." },
+  { id: "film", title: "Film", note: "Movies and cinema stories." },
+  { id: "series", title: "Series", note: "Television and streaming stories." },
+  { id: "anime", title: "Anime", note: "Anime series and their worlds." },
+  { id: "games", title: "Games", note: "Video games and play." },
+  { id: "sport", title: "Sport", note: "Races, matches, and a season." },
+  { id: "music", title: "Music", note: "A live set, and the next one." },
+  { id: "food", title: "Food", note: "A meal the team made, and what the next one needs." },
+];
+
 export const RETRO_TEMPLATES: Record<
   RetroTemplateId,
   {
     name: string;
     blurb: string;
-    group?: "classic" | "pop";
+    group?: RetroTemplateGroup;
     columns: { id: string; title: string; hint: string; tone: ColumnTone }[];
   }
 > = {
@@ -452,8 +466,8 @@ export const RETRO_TEMPLATES: Record<
     ],
   },
   daki: {
-    name: "Drop, add, keep, improve",
-    blurb: "Four decisions about the same work. Drop it, add it, keep it as it is, or keep it and change it next sprint.",
+    name: "DAKI",
+    blurb: "Drop, add, keep, or improve. Four decisions about the same work for the next sprint.",
     columns: [
       { id: "drop", title: "Drop", hint: "Stop carrying this into the next sprint.", tone: "bad" },
       { id: "add", title: "Add", hint: "Bring this into the next sprint. We did not have it this sprint.", tone: "idea" },
@@ -474,7 +488,7 @@ export const RETRO_TEMPLATES: Record<
   },
   "star-wars": {
     name: "Star Wars",
-    group: "pop",
+    group: "film",
     blurb: "What powered this sprint, what pulled it off course, and what we build next sprint.",
     columns: [
       { id: "force", title: "The Force", hint: "Keep. What gave this sprint its momentum?", tone: "good" },
@@ -484,7 +498,7 @@ export const RETRO_TEMPLATES: Record<
   },
   superhero: {
     name: "Superhero",
-    group: "pop",
+    group: "film",
     blurb: "The strength to keep, the weakness to stop feeding, and the mission for the next sprint.",
     columns: [
       { id: "power", title: "Superpower", hint: "Keep. What did this team do this sprint that we should rely on again?", tone: "good" },
@@ -494,7 +508,7 @@ export const RETRO_TEMPLATES: Record<
   },
   arcade: {
     name: "Arcade",
-    group: "pop",
+    group: "games",
     blurb: "What boosted this sprint, what bossed it, and which level we play next sprint.",
     columns: [
       { id: "powerup", title: "Power-up", hint: "Keep. What gave this sprint a boost we should use again?", tone: "good" },
@@ -504,7 +518,7 @@ export const RETRO_TEMPLATES: Record<
   },
   premiere: {
     name: "Premiere",
-    group: "pop",
+    group: "film",
     blurb: "What is worth running again, what gets no second sprint, and what deserves a sequel.",
     columns: [
       { id: "blockbuster", title: "Blockbuster", hint: "Keep. What from this sprint would we run again, the same way?", tone: "good" },
@@ -514,7 +528,7 @@ export const RETRO_TEMPLATES: Record<
   },
   quest: {
     name: "Quest",
-    group: "pop",
+    group: "games",
     blurb: "What we carry out of this sprint, what we stop fighting the same way, and the chapter we write next.",
     columns: [
       { id: "treasure", title: "Treasure", hint: "Keep. What result from this sprint do we carry into the next?", tone: "good" },
@@ -524,7 +538,7 @@ export const RETRO_TEMPLATES: Record<
   },
   race: {
     name: "Race weekend",
-    group: "pop",
+    group: "sport",
     blurb: "What we repeat, what forced a slowdown, what did not finish, and what we start first next sprint.",
     columns: [
       { id: "podium", title: "Podium", hint: "Keep. What result from this sprint is worth repeating?", tone: "good" },
@@ -535,17 +549,18 @@ export const RETRO_TEMPLATES: Record<
   },
   pokemon: {
     name: "Pokémon",
-    group: "pop",
-    blurb: "What stays on the team, what ran out of energy, and what is ready to grow next sprint.",
+    group: "anime",
+    blurb: "What we caught, the battle we chose, what fainted, and what is ready to evolve next sprint.",
     columns: [
       { id: "caught", title: "Caught", hint: "Keep. What practice did we catch this sprint and want to keep?", tone: "good" },
+      { id: "battle", title: "Battle", hint: "Name it. Which fight did this sprint choose, and was it the right one for the next sprint?", tone: "neutral" },
       { id: "fainted", title: "Fainted", hint: "Stop or rest. What ran out of energy this sprint?", tone: "bad" },
       { id: "evolve", title: "Evolve", hint: "Next. What is ready to become a stronger version next sprint?", tone: "idea" },
     ],
   },
   heist: {
     name: "Heist",
-    group: "pop",
+    group: "film",
     blurb: "What made this sprint work, what almost blew it, and how we leave for the next one.",
     columns: [
       { id: "crew", title: "The crew", hint: "Keep. Who or what made this sprint work?", tone: "good" },
@@ -555,7 +570,7 @@ export const RETRO_TEMPLATES: Record<
   },
   noir: {
     name: "Noir",
-    group: "pop",
+    group: "film",
     blurb: "One case about this sprint: the fact we keep, the distraction we drop, and the conclusion we act on next.",
     columns: [
       { id: "clue", title: "Clue", hint: "Keep. Which fact from this sprint should guide the next one?", tone: "good" },
@@ -565,7 +580,7 @@ export const RETRO_TEMPLATES: Record<
   },
   concert: {
     name: "Concert",
-    group: "pop",
+    group: "music",
     blurb: "What we play again, what was off this sprint, and the setlist for the next one.",
     columns: [
       { id: "encore", title: "Encore", hint: "Keep. What should we play again next sprint, the same way?", tone: "good" },
@@ -575,7 +590,7 @@ export const RETRO_TEMPLATES: Record<
   },
   wizarding: {
     name: "Wizarding",
-    group: "pop",
+    group: "film",
     blurb: "What worked easily, what curse kept returning, and the outcome the next sprint commits to.",
     columns: [
       { id: "spell", title: "Spell", hint: "Keep. What worked so well this sprint that it felt easy?", tone: "good" },
@@ -585,7 +600,7 @@ export const RETRO_TEMPLATES: Record<
   },
   streaming: {
     name: "Streaming",
-    group: "pop",
+    group: "series",
     blurb: "What is worth doing again, what we skip next sprint, and what that sprint should deliver.",
     columns: [
       { id: "binge", title: "Worth another watch", hint: "Keep. What from this sprint would we happily do again?", tone: "good" },
@@ -595,7 +610,7 @@ export const RETRO_TEMPLATES: Record<
   },
   marvel: {
     name: "Marvel",
-    group: "pop",
+    group: "film",
     blurb: "What we did better together, what wiped progress out, and the plan that finishes it next sprint.",
     columns: [
       { id: "assemble", title: "Assemble", hint: "Keep. What did we do better this sprint because we did it together?", tone: "good" },
@@ -605,7 +620,7 @@ export const RETRO_TEMPLATES: Record<
   },
   dc: {
     name: "DC",
-    group: "pop",
+    group: "film",
     blurb: "The call we answered, what we left in the dark, and the backup the next sprint needs.",
     columns: [
       { id: "signal", title: "The signal", hint: "Keep. What clear call did this sprint make, and who answered it?", tone: "good" },
@@ -615,7 +630,7 @@ export const RETRO_TEMPLATES: Record<
   },
   "harry-potter": {
     name: "Harry Potter",
-    group: "pop",
+    group: "film",
     blurb: "What protected this sprint, what drained it, and the problem that is still alive next sprint.",
     columns: [
       { id: "patronus", title: "Patronus", hint: "Keep. What protected the team when this sprint got hard?", tone: "good" },
@@ -625,7 +640,7 @@ export const RETRO_TEMPLATES: Record<
   },
   "breaking-bad": {
     name: "Breaking Bad",
-    group: "pop",
+    group: "series",
     blurb: "Work at the quality we want again, what spoiled it, and how the next sprint finishes clean.",
     columns: [
       { id: "sky", title: "Pure batch", hint: "Keep. What work this sprint came out at the quality we want again?", tone: "good" },
@@ -635,7 +650,7 @@ export const RETRO_TEMPLATES: Record<
   },
   "criminal-minds": {
     name: "Criminal Minds",
-    group: "pop",
+    group: "series",
     blurb: "The pattern we will reuse, the hidden problem we will stop, and the case the next sprint takes on purpose.",
     columns: [
       { id: "profile", title: "Profile", hint: "Keep. What pattern from this sprint do we finally understand and should use?", tone: "good" },
@@ -645,7 +660,7 @@ export const RETRO_TEMPLATES: Record<
   },
   ncis: {
     name: "NCIS",
-    group: "pop",
+    group: "series",
     blurb: "What this sprint proved, the thread we dropped, and the one rule the next sprint will follow.",
     columns: [
       { id: "evidence", title: "Evidence", hint: "Keep. What did this sprint prove, so we do not relearn it?", tone: "good" },
@@ -655,7 +670,7 @@ export const RETRO_TEMPLATES: Record<
   },
   "one-piece": {
     name: "One Piece",
-    group: "pop",
+    group: "anime",
     blurb: "What the crew carries forward, what knocked this sprint off course, and the one destination next.",
     columns: [
       { id: "treasure", title: "Treasure", hint: "Keep. What result from this sprint is worth carrying forward?", tone: "good" },
@@ -665,7 +680,7 @@ export const RETRO_TEMPLATES: Record<
   },
   naruto: {
     name: "Naruto",
-    group: "pop",
+    group: "anime",
     blurb: "The teamwork we keep, what we avoided and it cost us, and the mission we accept next.",
     columns: [
       { id: "bond", title: "Bond", hint: "Keep. What teamwork held this sprint together?", tone: "good" },
@@ -675,7 +690,7 @@ export const RETRO_TEMPLATES: Record<
   },
   bleach: {
     name: "Bleach",
-    group: "pop",
+    group: "anime",
     blurb: "The strength we keep drawing, what emptied this sprint, and the power we have not used yet.",
     columns: [
       { id: "blade", title: "Our blade", hint: "Keep. What strength should we keep using next sprint?", tone: "good" },
@@ -685,7 +700,7 @@ export const RETRO_TEMPLATES: Record<
   },
   lotr: {
     name: "Lord of the Rings",
-    group: "pop",
+    group: "film",
     blurb: "Who carried this sprint, the burden we put down, and the next stretch of road.",
     columns: [
       { id: "fellowship", title: "Fellowship", hint: "Keep. Who or what carried this sprint?", tone: "good" },
@@ -695,7 +710,7 @@ export const RETRO_TEMPLATES: Record<
   },
   "stranger-things": {
     name: "Stranger Things",
-    group: "pop",
+    group: "series",
     blurb: "What the group did well, what flipped on us, and the one gate we close before the next sprint.",
     columns: [
       { id: "party", title: "The party", hint: "Keep. What did the group do this sprint that worked?", tone: "good" },
@@ -705,17 +720,18 @@ export const RETRO_TEMPLATES: Record<
   },
   avatar: {
     name: "Avatar",
-    group: "pop",
-    blurb: "What stayed healthy, what burned this sprint, and the skill we practice next.",
+    group: "series",
+    blurb: "Four elements of this sprint. Water adapted, earth held, fire burned, and air is what we practice next.",
     columns: [
-      { id: "balance", title: "Balance", hint: "Keep. What stayed healthy this sprint and should stay?", tone: "good" },
+      { id: "water", title: "Water", hint: "Keep. What adapted and kept flowing this sprint?", tone: "good" },
+      { id: "earth", title: "Earth", hint: "Keep. What foundation held this sprint and should stay?", tone: "good" },
       { id: "fire", title: "Fire", hint: "Stop. What burned time, trust, or quality this sprint?", tone: "bad" },
-      { id: "element", title: "Next element", hint: "Next. What skill will we practice next sprint?", tone: "idea" },
+      { id: "air", title: "Air", hint: "Next. What should the next sprint let move, or practice?", tone: "idea" },
     ],
   },
   sherlock: {
     name: "Sherlock",
-    group: "pop",
+    group: "series",
     blurb: "The conclusion we keep, the blind spot we stop ignoring, and the question the next sprint answers.",
     columns: [
       { id: "deduction", title: "Deduction", hint: "Keep. What conclusion does this sprint actually support?", tone: "good" },
@@ -725,12 +741,328 @@ export const RETRO_TEMPLATES: Record<
   },
   "squid-game": {
     name: "Squid Game",
-    group: "pop",
+    group: "series",
     blurb: "Green light is what kept us moving. Red light is what froze us. The next game is what we play differently.",
     columns: [
       { id: "circle", title: "Green light", hint: "Keep. What kept this sprint moving, and should move again?", tone: "good" },
       { id: "triangle", title: "Red light", hint: "Stop. What froze this sprint or knocked people out?", tone: "bad" },
       { id: "square", title: "Next game", hint: "Next. What will we play differently next sprint?", tone: "idea" },
+    ],
+  },
+  taco: {
+    name: "TACO",
+    blurb: "Four looks at the same sprint: how we worked, what we finished, what hurt, and what we should take next.",
+    columns: [
+      { id: "teamwork", title: "Teamwork", hint: "Keep. How did we work together this sprint, and what should stay?", tone: "good" },
+      { id: "accomplishments", title: "Accomplishments", hint: "Keep. What did this sprint actually finish?", tone: "good" },
+      { id: "challenges", title: "Challenges", hint: "Stop. What challenge hurt this sprint and should not return the same way?", tone: "bad" },
+      { id: "opportunities", title: "Opportunities", hint: "Next. What opportunity should the next sprint take?", tone: "idea" },
+    ],
+  },
+  "4ps": {
+    name: "4Ps",
+    blurb: "Product, process, people, and the personal need the next sprint can support.",
+    columns: [
+      { id: "product", title: "Product", hint: "Keep. What about the product worked for the user this sprint?", tone: "good" },
+      { id: "process", title: "Process", hint: "Name it. What in the way we worked this sprint should change next sprint?", tone: "neutral" },
+      { id: "people", title: "People", hint: "Keep. What about how we treated each other should the next sprint protect?", tone: "good" },
+      { id: "personal", title: "Personal", hint: "Next. What does a person need next sprint that the team can support?", tone: "idea" },
+    ],
+  },
+  digimon: {
+    name: "Digimon",
+    group: "anime",
+    blurb: "The partner we keep, the rookie that just started, the form ready to digivolve, and the virus we stop.",
+    columns: [
+      { id: "partner", title: "Partner", hint: "Keep. What partnered with the team this sprint and should stay?", tone: "good" },
+      { id: "rookie", title: "Rookie", hint: "Next. What only just started this sprint and needs another sprint to grow?", tone: "idea" },
+      { id: "digivolve", title: "Digivolve", hint: "Next. What is ready to grow into a stronger form next sprint?", tone: "idea" },
+      { id: "virus", title: "Virus", hint: "Stop. What corrupted this sprint and should not spread?", tone: "bad" },
+    ],
+  },
+  "star-trek": {
+    name: "Star Trek",
+    group: "series",
+    blurb: "Who held the bridge, what moved at warp, what raised a red alert, and the voyage the next sprint accepts.",
+    columns: [
+      { id: "bridge", title: "Bridge", hint: "Keep. Who held this sprint together when it moved fast?", tone: "good" },
+      { id: "warp", title: "Warp", hint: "Keep. What moved this sprint at speed and should again?", tone: "good" },
+      { id: "alert", title: "Red alert", hint: "Stop. What put this sprint in danger?", tone: "bad" },
+      { id: "voyage", title: "Next voyage", hint: "Next. What mission should the next sprint accept?", tone: "idea" },
+    ],
+  },
+  f1: {
+    name: "F1",
+    group: "sport",
+    blurb: "A grand prix: the start we earned, the pit stop, the strategy call, the pace, and the result we can claim.",
+    columns: [
+      { id: "grid", title: "Front row", hint: "Keep. What earned this sprint its start?", tone: "good" },
+      { id: "pit", title: "Pit stop", hint: "Stop. What cost this sprint time in the pits?", tone: "bad" },
+      { id: "strategy", title: "Strategy", hint: "Name it. Which call this sprint gained or lost us time, and will the next sprint make it again?", tone: "neutral" },
+      { id: "pace", title: "Race pace", hint: "Next. What pace should the next sprint hold?", tone: "idea" },
+      { id: "flag", title: "Chequered flag", hint: "Keep. What result can this sprint actually claim?", tone: "good" },
+    ],
+  },
+  motogp: {
+    name: "MotoGP",
+    group: "sport",
+    blurb: "One corner: where we braked, the apex we hit, the gravel we slid into, and the slipstream next sprint.",
+    columns: [
+      { id: "brake", title: "Braking", hint: "Name it. Where did this sprint set up the corner, and what should the next sprint prepare earlier?", tone: "neutral" },
+      { id: "apex", title: "Apex", hint: "Keep. What clean line did this sprint hit?", tone: "good" },
+      { id: "gravel", title: "Gravel", hint: "Stop. Where did this sprint slide off?", tone: "bad" },
+      { id: "draft", title: "Slipstream", hint: "Next. What should the next sprint draft behind?", tone: "idea" },
+    ],
+  },
+  "world-cup": {
+    name: "FIFA World Cup",
+    group: "sport",
+    blurb: "A match: the goal, the assist that set it up, the offside, the card, and what still needs extra time.",
+    columns: [
+      { id: "goal", title: "Goal", hint: "Keep. What did this sprint actually score?", tone: "good" },
+      { id: "assist", title: "Assist", hint: "Keep. What set up the result this sprint, and should set one up again?", tone: "good" },
+      { id: "offside", title: "Offside", hint: "Stop. What looked done this sprint but did not count?", tone: "bad" },
+      { id: "card", title: "Card", hint: "Stop. Where did this sprint cross a line?", tone: "bad" },
+      { id: "extra", title: "Extra time", hint: "Next. What still needs another sprint to finish?", tone: "idea" },
+    ],
+  },
+  mario: {
+    name: "Super Mario",
+    group: "games",
+    blurb: "One level: the coins we collected, the star that protected us, the pit we fell in, the pipe ahead, and the flag we reached.",
+    columns: [
+      { id: "coin", title: "Coin", hint: "Keep. What small win did this sprint collect, and should collect again?", tone: "good" },
+      { id: "star", title: "Super star", hint: "Keep. What made this sprint briefly safe to move fast?", tone: "good" },
+      { id: "pit", title: "Pit", hint: "Stop. Where did this sprint fall, and how do we not fall next sprint?", tone: "bad" },
+      { id: "pipe", title: "Warp pipe", hint: "Next. What shortcut should the next sprint take?", tone: "idea" },
+      { id: "flagpole", title: "Flag", hint: "Keep. What level did this sprint actually clear?", tone: "good" },
+    ],
+  },
+  "marie-kondo": {
+    name: "Marie Kondo",
+    blurb: "Keep what sparks joy, thank what has finished its job, and let the rest go before the next sprint.",
+    columns: [
+      { id: "joy", title: "Spark joy", hint: "Keep. What in this sprint sparks joy and should stay?", tone: "good" },
+      { id: "thanks", title: "Thank it", hint: "Name it. What did its job this sprint and can be thanked, then released?", tone: "neutral" },
+      { id: "discard", title: "Let go", hint: "Stop. What does not earn a place in the next sprint?", tone: "bad" },
+    ],
+  },
+  kalm: {
+    name: "KALM",
+    blurb: "Keep what works, add what is missing, do less of the excess, and do more of what helped this sprint.",
+    columns: [
+      { id: "kalm-keep", title: "Keep", hint: "Keep. What should the next sprint leave unchanged?", tone: "good" },
+      { id: "kalm-add", title: "Add", hint: "Next. What was missing this sprint and should be added?", tone: "idea" },
+      { id: "kalm-less", title: "Less", hint: "Name it. What should the next sprint do less of?", tone: "neutral" },
+      { id: "kalm-more", title: "More", hint: "Next. What helped this sprint and deserves more time?", tone: "idea" },
+    ],
+  },
+  alc: {
+    name: "ALC",
+    blurb: "Appreciations we protect, learnings we will use, and challenges that should not return the same way next sprint.",
+    columns: [
+      { id: "appreciate", title: "Appreciations", hint: "Keep. Who or what do we appreciate from this sprint?", tone: "good" },
+      { id: "alc-learned", title: "Learned", hint: "Next. What did this sprint teach us that the next sprint should use?", tone: "idea" },
+      { id: "alc-challenge", title: "Challenges", hint: "Stop. What challenge hurt this sprint and should change next sprint?", tone: "bad" },
+    ],
+  },
+  "mario-kart": {
+    name: "Mario Kart",
+    group: "games",
+    blurb: "One race: the boost, the item we grab, the banana we dropped, the shell that hit us, and the place we finished.",
+    columns: [
+      { id: "boost", title: "Boost", hint: "Keep. What gave this sprint a burst of speed?", tone: "good" },
+      { id: "item", title: "Item box", hint: "Next. What should the next sprint grab before the first lap?", tone: "idea" },
+      { id: "banana", title: "Banana", hint: "Stop. What did we drop that spun this sprint out?", tone: "bad" },
+      { id: "shell", title: "Shell", hint: "Stop. What hit this sprint from outside?", tone: "bad" },
+      { id: "finish", title: "Finish", hint: "Keep. What place did this sprint actually take, and is it worth repeating?", tone: "good" },
+    ],
+  },
+  pacman: {
+    name: "Pac-Man",
+    group: "games",
+    blurb: "Pacman: the pellets, the cherry bonus, the ghost that chased us, and the power pellet for the next sprint.",
+    columns: [
+      { id: "pellet", title: "Pellet", hint: "Keep. What small win did this sprint collect, and should collect again?", tone: "good" },
+      { id: "cherry", title: "Cherry", hint: "Keep. What bonus did this sprint reach, and how do we reach it again?", tone: "good" },
+      { id: "ghost", title: "Ghost", hint: "Stop. What chased this sprint and should not chase the next one?", tone: "bad" },
+      { id: "power", title: "Power pellet", hint: "Next. What would let the next sprint turn a chase around?", tone: "idea" },
+    ],
+  },
+  pizza: {
+    name: "Pizza",
+    group: "food",
+    blurb: "One pizza: the dough that held, the sauce we shared, the topping to add, the slice we served, and the crust we burned.",
+    columns: [
+      { id: "dough", title: "Dough", hint: "Keep. What base held this sprint together?", tone: "good" },
+      { id: "sauce", title: "Sauce", hint: "Keep. What shared context made this sprint one piece of work?", tone: "good" },
+      { id: "topping", title: "Topping", hint: "Next. What should the next sprint add on top of what already works?", tone: "idea" },
+      { id: "slice", title: "Slice", hint: "Keep. What finished piece of this sprint can we serve again?", tone: "good" },
+      { id: "burnt", title: "Burnt crust", hint: "Stop. What did we leave in too long this sprint?", tone: "bad" },
+    ],
+  },
+  cricket: {
+    name: "Cricket",
+    group: "sport",
+    blurb: "One innings: the opening stand, the partnership, the wicket, the extras that did not count, and the declaration for the next sprint.",
+    columns: [
+      { id: "opening", title: "Opening stand", hint: "Keep. What opening did this sprint build, and should the next sprint open the same way?", tone: "good" },
+      { id: "partnership", title: "Partnership", hint: "Keep. Which partnership held this sprint's innings together?", tone: "good" },
+      { id: "wicket", title: "Wicket", hint: "Stop. What wicket fell this sprint, and how do we not lose it next sprint?", tone: "bad" },
+      { id: "extras", title: "Extras", hint: "Stop. What extra work this sprint did not count toward the goal?", tone: "bad" },
+      { id: "declare", title: "Declaration", hint: "Next. What should the next sprint declare finished and leave behind?", tone: "idea" },
+    ],
+  },
+  basketball: {
+    name: "Basketball",
+    group: "sport",
+    blurb: "One possession: the fast break, the assist, the turnover, the foul, and the next possession this sprint sets up.",
+    columns: [
+      { id: "fast-break", title: "Fast break", hint: "Keep. What did this sprint score before the defense was set?", tone: "good" },
+      { id: "hoop-assist", title: "Assist", hint: "Keep. What pass this sprint set up someone else's score?", tone: "good" },
+      { id: "turnover", title: "Turnover", hint: "Stop. What did this sprint give away, and how do we keep it next sprint?", tone: "bad" },
+      { id: "foul", title: "Foul", hint: "Stop. Where did this sprint cross a line?", tone: "bad" },
+      { id: "possession", title: "Next possession", hint: "Next. What possession should the next sprint take first?", tone: "idea" },
+    ],
+  },
+  "field-hockey": {
+    name: "Field Hockey",
+    group: "sport",
+    blurb: "One attack: entering the circle, the penalty corner, the green card, and the half the next sprint plays.",
+    columns: [
+      { id: "circle", title: "Circle", hint: "Keep. What did this sprint carry into the circle, close enough to score?", tone: "good" },
+      { id: "corner", title: "Penalty corner", hint: "Name it. Which set piece did this sprint earn, and was it worth the stoppage?", tone: "neutral" },
+      { id: "green-card", title: "Green card", hint: "Stop. Where did this sprint earn a warning it should not earn next sprint?", tone: "bad" },
+      { id: "hockey-half", title: "Next half", hint: "Next. What should the next half, the next sprint, play differently?", tone: "idea" },
+    ],
+  },
+  tennis: {
+    name: "Tennis",
+    group: "sport",
+    blurb: "One set: the ace, the rally, the fault, the break point, and the next set.",
+    columns: [
+      { id: "ace", title: "Ace", hint: "Keep. What did this sprint win cleanly, without a long rally?", tone: "good" },
+      { id: "rally", title: "Rally", hint: "Name it. Which long exchange this sprint was worth staying in?", tone: "neutral" },
+      { id: "fault", title: "Fault", hint: "Stop. What unforced error did this sprint serve up?", tone: "bad" },
+      { id: "break-point", title: "Break point", hint: "Stop. Where did this sprint lose its own serve?", tone: "bad" },
+      { id: "next-set", title: "Next set", hint: "Next. What does the next set, the next sprint, change?", tone: "idea" },
+    ],
+  },
+  volleyball: {
+    name: "Volleyball",
+    group: "sport",
+    blurb: "One rally: the serve, the set, the spike, the net fault, and the next rally.",
+    columns: [
+      { id: "serve", title: "Serve", hint: "Keep. What clean start did this sprint put in play?", tone: "good" },
+      { id: "volley-set", title: "Set", hint: "Keep. What did this sprint place so a teammate could finish it?", tone: "good" },
+      { id: "spike", title: "Spike", hint: "Keep. What did this sprint actually finish?", tone: "good" },
+      { id: "net", title: "Net", hint: "Stop. Where did this sprint touch the net and lose the rally?", tone: "bad" },
+      { id: "next-rally", title: "Next rally", hint: "Next. What should the next rally, the next sprint, do first?", tone: "idea" },
+    ],
+  },
+  "table-tennis": {
+    name: "Table Tennis",
+    group: "sport",
+    blurb: "One point: the serve, the spin we chose, the edge that went out, and the next game.",
+    columns: [
+      { id: "tt-serve", title: "Serve", hint: "Keep. What short, controlled start did this sprint use?", tone: "good" },
+      { id: "spin", title: "Spin", hint: "Name it. Which variation did this sprint put on the work, and did it land?", tone: "neutral" },
+      { id: "edge", title: "Edge", hint: "Stop. What looked in this sprint and still went out?", tone: "bad" },
+      { id: "tt-next", title: "Next game", hint: "Next. What should the next game, the next sprint, change about the point?", tone: "idea" },
+    ],
+  },
+  baseball: {
+    name: "Baseball",
+    group: "sport",
+    blurb: "One inning: the hit, the home run, the strikeout, the error, and the next inning.",
+    columns: [
+      { id: "hit", title: "Hit", hint: "Keep. What did this sprint put in play and reach base with?", tone: "good" },
+      { id: "homer", title: "Home run", hint: "Keep. What did this sprint clear that we can claim?", tone: "good" },
+      { id: "strikeout", title: "Strikeout", hint: "Stop. What did this sprint swing through and miss?", tone: "bad" },
+      { id: "field-error", title: "Error", hint: "Stop. What fielding mistake this sprint let a run in?", tone: "bad" },
+      { id: "next-inning", title: "Next inning", hint: "Next. What does the next inning, the next sprint, need ready?", tone: "idea" },
+    ],
+  },
+  rugby: {
+    name: "Rugby",
+    group: "sport",
+    blurb: "One score: the try, the conversion, the knock-on, the penalty, and the next half.",
+    columns: [
+      { id: "try", title: "Try", hint: "Keep. What did this sprint ground over the line?", tone: "good" },
+      { id: "conversion", title: "Conversion", hint: "Keep. What did this sprint add after the score so the result held?", tone: "good" },
+      { id: "knock-on", title: "Knock-on", hint: "Stop. What did this sprint spill forward and lose?", tone: "bad" },
+      { id: "rugby-penalty", title: "Penalty", hint: "Stop. Where did this sprint give the other side field position?", tone: "bad" },
+      { id: "rugby-half", title: "Next half", hint: "Next. What should the next half, the next sprint, keep in hand?", tone: "idea" },
+    ],
+  },
+  golf: {
+    name: "Golf",
+    group: "sport",
+    blurb: "One hole: the birdie under the plan, the par we met, the bunker, the hazard, and the next hole.",
+    columns: [
+      { id: "birdie", title: "Birdie", hint: "Keep. Where did this sprint beat the plan?", tone: "good" },
+      { id: "par", title: "Par", hint: "Name it. Where did this sprint meet the plan and need nothing more?", tone: "neutral" },
+      { id: "bunker", title: "Bunker", hint: "Stop. Where did this sprint get stuck short of the green?", tone: "bad" },
+      { id: "hazard", title: "Hazard", hint: "Stop. Where did this sprint lose the ball entirely?", tone: "bad" },
+      { id: "next-hole", title: "Next hole", hint: "Next. What club should the next hole, the next sprint, take first?", tone: "idea" },
+    ],
+  },
+  olympics: {
+    name: "Olympics",
+    group: "sport",
+    blurb: "One Games: the gold we can claim, the personal best, the false start, the disqualification, and the next Games.",
+    columns: [
+      { id: "gold", title: "Gold", hint: "Keep. What result from this sprint can we claim as the best we have done?", tone: "good" },
+      { id: "personal-best", title: "Personal best", hint: "Keep. Where did this sprint beat our own previous mark?", tone: "good" },
+      { id: "false-start", title: "False start", hint: "Stop. Where did this sprint leave before it was ready?", tone: "bad" },
+      { id: "dq", title: "Disqualified", hint: "Stop. Where did this sprint break a rule and lose the result?", tone: "bad" },
+      { id: "next-games", title: "Next Games", hint: "Next. What should the next Games, the next sprint, train before it competes?", tone: "idea" },
+    ],
+  },
+  esports: {
+    name: "eSports",
+    group: "games",
+    blurb: "One series: the draft we prepared, the execute we landed, the throw we gave back, and the next map.",
+    columns: [
+      { id: "draft", title: "Draft", hint: "Keep. What did this sprint pick before play started, and should the next sprint pick it again?", tone: "good" },
+      { id: "execute", title: "Execute", hint: "Keep. Which play did this sprint call and actually land?", tone: "good" },
+      { id: "throw", title: "Throw", hint: "Stop. Where did this sprint give back a lead it already had?", tone: "bad" },
+      { id: "next-map", title: "Next map", hint: "Next. What should the next map, the next sprint, ban or pick first?", tone: "idea" },
+    ],
+  },
+  dota: {
+    name: "DOTA",
+    group: "games",
+    blurb: "A Dota match: the lane, the last hits, the feed, the throw, and the ancient the next sprint takes. DOTA.",
+    columns: [
+      { id: "laning", title: "Laning", hint: "Keep. Which lane did this sprint win in the early game?", tone: "good" },
+      { id: "last-hit", title: "Last hit", hint: "Keep. Which small last hit did this sprint secure instead of leaving it?", tone: "good" },
+      { id: "feed", title: "Feed", hint: "Stop. Where did this sprint die and hand gold to the other side?", tone: "bad" },
+      { id: "dota-throw", title: "Throw", hint: "Stop. Where did this sprint throw a lead late in the match?", tone: "bad" },
+      { id: "ancient", title: "Ancient", hint: "Next. What ancient, the real objective, should the next sprint take?", tone: "idea" },
+    ],
+  },
+  "resident-evil": {
+    name: "Resident Evil",
+    group: "games",
+    blurb: "One mansion loop: the save room, the puzzle, the infection, the ambush, and the escape into the next sprint.",
+    columns: [
+      { id: "save-room", title: "Save room", hint: "Keep. What checkpoint did this sprint earn that we can return to?", tone: "good" },
+      { id: "puzzle", title: "Puzzle", hint: "Name it. Which lock did this sprint solve, and which lock is still closed?", tone: "neutral" },
+      { id: "infection", title: "Infection", hint: "Stop. What spread this sprint and should be contained next sprint?", tone: "bad" },
+      { id: "ambush", title: "Ambush", hint: "Stop. What surprised this sprint because we opened the door unready?", tone: "bad" },
+      { id: "escape", title: "Escape", hint: "Next. What route should the next sprint take out of this room?", tone: "idea" },
+    ],
+  },
+  "assassins-creed": {
+    name: "Assassin's Creed",
+    group: "games",
+    blurb: "Assassin Creeds for this sprint: blend, leap, stop the detection, and name the next contract. Assassins Creed.",
+    columns: [
+      { id: "blend", title: "Blend", hint: "Keep. Where did this sprint disappear into the crowd and still get the work done?", tone: "good" },
+      { id: "leap", title: "Leap", hint: "Keep. Which leap of faith this sprint landed because we had looked first?", tone: "good" },
+      { id: "detection", title: "Detection", hint: "Stop. Where was this sprint seen, and how do we stay hidden next sprint?", tone: "bad" },
+      { id: "contract", title: "Next contract", hint: "Next. Which contract should the next sprint accept, and which should it refuse?", tone: "idea" },
     ],
   },
 };
@@ -785,6 +1117,7 @@ const COLUMN_MARKS: Record<string, string> = {
   "race:dnf": "🏁",
   "race:pole": "🚩",
   "pokemon:caught": "⚪",
+  "pokemon:battle": "⚔️",
   "pokemon:fainted": "💫",
   "pokemon:evolve": "🔆",
   "heist:crew": "🎭",
@@ -835,15 +1168,141 @@ const COLUMN_MARKS: Record<string, string> = {
   "stranger-things:party": "🚲",
   "stranger-things:upside": "🔺",
   "stranger-things:gate": "🚪",
-  "avatar:balance": "☯️",
+  "avatar:water": "💧",
+  "avatar:earth": "🪨",
   "avatar:fire": "🔥",
-  "avatar:element": "💧",
+  "avatar:air": "🌬️",
   "sherlock:deduction": "🔍",
   "sherlock:blind": "🙈",
   "sherlock:case": "🎩",
   "squid-game:circle": "🟢",
   "squid-game:triangle": "🔴",
   "squid-game:square": "⏭️",
+  "taco:teamwork": "🤝",
+  "taco:accomplishments": "🏆",
+  "taco:challenges": "⛰️",
+  "taco:opportunities": "🚪",
+  "4ps:product": "📦",
+  "4ps:process": "🔄",
+  "4ps:people": "👥",
+  "4ps:personal": "🌱",
+  "digimon:partner": "🤝",
+  "digimon:rookie": "🥚",
+  "digimon:digivolve": "✨",
+  "digimon:virus": "🦠",
+  "star-trek:bridge": "🛰️",
+  "star-trek:warp": "🚀",
+  "star-trek:alert": "🔴",
+  "star-trek:voyage": "🖖",
+  "f1:grid": "🏎️",
+  "f1:pit": "🔧",
+  "f1:strategy": "📋",
+  "f1:pace": "🏁",
+  "f1:flag": "🏴",
+  "motogp:brake": "🛑",
+  "motogp:apex": "🏍️",
+  "motogp:gravel": "🪨",
+  "motogp:draft": "💨",
+  "world-cup:goal": "⚽",
+  "world-cup:assist": "👟",
+  "world-cup:offside": "🚩",
+  "world-cup:card": "🟨",
+  "world-cup:extra": "⏱️",
+  "mario:coin": "🪙",
+  "mario:star": "⭐",
+  "mario:pit": "🕳️",
+  "mario:pipe": "🟢",
+  "mario:flagpole": "🚩",
+  "marie-kondo:joy": "✨",
+  "marie-kondo:thanks": "🙏",
+  "marie-kondo:discard": "📤",
+  "kalm:kalm-keep": "📌",
+  "kalm:kalm-add": "➕",
+  "kalm:kalm-less": "➖",
+  "kalm:kalm-more": "🔼",
+  "alc:appreciate": "💛",
+  "alc:alc-learned": "💡",
+  "alc:alc-challenge": "⛰️",
+  "mario-kart:boost": "⚡",
+  "mario-kart:banana": "🍌",
+  "mario-kart:shell": "🐚",
+  "mario-kart:item": "🎁",
+  "mario-kart:finish": "🏁",
+  "pacman:pellet": "🟡",
+  "pacman:cherry": "🍒",
+  "pacman:ghost": "👻",
+  "pacman:power": "⚪",
+  "pizza:dough": "🍞",
+  "pizza:sauce": "🍅",
+  "pizza:slice": "🍕",
+  "pizza:topping": "🧀",
+  "pizza:burnt": "🔥",
+  "cricket:opening": "🏏",
+  "cricket:partnership": "🤝",
+  "cricket:wicket": "🪵",
+  "cricket:extras": "➕",
+  "cricket:declare": "📣",
+  "basketball:fast-break": "🏃",
+  "basketball:hoop-assist": "🏀",
+  "basketball:turnover": "↩️",
+  "basketball:foul": "✋",
+  "basketball:possession": "🎯",
+  "field-hockey:circle": "⭕",
+  "field-hockey:corner": "📐",
+  "field-hockey:green-card": "🟩",
+  "field-hockey:hockey-half": "⏯️",
+  "tennis:ace": "🎾",
+  "tennis:rally": "〰️",
+  "tennis:fault": "❌",
+  "tennis:break-point": "💔",
+  "tennis:next-set": "🎖️",
+  "volleyball:serve": "🏐",
+  "volleyball:volley-set": "🙌",
+  "volleyball:spike": "💥",
+  "volleyball:net": "🥅",
+  "volleyball:next-rally": "🔄",
+  "table-tennis:tt-serve": "🏓",
+  "table-tennis:spin": "🌀",
+  "table-tennis:edge": "📏",
+  "table-tennis:tt-next": "🎮",
+  "baseball:hit": "⚾",
+  "baseball:homer": "💨",
+  "baseball:strikeout": "🅚",
+  "baseball:field-error": "🧤",
+  "baseball:next-inning": "⏭️",
+  "rugby:try": "🏉",
+  "rugby:conversion": "🥅",
+  "rugby:knock-on": "🤲",
+  "rugby:rugby-penalty": "🚩",
+  "rugby:rugby-half": "⏯️",
+  "golf:birdie": "🐦",
+  "golf:par": "⛳",
+  "golf:bunker": "🏖️",
+  "golf:hazard": "💧",
+  "golf:next-hole": "🕳️",
+  "olympics:gold": "🥇",
+  "olympics:personal-best": "📈",
+  "olympics:false-start": "🚦",
+  "olympics:dq": "🚫",
+  "olympics:next-games": "🏛️",
+  "esports:draft": "🎮",
+  "esports:execute": "🎯",
+  "esports:throw": "💸",
+  "esports:next-map": "🗺️",
+  "dota:laning": "🛡️",
+  "dota:last-hit": "💰",
+  "dota:feed": "💀",
+  "dota:dota-throw": "📉",
+  "dota:ancient": "🏰",
+  "resident-evil:save-room": "💾",
+  "resident-evil:puzzle": "🧩",
+  "resident-evil:infection": "🧟",
+  "resident-evil:ambush": "🚪",
+  "resident-evil:escape": "🏃",
+  "assassins-creed:blend": "🫥",
+  "assassins-creed:leap": "🦅",
+  "assassins-creed:detection": "👁️",
+  "assassins-creed:contract": "📜",
 };
 
 export function columnMark(templateId: string, columnId: string): string {
@@ -852,6 +1311,74 @@ export function columnMark(templateId: string, columnId: string): string {
 
 export function columnsFor(templateId: RetroTemplateId): RetroColumn[] {
   return RETRO_TEMPLATES[templateId].columns.map((column) => ({ ...column }));
+}
+
+/** Shape picker order: A to Z by the name the room sees. */
+export function retroTemplateIds(): RetroTemplateId[] {
+  return (Object.keys(RETRO_TEMPLATES) as RetroTemplateId[]).sort((left, right) =>
+    RETRO_TEMPLATES[left].name.localeCompare(RETRO_TEMPLATES[right].name, "en", {
+      sensitivity: "base",
+      numeric: true,
+    }),
+  );
+}
+
+/** Column counts that exist on at least one shape, smallest first. */
+export function retroColumnCounts(): number[] {
+  const counts = new Set(
+    (Object.keys(RETRO_TEMPLATES) as RetroTemplateId[]).map((id) => RETRO_TEMPLATES[id].columns.length),
+  );
+  return [...counts].sort((left, right) => left - right);
+}
+
+export interface RetroTemplateQuery {
+  group?: RetroTemplateGroup;
+  columns?: number;
+}
+
+const COLUMN_COUNT_WORDS: Record<string, number> = {
+  three: 3,
+  four: 4,
+  five: 5,
+};
+
+/** "4", "4 columns", "4-column", and "five" are a column-count search. */
+function columnCountFromQuery(needle: string): number | null {
+  const match = /^(three|four|five|\d+)\s*-?\s*(columns?|cols?)?$/.exec(needle);
+  const token = match?.[1];
+  if (!token) return null;
+  const count = COLUMN_COUNT_WORDS[token] ?? Number(token);
+  if (!Number.isInteger(count) || count < 1 || count > 12) return null;
+  return count;
+}
+
+/**
+ * Match a shape by its name, blurb, column titles, theme shelf, or column count.
+ * An empty query returns every shape, A to Z. Shelf and column filters narrow that list.
+ */
+export function searchRetroTemplates(query: string, filters: RetroTemplateQuery = {}): RetroTemplateId[] {
+  const needle = query.trim().toLocaleLowerCase();
+  const ordered = retroTemplateIds();
+  const askedCount = needle ? columnCountFromQuery(needle) : null;
+  return ordered.filter((id) => {
+    const template = RETRO_TEMPLATES[id];
+    const groupId = template.group ?? "classic";
+    if (filters.group && groupId !== filters.group) return false;
+    if (filters.columns != null && template.columns.length !== filters.columns) return false;
+    if (!needle) return true;
+    if (askedCount != null && template.columns.length === askedCount) return true;
+    const group = RETRO_TEMPLATE_GROUPS.find((item) => item.id === groupId);
+    const haystack = [
+      template.name,
+      template.blurb,
+      ...template.columns.map((column) => column.title),
+      group?.title ?? "",
+      groupId,
+    ]
+      .join("\n")
+      .toLocaleLowerCase();
+    return haystack.includes(needle);
+  });
 }
 
 interface ReviewSeedItem {

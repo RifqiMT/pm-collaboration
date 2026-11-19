@@ -25,7 +25,7 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 
 - **Fast start** — Create a room in seconds; share a short code  
 - **Psychological safety** — Brainstorm notes stay private on the server until Discuss  
-- **Facilitation control** — Host gates sections, icebreaker, discussion walk, and timers  
+- **Facilitation control** — Host gates sections, icebreaker, and discussion walk; timers and vote budget are open on web  
 - **Clear closure** — Actions with owners; review decisions; roadmap quadrants  
 - **Honest math** — Shared scoring in `@cadence/core` on web and mobile  
 - **Exportable record** — Retro summary downloads as CSV  
@@ -37,7 +37,7 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Area | Capabilities |
 | --- | --- |
 | Rooms | Create/join by code, local identity, presence (20s), optional demo seed, max 40 people |
-| Retro | 34 templates, 18 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8 + custom 1–60 min, summary CSV |
+| Retro | 62 templates (8 shelves + shape search/filters), 18 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8 + custom 1–60 min, summary CSV |
 | Review | Seeded checklist, multi-signer checks, goal, praise/change/question, ship·iterate·hold |
 | Roadmap | RICE / ICE / value÷complexity, complexity index, median & 3.5 guides, quadrants, insights |
 | Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` in core) |
@@ -83,7 +83,7 @@ On the phone home screen, set the server to your computer’s address (e.g. `htt
 The host moves the room through six sections. Each section shows only its own work.
 
 1. **Icebreaker** — Short warm-up (18 games). On This or That, the host can write the two sides.  
-2. **Notes** — Classic and pop-culture templates; you see only your notes until Discuss. Column glyphs grow as notes collect.  
+2. **Notes** — Templates grouped as Classic, Film, Series, Anime, Games, Sport, Music, and Food. Sport includes cricket, basketball, field hockey, tennis, volleyball, table tennis, baseball, rugby, golf, and the Olympics. Games include eSports, DOTA, Resident Evil, and Assassin's Creed. Each shape uses the number of columns that theme needs. Search and filters use the name, a column, the column count, or the theme shelf. You see only your notes until Discuss. Column glyphs grow as notes collect.  
 3. **Discuss** — Notes revealed; status walk or author walk; raise-hand speaking queue (named notes highlight; anonymous stay unattributed).  
 4. **Vote** — Dot budget (default 3, host sets 1–10). Notes are not editable while voting.  
 5. **Actions** — Text, owner, done; can start from a note.  

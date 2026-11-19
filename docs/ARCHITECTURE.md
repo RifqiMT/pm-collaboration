@@ -1,6 +1,6 @@
 # TeamCompass — Architecture
 
-**Last updated:** 2026-11-18  
+**Last updated:** 2026-11-19  
 
 ---
 
@@ -34,7 +34,7 @@ TeamCompass is a **monorepo** with a shared domain library and two clients that 
 
 | Path | Package | Responsibility |
 | --- | --- | --- |
-| `packages/core` | `@cadence/core` | Types, `createRoom`, `applyOp`, `presentRoom`, scoring, content, glossary, retro export, validation |
+| `packages/core` | `@cadence/core` | Types, `createRoom`, `applyOp`, `presentRoom`, scoring, content (62 templates + `searchRetroTemplates`), glossary, retro export, validation |
 | `apps/web` | `@cadence/web` | Next.js App Router UI, API routes, JSON persistence, HTTP helpers |
 | `apps/mobile` | `@cadence/mobile` | Expo RN client (not in root workspaces; depends via `file:../../packages/core`) |
 
@@ -120,7 +120,7 @@ Details: [API.md](./API.md).
 | Route | Component |
 | --- | --- |
 | `/` | `HomeScreen` |
-| `/new` | `NewRoomForm` |
+| `/new` | `NewRoomForm` (shape finder for retros) |
 | `/r/[code]` | `RoomApp` → `RetroBoard` / `ReviewBoard` / `RoadmapBoard` |
 | `/guide` | Definitions from `GLOSSARY` (`guide/page.tsx`) |
 

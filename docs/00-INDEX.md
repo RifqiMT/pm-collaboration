@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-18  
+**Last documentation refresh:** 2026-11-19  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -51,7 +51,8 @@ This index is the reading map for product, engineering, design, and leadership s
 | Domain types & limits | `packages/core/src/types.ts` |
 | Room mutations & privacy | `packages/core/src/room.ts` |
 | Scoring & quadrants | `packages/core/src/scoring.ts` |
-| Templates, icebreakers, review seed | `packages/core/src/content.ts` |
+| Templates, shelves, search, icebreakers, review seed | `packages/core/src/content.ts` (`RETRO_TEMPLATES`, `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`) |
+| Shape picker UI | `apps/web/.../new-room-form.tsx`, mobile create in `App.js`, `.shape-finder*` in `globals.css` |
 | Demo seed data | `packages/core/src/demo.ts` |
 | In-app Definitions glossary | `packages/core/src/glossary.ts` |
 | Retro CSV export | `packages/core/src/retro-export.ts` |

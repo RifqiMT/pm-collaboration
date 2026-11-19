@@ -1341,7 +1341,7 @@ function fillDemo(room: Room, hostId: string, now: string): void {
   const authors = [host, alex, sam, jordan];
 
   if (room.retro) {
-    room.retro.cards = demoNotesForColumns(room.retro.columns, authors, now);
+    room.retro.cards = demoNotesForColumns(room.retro.columns, authors, now, room.retro.templateId);
     const source =
       room.retro.cards.find((card) => card.columnId === room.retro?.columns[1]?.id)?.id ??
       room.retro.cards[0]?.id ??

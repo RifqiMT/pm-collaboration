@@ -2,7 +2,7 @@
 
 **Document type:** Requirements ↔ Stories ↔ Implementation ↔ Verification  
 **Product:** TeamCompass (`@cadence/*`)  
-**Last updated:** 2026-11-18  
+**Last updated:** 2026-11-19  
 
 ---
 
@@ -38,7 +38,7 @@
 | Req ID | Requirement (short) | Story | Implementation | Verification | Status |
 | --- | --- | --- | --- | --- | --- |
 | FR-RET1 | Host-gated phases | US-2.9 | `retro.setPhase`, `retro-board.tsx` | Host gate tests | Implemented |
-| FR-RET2 | 34 templates | US-2.1 | `content.ts` `RETRO_TEMPLATES` | Template coverage tests | Implemented |
+| FR-RET2 | 62 templates + shape search/filters | US-2.1 | `RETRO_TEMPLATES`, `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`, `new-room-form.tsx`, mobile create, `retro-glyphs.tsx` | Template + search tests; glyph tests | Implemented |
 | FR-RET3 | Brainstorm privacy | US-2.3 | `presentRoom` | Privacy tests | Implemented |
 | FR-RET4 | 18 icebreakers | US-2.2 | `ICEBREAKERS`, `icebreaker-panel.tsx` | Icebreaker tests | Implemented |
 | FR-RET5 | Custom This/That pairs | US-2.2 | `setIcebreakerPairs` | Pair validation tests | Implemented |
