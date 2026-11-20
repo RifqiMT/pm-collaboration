@@ -2,7 +2,7 @@
 
 **Purpose:** Technical and business limitations that constrain product development.  
 **Audience:** Engineers, PMs, designers, security reviewers  
-**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
+**Last updated:** 2026-11-20 (Lineup icebreaker)  
 
 Violating a hard guardrail without an approved architecture change is a product defect, not a stretch goal.
 
@@ -33,6 +33,7 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-PRIV-4 Telemetry (future)** | If analytics are added | Do not log private note bodies or raw Health Check author linkage |
 | **G-PRIV-5 Health Check anonymity** | Peers see synthetic `health-…` author ids; CSV author is `Anonymous` | Do not re-attribute health scores in UI, summary, or export; keep averages/spreads only |
 | **G-PRIV-6 Travel catalog boundary** | Wishlist limited to `TRAVEL_COUNTRIES` (175) and max 5 pins | Do not accept free-text countries or expand the catalog without content + flag asset updates |
+| **G-PRIV-7 Lineup membership** | Order body must include every current participant exactly once | Do not accept partial lineups or unknown ids; keep title changes clearing prior lineup answers |
 
 ---
 
@@ -76,7 +77,7 @@ Violating a hard guardrail without an approved architecture change is a product 
 
 | Guardrail | Limitation | Implication |
 | --- | --- | --- |
-| **G-FAC-1 Host authority** | Phase, icebreaker, discuss mode (not vote budget or timers) | Product assumes a facilitator role; timer/budget controls are open to joined actors on web |
+| **G-FAC-1 Host authority** | Phase, icebreaker selection, This or That pairs, Lineup title (`setOrderTitle`), discuss mode (not vote budget or timers) | Product assumes a facilitator role; timer/budget controls are open to joined actors on web; renaming a Lineup clears shared orders |
 | **G-FAC-2 Section isolation** | Each retro section shows its work | Resist “show everything always” feature requests |
 | **G-FAC-3 Summary is terminal collection** | No timer/stopwatch on Summary | Keep Summary for export/review, not timed work |
 | **G-FAC-4 One ritual per room** | `kind` fixed at create | No multi-ritual mashup room without redesign |
@@ -141,6 +142,7 @@ Until one of these is approved and implemented, build **within** the guardrails 
 - [ ] Does this weaken brainstorm privacy?  
 - [ ] Does this re-attribute Health Check scores to peers (UI, summary, or CSV)?  
 - [ ] Does Travel Wishlist accept countries outside `TRAVEL_COUNTRIES` or more than five pins?  
+- [ ] Does Lineup accept a partial order or keep stale answers after a host title change?  
 - [ ] Does this assume multiple server instances?  
 - [ ] Does this duplicate scoring math outside core?  
 - [ ] Does this raise limits without a rationale?  

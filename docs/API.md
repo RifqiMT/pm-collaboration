@@ -5,7 +5,7 @@
 **CORS:** `Access-Control-Allow-Origin: *`  
 **Caching:** `Cache-Control: no-store`  
 **Runtime:** Node.js (`force-dynamic`)  
-**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
+**Last updated:** 2026-11-20 (Lineup icebreaker)  
 
 ---
 
@@ -107,16 +107,15 @@ Fails with `full` if participants ≥ 40.
 | `type` | Fields | Notes |
 | --- | --- | --- |
 | `retro.setPhase` | `phase` | Host only |
-| `retro.setIcebreaker` | `game` (`IcebreakerId`, 20 values incl. `health-check`, `travel-wishlist`) | Host only |
+| `retro.setIcebreaker` | `game` (`IcebreakerId`, 21 values incl. `health-check`, `travel-wishlist`, `lineup`) | Host only |
 | `retro.setIcebreakerPairs` | `pairs[]` | Host only; This or That |
-| `retro.answerIcebreaker` | `body`, `round?` — Health Check: six `1–7` ints joined by `,`; Travel Wishlist: 1–5 ISO codes joined by `,` | Validated per `IcebreakerMode` (`scale` / `map` / …) |
+| `retro.setOrderTitle` | `title` (max 80) | Host only; Lineup. A changed title clears shared lineup orders |
+| `retro.answerIcebreaker` | `body`, `round?` — Health Check: six `1–7` ints joined by `,`; Travel Wishlist: 1–5 ISO codes joined by `,`; Lineup: every participant id, once, joined by `,` | Validated per `IcebreakerMode` (`scale` / `map` / `order` / …) |
 | `retro.guessIcebreaker` | `targetId`, `index` | Two truths |
 | `retro.revealIcebreaker` | — | |
-| `retro.nextIcebreakerRound` | `step` | Host only |
 | `retro.setVotesPerPerson` | `count` | 1–10; **not** host-gated |
 | `retro.startTimer` | `seconds`, `phase?` | 30–3600; **not** host-gated |
 | `retro.clearTimer` | `phase?` | **not** host-gated |
-| `retro.focusCard` | `cardId \| null` | Discuss |
 | `retro.setDiscussionBy` | `by: status\|author` | Host only |
 | `retro.focusGroup` | `key` | Column id, author id, or `anonymous` |
 | `retro.raiseHand` | `raised` | Discuss only; desired-state speak queue. Cleared on phase change. |

@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
+**Last updated:** 2026-11-20 (Lineup icebreaker)  
 
 ---
 
@@ -136,6 +136,6 @@ Recommended before merge: `npm test` and a two-browser smoke of create → join 
 4. Local file backend: one writer process. Vercel: require Supabase or Redis (see DEPLOYMENT.md).  
 5. Document new `LIMITS` and formulas in [VARIABLES.md](./VARIABLES.md).  
 6. Preserve brainstorm privacy in `presentRoom` when changing card views.  
-7. Keep Health Check peer anonymization and Travel Wishlist catalog (`countries.ts` + flag assets) in sync when extending icebreakers.  
+7. Keep Health Check peer anonymization, Travel Wishlist catalog (`countries.ts` + flag assets), and Lineup membership rules (`parsePeopleOrder` / `setOrderTitle` clear-on-rename) in sync when extending icebreakers.  
 
 See also: [ARCHITECTURE.md](./ARCHITECTURE.md), [GUARDRAILS.md](./GUARDRAILS.md).

@@ -37,7 +37,7 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Area | Capabilities |
 | --- | --- |
 | Rooms | Create/join by code, local identity, presence (20s), optional demo seed, max 40 people |
-| Retro | 62 templates (8 shelves + shape search/filters), 20 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8 + custom 1–60 min, summary CSV |
+| Retro | 62 templates (8 shelves + shape search/filters), 21 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8 + custom 1–60 min, summary CSV |
 | Review | Seeded checklist, multi-signer checks, goal, praise/change/question, ship·iterate·hold |
 | Roadmap | RICE / ICE / value÷complexity, complexity index, median & 3.5 guides, quadrants, insights |
 | Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` in core) |
@@ -82,7 +82,7 @@ On the phone home screen, set the server to your computer’s address (e.g. `htt
 
 The host moves the room through six sections. Each section shows only its own work.
 
-1. **Icebreaker** — Short warm-up (**20** games). On This or That, the host can write the two sides. **Health Check** rates six statements anonymously on a 1–7 scale; **Travel Wishlist** pins up to five countries on a shared map (web map; same list on mobile).  
+1. **Icebreaker** — Short warm-up (**21** games). On This or That, the host can write the two sides. **Health Check** rates six statements anonymously on a 1–7 scale. **Travel Wishlist** pins up to five countries on a shared map. **Lineup** lets the host name an order, then everyone arranges the people in the room.  
 2. **Notes** — Templates grouped as Classic, Film, Series, Anime, Games, Sport, Music, and Food. Sport includes cricket, basketball, field hockey, tennis, volleyball, table tennis, baseball, rugby, golf, and the Olympics. Games include eSports, DOTA, Resident Evil, and Assassin's Creed. Each shape uses the number of columns that theme needs. Search and filters use the name, a column, the column count, or the theme shelf. You see only your notes until Discuss. Column glyphs grow as notes collect.  
 3. **Discuss** — Notes revealed; status walk or author walk; raise-hand speaking queue (named notes highlight; anonymous stay unattributed).  
 4. **Vote** — Dot budget (default 3; any joined person can set **1–10** on web). Notes are not editable while voting.  
@@ -145,9 +145,9 @@ Details: [docs/TECH_STACK.md](docs/TECH_STACK.md)
 ```
 pm-collaboration/
 ├── packages/core     # Room rules, privacy, scoring, content, countries, glossary, export
-├── apps/web          # Next.js UI (/guide, travel map + flags) + room API + store
+├── apps/web          # Next.js UI (/guide, travel map, lineup order) + room API + store
 ├── apps/mobile       # Expo iOS/Android client (home / guide / create / room)
-└── docs/             # Product documentation suite (current as of 2026-11-19 evening)
+└── docs/             # Product documentation suite (current as of 2026-11-20)
 ```
 
 ---

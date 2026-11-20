@@ -11,6 +11,8 @@ import {
   parseHealthScores,
   showAndTellParts,
   pairQuestion,
+  parsePeopleOrder,
+  formatPeopleOrder,
   storedThisOrThatPairs,
   thisOrThatGame,
   truthDisplayOrder,
@@ -186,7 +188,6 @@ export function applyOp(room: Room, op: Op, actorId: string, now: string): Room 
     case "retro.setVotesPerPerson":
     case "retro.startTimer":
     case "retro.clearTimer":
-    case "retro.focusCard":
     case "retro.setDiscussionBy":
     case "retro.focusGroup":
     case "retro.raiseHand":
@@ -196,10 +197,10 @@ export function applyOp(room: Room, op: Op, actorId: string, now: string): Room 
     case "retro.deleteAction":
     case "retro.setIcebreaker":
     case "retro.setIcebreakerPairs":
+    case "retro.setOrderTitle":
     case "retro.answerIcebreaker":
     case "retro.guessIcebreaker":
     case "retro.revealIcebreaker":
-    case "retro.nextIcebreakerRound":
       changed = applyRetro(next, op, actorId, now);
       break;
     case "review.setItemDone":
@@ -357,6 +358,8 @@ export function parseOp(input: unknown): Op {
       return { type, game: expectEnum(record.game, ICEBREAKER_IDS, "Icebreaker") };
     case "retro.setIcebreakerPairs":
       return { type, pairs: parsePairs(record.pairs) };
+    case "retro.setOrderTitle":
+      return { type, title: String(record.title ?? "") };
     case "retro.answerIcebreaker":
       return {
         type,
@@ -371,8 +374,6 @@ export function parseOp(input: unknown): Op {
       };
     case "retro.revealIcebreaker":
       return { type };
-    case "retro.nextIcebreakerRound":
-      return { type, step: asNumber(record.step, "Round") };
     case "retro.setVotesPerPerson":
       return { type, count: asNumber(record.count, "Votes") };
     case "retro.startTimer":
@@ -386,8 +387,6 @@ export function parseOp(input: unknown): Op {
         type,
         ...(record.phase == null ? {} : { phase: expectEnum(record.phase, PHASES, "Phase") }),
       };
-    case "retro.focusCard":
-      return { type, cardId: record.cardId == null ? null : expectString(record.cardId, "Note") };
     case "retro.setDiscussionBy":
       return { type, by: expectEnum(record.by, DISCUSSION_BY, "Discussion") };
     case "retro.focusGroup":
@@ -508,7 +507,6 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       if (!card) throw new CadenceError("That note is gone.", "missing");
       assertCanChangeCard(retro, card, actorId);
       retro.cards.splice(index, 1);
-      if (retro.discussedCardId === op.cardId) retro.discussedCardId = null;
       return true;
     }
     case "retro.vote": {
@@ -567,11 +565,27 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       reconcilePairAnswers(retro, pairs);
       return true;
     }
+    case "retro.setOrderTitle": {
+      requirePhase(retro, "icebreak", "The icebreaker is only open during the warm-up.");
+      if (actorId !== hostOf(room)) {
+        throw new CadenceError("Only the host can name this lineup.", "host");
+      }
+      const title = cleanLine(op.title, LIMITS.title, "Title");
+      if (retro.icebreakerOrderTitle === title) return false;
+      retro.icebreakerOrderTitle = title;
+      retro.icebreakerAnswers = retro.icebreakerAnswers.filter((answer) => answer.game !== "lineup");
+      return true;
+    }
     case "retro.answerIcebreaker": {
       requirePhase(retro, "icebreak", "The icebreaker is only open during the warm-up.");
       const game = playingIcebreaker(retro);
       const round = pairRound(game, retro.icebreakerRound, op.round);
-      const accepted = normalizeIcebreaker(game, round, op.body);
+      const accepted = normalizeIcebreaker(
+        game,
+        round,
+        op.body,
+        room.participants.map((person) => person.id),
+      );
       const existing = retro.icebreakerAnswers.find(
         (answer) => answer.game === game.id && answer.round === round && answer.authorId === actorId,
       );
@@ -638,19 +652,6 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       answer.revealed = true;
       return true;
     }
-    case "retro.nextIcebreakerRound": {
-      requirePhase(retro, "icebreak", "The icebreaker is only open during the warm-up.");
-      if (actorId !== hostOf(room)) {
-        throw new CadenceError("Only the host can choose the icebreaker.", "host");
-      }
-      const game = playingIcebreaker(retro);
-      const rounds = game.rounds?.length ?? 0;
-      if (rounds < 2 || (op.step !== 1 && op.step !== -1)) return false;
-      const nextRound = retro.icebreakerRound + op.step;
-      if (nextRound < 0 || nextRound >= rounds) return false;
-      retro.icebreakerRound = nextRound;
-      return true;
-    }
     case "retro.setVotesPerPerson": {
       requirePhase(retro, "vote", "The dot budget is set in the vote section.");
       const count = clampInt(op.count, 1, 10, "Votes per person");
@@ -693,15 +694,6 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       delete next[phase];
       retro.timers = next;
       retro.timerEndsAt = next[retro.phase] ?? null;
-      return true;
-    }
-    case "retro.focusCard": {
-      requirePhase(retro, "discuss", "The discussion order changes in the discuss section.");
-      if (op.cardId && !retro.cards.some((card) => card.id === op.cardId)) {
-        throw new CadenceError("That note is gone.", "missing");
-      }
-      if (retro.discussedCardId === op.cardId) return false;
-      retro.discussedCardId = op.cardId;
       return true;
     }
     case "retro.setDiscussionBy": {
@@ -1015,7 +1007,12 @@ function splitDash(value: string): [string, string] {
   return [match[1], (match[2] ?? "").trim()];
 }
 
-function normalizeIcebreaker(game: IcebreakerGame, round: number, input: string): { body: string; lie?: number } {
+function normalizeIcebreaker(
+  game: IcebreakerGame,
+  round: number,
+  input: string,
+  participantIds: readonly string[] = [],
+): { body: string; lie?: number } {
   if (game.mode === "word") {
     const body = cleanLine(input, LIMITS.icebreakerWord, "Word");
     if (/\s/.test(body)) throw new CadenceError("Keep it to one word.", "text");
@@ -1069,6 +1066,12 @@ function normalizeIcebreaker(game: IcebreakerGame, round: number, input: string)
       throw new CadenceError("Paste an https link to a GIF.", "text");
     }
     return { body: note ? `${head} — ${note}` : head };
+  }
+  if (game.mode === "order") {
+    const cleaned = cleanLine(input, 4_000, "Order");
+    const ids = parsePeopleOrder(cleaned, participantIds);
+    if (!ids) throw new CadenceError("Put every person in the room into the order.", "choice");
+    return { body: formatPeopleOrder(ids) };
   }
   if (game.mode === "map") {
     const cleaned = cleanLine(input, 40, "Wishlist");
@@ -1214,6 +1217,13 @@ function reconcilePairAnswers(retro: RetroState, pairs: IcebreakerPair[]): void 
   if (retro.icebreakerRound >= pairs.length) retro.icebreakerRound = Math.max(0, pairs.length - 1);
 }
 
+function storedOrderTitle(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const title = value.replace(/[\u0000-\u001F]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!title) return null;
+  return title.slice(0, LIMITS.title);
+}
+
 function withIcebreaker(retro: RetroState): RetroState {
   const known = ICEBREAKERS.some((game) => game.id === retro.icebreaker);
   const game = icebreakerById(known ? retro.icebreaker : "one-word");
@@ -1229,6 +1239,7 @@ function withIcebreaker(retro: RetroState): RetroState {
     ...stopwatches,
     icebreaker: game.id,
     icebreakerPairs: pairs,
+    icebreakerOrderTitle: storedOrderTitle(retro.icebreakerOrderTitle),
     icebreakerRound: playing.rounds ? Math.min(round, last) : round,
     icebreakerAnswers: Array.isArray(retro.icebreakerAnswers) ? retro.icebreakerAnswers : [],
     discussionBy: retro.discussionBy === "author" ? "author" : "status",
@@ -1312,6 +1323,7 @@ function ensureIcebreaker(retro: RetroState): void {
   const next = withIcebreaker(retro);
   retro.icebreaker = next.icebreaker;
   retro.icebreakerPairs = next.icebreakerPairs;
+  retro.icebreakerOrderTitle = next.icebreakerOrderTitle;
   retro.icebreakerRound = next.icebreakerRound;
   retro.icebreakerAnswers = next.icebreakerAnswers;
   retro.discussionBy = next.discussionBy;
@@ -1335,13 +1347,13 @@ function blankRetro(templateId: RetroTemplateId, now: string): RetroState {
     columns: columnsFor(templateId),
     cards: [],
     actions: [],
-    discussedCardId: null,
     discussionBy: "status",
     discussedGroupKey: null,
     raisedHands: [],
     icebreaker: "one-word",
     icebreakerRound: 0,
     icebreakerPairs: null,
+    icebreakerOrderTitle: null,
     icebreakerAnswers: [],
   };
 }

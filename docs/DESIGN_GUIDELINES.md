@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
+**Last updated:** 2026-11-20 (Lineup icebreaker)  
 
 ---
 
@@ -175,6 +175,14 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 - Cap visual noise: at most five pins per person; heat communicates overlap, not decoration  
 - Keep map fills in the ink/sea family—avoid neon heatmaps  
 
+### 5.6a3 Lineup (`order`)
+
+- Board shell `.order-board` with host title form `.order-title` / `.order-title-field` / `.order-title-actions`  
+- Compose lane `.order-compose` with ranked rows `.order-row` (`.dragging` / `.over` / `.mine`), grip, rank, avatar, name, up/down moves  
+- Shared room strip `.order-room` / `.order-card*` compares lineups after share—quiet chips, not scoreboards  
+- Wait copy for guests until the host names the order (`.order-wait`)  
+- Mobile mirrors title + reorder list without inventing a second interaction model  
+
 ### 5.6b Discuss raise hand
 
 - Toggle control and ordered queue in Discuss chrome (`.hand-raise`, `.hand-toggle`)  
@@ -267,9 +275,9 @@ Site-wide attribution sits at the bottom of the shell (web) and at the end of ho
 
 ## 12. File references
 
-- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.guide-link` / `.shape-finder*` / `.health-*` / `.wish-map*`)  
+- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.guide-link` / `.shape-finder*` / `.health-*` / `.wish-map*` / `.order-*`)  
 - Shape picker: `apps/web/src/components/new-room-form.tsx`, mobile create in `App.js`  
-- Icebreakers: `icebreaker-panel.tsx`, `travel-map.tsx`, `world-map-paths.ts`, `apps/web/public/flags/`  
+- Icebreakers: `icebreaker-panel.tsx`, `travel-map.tsx`, `world-map-paths.ts`, `people-order.tsx`, `apps/web/public/flags/`  
 - Definitions page: `apps/web/src/app/guide/page.tsx`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
 - Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  

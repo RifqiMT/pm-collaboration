@@ -1,7 +1,7 @@
 # TeamCompass — Product Metrics & OKRs
 
 **Audience:** Product team, engineering leads, facilitators of internal adoption  
-**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
+**Last updated:** 2026-11-20 (Lineup icebreaker)  
 **Note:** TeamCompass MVP does not yet ship an analytics pipeline. Metrics below define what to measure when instrumentation is added, plus qualitative proxies available today from `rooms.json` and meeting outcomes.
 
 ---
@@ -44,6 +44,8 @@
 | `icebreaker_completion_rate` | Icebreaker completion | Participants with ≥1 answer for the active game / participants when leaving Icebreaker | ratio | ≥ 80% in live retros | `icebreakerAnswers` |
 | `health_check_share` | Health Check adoption | Retros that select `health-check` / retros that run an icebreaker | ratio | Inform connection-game mix; no hard target | `retro.icebreaker` |
 | `travel_wishlist_share` | Travel Wishlist adoption | Retros that select `travel-wishlist` / icebreaker retros | ratio | Inform connection-game mix; no hard target | `retro.icebreaker` |
+| `lineup_share` | Lineup adoption | Retros that select `lineup` / icebreaker retros | ratio | Inform connection-game mix; no hard target | `retro.icebreaker` |
+| `lineup_completion_rate` | Lineup share completion | Participants with a lineup answer / participants after host titled the order | ratio | ≥ 80% when Lineup is used | `icebreakerAnswers` where `game=lineup` |
 | `health_room_average` | Room health average (qualitative) | `healthOverallAverage` when Health Check is used | mean of shared 1–7 scores | Track trend only; never attribute to individuals | shared answers only |
 
 ### 2.3 Reliability & experience

@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
+**Last documentation refresh:** 2026-11-20 (Lineup icebreaker)  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -51,13 +51,13 @@ This index is the reading map for product, engineering, design, and leadership s
 | Domain types & limits | `packages/core/src/types.ts` |
 | Room mutations & privacy | `packages/core/src/room.ts` |
 | Scoring & quadrants | `packages/core/src/scoring.ts` |
-| Templates, shelves, search, icebreakers, review seed | `packages/core/src/content.ts` (`RETRO_TEMPLATES`, `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`, `ICEBREAKERS`, `HEALTH_CHECK`) |
+| Templates, shelves, search, icebreakers, review seed | `packages/core/src/content.ts` (`RETRO_TEMPLATES`, `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`, `ICEBREAKERS` 21, `HEALTH_CHECK`, `parsePeopleOrder`) |
 | Travel wishlist catalog | `packages/core/src/countries.ts` (`TRAVEL_COUNTRIES` 175, parse/format/export) |
 | Shape picker UI | `apps/web/.../new-room-form.tsx`, mobile create in `App.js`, `.shape-finder*` in `globals.css` |
-| Health Check / Travel Wishlist UI | `icebreaker-panel.tsx` (`.health-check*`), `travel-map.tsx`, `world-map-paths.ts`, `apps/web/public/flags/*.svg`; mobile `HealthCheckMobile` / `TravelWishlistMobile` in `App.js` |
+| Health Check / Travel Wishlist / Lineup UI | `icebreaker-panel.tsx` (`.health-check*`), `travel-map.tsx`, `world-map-paths.ts`, `people-order.tsx` (`.order-*`), `apps/web/public/flags/*.svg`; mobile `HealthCheckMobile` / `TravelWishlistMobile` / `PeopleOrderMobile` in `App.js` |
 | Demo seed data | `packages/core/src/demo.ts` |
 | In-app Definitions glossary | `packages/core/src/glossary.ts` |
-| Retro CSV export | `packages/core/src/retro-export.ts` (health anonymous; travel names; show-and-tell caption) |
+| Retro CSV export | `packages/core/src/retro-export.ts` (health anonymous; travel names; lineup ranked names; show-and-tell caption) |
 | Web UI & polling | `apps/web/src/components/` |
 | Definitions page | `apps/web/src/app/guide/page.tsx` (`/guide`) |
 | Mobile Definitions | `Guide` screen in `apps/mobile/App.js` |

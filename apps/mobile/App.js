@@ -21,6 +21,7 @@ import {
   TRAVEL_WISHLIST_MAX,
   countryByCode,
   countryFlagEmoji,
+  parsePeopleOrder,
   parseTravelWishlist,
   travelWishlistExportText,
   showAndTellMediaSources,
@@ -991,7 +992,7 @@ function IcebreakerMobile({ retro, room, actorId, host, send }) {
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const mine = answers.find((answer) => answer.authorId === actorId);
   const nameOf = (id) => room.participants.find((person) => person.id === id)?.name ?? "Someone";
-  const prompt = game.questions?.[round] ?? game.prompt;
+  const prompt = game.id === "lineup" ? retro.icebreakerOrderTitle || game.prompt : game.questions?.[round] ?? game.prompt;
   return (
     <View style={styles.card}>
       <Text style={styles.kicker}>Before the retro</Text>
@@ -1037,7 +1038,18 @@ function IcebreakerMobile({ retro, room, actorId, host, send }) {
         <>
           <Text style={styles.lede}>{prompt}</Text>
           <Text style={styles.meta}>{game.how}</Text>
-          <IcePlay game={game} round={round} answers={answers} mine={mine} actorId={actorId} nameOf={nameOf} send={send} />
+          <IcePlay
+            game={game}
+            round={round}
+            answers={answers}
+            mine={mine}
+            actorId={actorId}
+            nameOf={nameOf}
+            send={send}
+            host={host}
+            orderTitle={retro.icebreakerOrderTitle}
+            participants={room.participants}
+          />
         </>
       )}
       {host ? (
@@ -1212,7 +1224,7 @@ function PairEditorMobile({ pairs, send }) {
   );
 }
 
-function IcePlay({ game, round, answers, mine, actorId, nameOf, send }) {
+function IcePlay({ game, round, answers, mine, actorId, nameOf, send, host, orderTitle, participants }) {
   const [text, setText] = useState("");
   const [note, setNote] = useState("");
   const [lines, setLines] = useState(["", "", ""]);
@@ -1236,6 +1248,20 @@ function IcePlay({ game, round, answers, mine, actorId, nameOf, send }) {
   }
   if (game.mode === "map") {
     return <TravelWishlistMobile answers={answers} mine={mine} nameOf={nameOf} send={send} />;
+  }
+  if (game.mode === "order") {
+    return (
+      <PeopleOrderMobile
+        host={host}
+        title={orderTitle}
+        participants={participants}
+        answers={answers}
+        mine={mine}
+        actorId={actorId}
+        nameOf={nameOf}
+        send={send}
+      />
+    );
   }
   if (game.mode === "choice" || game.mode === "pairs" || game.mode === "note" || game.mode === "emoji") {
     const choices = game.mode === "emoji" ? game.choices ?? [] : icebreakerChoices(game, round);
@@ -1398,6 +1424,108 @@ function IcePlay({ game, round, answers, mine, actorId, nameOf, send }) {
           ))}
     </View>
   );
+}
+
+function PeopleOrderMobile({ host, title, participants, answers, mine, actorId, nameOf, send }) {
+  const ids = participants.map((person) => person.id);
+  const signature = `${ids.join(",")}|${mine?.body ?? ""}`;
+  const [order, setOrder] = useState(startingPeopleOrder(mine?.body, ids));
+  const [draft, setDraft] = useState(title ?? "");
+  const [note, setNote] = useState("");
+  useEffect(() => {
+    setOrder(startingPeopleOrder(mine?.body, ids));
+  }, [signature]);
+  useEffect(() => {
+    setDraft(title ?? "");
+  }, [title]);
+  function move(index, direction) {
+    setOrder((current) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= current.length) return current;
+      const next = [...current];
+      const [item] = next.splice(index, 1);
+      next.splice(nextIndex, 0, item);
+      return next;
+    });
+    setNote("");
+  }
+  const saved = mine?.body ?? "";
+  const ready = order.length > 0 && order.join(",") !== saved;
+  return (
+    <View style={{ gap: 10 }}>
+      {host ? (
+        <View style={{ gap: 8 }}>
+          <Text style={styles.meta}>Lineup title</Text>
+          <TextInput style={styles.input} value={draft} maxLength={80} placeholder="Years on the team" onChangeText={setDraft} />
+          <Pressable
+            style={styles.button}
+            disabled={!draft.trim() || draft.trim() === (title ?? "")}
+            onPress={() => {
+              void send({ type: "retro.setOrderTitle", title: draft.trim() });
+            }}
+          >
+            <Text style={styles.buttonText}>Save title</Text>
+          </Pressable>
+          <Text style={styles.meta}>
+            {answers.length > 0
+              ? "Saving a new title clears the orders already shared."
+              : "Name what the order means. Everyone lines the room up under that title."}
+          </Text>
+        </View>
+      ) : null}
+      {order.map((id, index) => {
+        const person = participants.find((item) => item.id === id);
+        return (
+          <View key={id} style={[styles.card, { flexDirection: "row", alignItems: "center", justifyContent: "space-between" }]}>
+            <Text>
+              {index + 1}. {id === actorId ? "You" : person?.name ?? nameOf(id)}
+            </Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Pressable disabled={index === 0} onPress={() => move(index, -1)}>
+                <Text style={styles.meta}>Up</Text>
+              </Pressable>
+              <Pressable disabled={index === order.length - 1} onPress={() => move(index, 1)}>
+                <Text style={styles.meta}>Down</Text>
+              </Pressable>
+            </View>
+          </View>
+        );
+      })}
+      {note ? <Text style={styles.error}>{note}</Text> : null}
+      <Pressable
+        style={styles.button}
+        disabled={!ready}
+        onPress={() => {
+          void send({ type: "retro.answerIcebreaker", body: order.join(",") });
+        }}
+      >
+        <Text style={styles.buttonText}>{mine ? "Update" : "Share"}</Text>
+      </Pressable>
+      {mine ? (
+        answers.map((answer) => (
+          <Text key={answer.id}>
+            {answer.authorId === actorId ? "You" : nameOf(answer.authorId)}:{" "}
+            {answer.body
+              .split(",")
+              .map((id, index) => `${index + 1}. ${id.trim() === actorId ? "You" : nameOf(id.trim())}`)
+              .join(", ")}
+          </Text>
+        ))
+      ) : (
+        <Text style={styles.meta}>Share your order to see how everyone else lined the room up.</Text>
+      )}
+    </View>
+  );
+}
+
+function startingPeopleOrder(body, participantIds) {
+  const exact = body ? parsePeopleOrder(body, participantIds) : null;
+  if (exact) return exact;
+  const previous = String(body ?? "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter((id) => participantIds.includes(id));
+  return [...previous, ...participantIds.filter((id) => !previous.includes(id))];
 }
 
 function TravelWishlistMobile({ answers, mine, nameOf, send }) {

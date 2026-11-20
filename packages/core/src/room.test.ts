@@ -395,9 +395,8 @@ describe("retrospective", () => {
     expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "Snowy" }, HOST, NOW)).toThrow(/forecast/);
 
     room = applyOp(room, { type: "retro.setIcebreaker", game: "this-or-that" }, HOST, NOW);
-    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Morning" }, HOST, NOW);
-    room = applyOp(room, { type: "retro.nextIcebreakerRound", step: 1 }, HOST, NOW);
-    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Tea" }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Morning", round: 0 }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Tea", round: 1 }, HOST, NOW);
     expect(room.retro?.icebreakerAnswers.filter((answer) => answer.game === "this-or-that").map((answer) => [answer.round, answer.body])).toEqual([
       [0, "Morning"],
       [1, "Tea"],
@@ -503,6 +502,33 @@ describe("retrospective", () => {
     expect(exported?.answers.find((answer) => answer.author === "Alex Rivera")?.body).toBe("Italy");
   });
 
+  it("lets the host name a lineup and stores an order of everyone in the room", () => {
+    let room = retroRoom();
+    room = joinRoom(room, { id: "person_alexdemo01", name: "Alex Rivera" }, NOW).room;
+    room = applyOp(room, { type: "retro.setIcebreaker", game: "lineup" }, HOST, NOW);
+    expect(() => applyOp(room, { type: "retro.setOrderTitle", title: "Years on the team" }, "person_alexdemo01", NOW)).toThrow(/host/);
+    expect(() => applyOp(room, { type: "retro.setOrderTitle", title: "   " }, HOST, NOW)).toThrow(/empty/);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: HOST }, HOST, NOW)).toThrow(/every person/);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: `${HOST},${HOST}` }, HOST, NOW)).toThrow(/every person/);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: `${HOST},person_missing01` }, HOST, NOW)).toThrow(/every person/);
+
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: `person_alexdemo01,${HOST}` }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: `${HOST},person_alexdemo01` }, "person_alexdemo01", NOW);
+    const exported = retrospectiveExport(presentRoom(room, HOST, NOW));
+    expect(exported?.answers.find((answer) => answer.author === "Rifqi")?.body).toBe("1. Alex Rivera, 2. Rifqi");
+    expect(exported?.answers.find((answer) => answer.author === "Alex Rivera")?.question).toBe("Order the room");
+
+    room = applyOp(room, { type: "retro.setOrderTitle", title: "Years on the team" }, HOST, NOW);
+    expect(room.retro?.icebreakerOrderTitle).toBe("Years on the team");
+    expect(room.retro?.icebreakerAnswers.filter((answer) => answer.game === "lineup")).toHaveLength(0);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: `${HOST},person_alexdemo01` }, HOST, NOW);
+    room = applyOp(room, { type: "retro.setOrderTitle", title: "Years on the team" }, HOST, NOW);
+    expect(room.retro?.icebreakerAnswers.filter((answer) => answer.game === "lineup")).toHaveLength(1);
+    const titled = retrospectiveExport(presentRoom(room, "person_alexdemo01", NOW));
+    expect(titled?.answers[0]?.question).toBe("Years on the team");
+    expect(titled?.answers[0]?.body).toBe("1. Rifqi, 2. Alex Rivera");
+  });
+
   it("lets the host rewrite This or That pairs", () => {
     let room = retroRoom();
     room = joinRoom(room, { id: "person_alexdemo01", name: "Alex Rivera" }, NOW).room;
@@ -520,9 +546,8 @@ describe("retrospective", () => {
       applyOp(room, { type: "retro.setIcebreakerPairs", pairs: [{ question: "Same?", left: "A", right: "a" }] }, HOST, NOW),
     ).toThrow(/different/);
 
-    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Morning" }, HOST, NOW);
-    room = applyOp(room, { type: "retro.nextIcebreakerRound", step: 1 }, HOST, NOW);
-    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Tea" }, "person_alexdemo01", NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Morning", round: 0 }, HOST, NOW);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Tea", round: 1 }, "person_alexdemo01", NOW);
     room = applyOp(
       room,
       {
@@ -536,10 +561,11 @@ describe("retrospective", () => {
       NOW,
     );
     expect(room.retro?.icebreakerPairs?.map((pair) => pair.question)).toEqual(["Ship or Slip?", "Coffee or Tea?"]);
-    expect(room.retro?.icebreakerRound).toBe(1);
-    expect(room.retro?.icebreakerAnswers.filter((item) => item.game === "this-or-that").map((item) => item.body)).toEqual(["Tea"]);
-    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "Morning" }, HOST, NOW)).toThrow(/choices/);
-    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Coffee" }, HOST, NOW);
+    expect(room.retro?.icebreakerAnswers.filter((item) => item.game === "this-or-that").map((item) => [item.round, item.body])).toEqual([
+      [1, "Tea"],
+    ]);
+    expect(() => applyOp(room, { type: "retro.answerIcebreaker", body: "Morning", round: 1 }, HOST, NOW)).toThrow(/choices/);
+    room = applyOp(room, { type: "retro.answerIcebreaker", body: "Coffee", round: 1 }, HOST, NOW);
     expect(room.retro?.icebreakerAnswers.some((item) => item.round === 1 && item.body === "Coffee")).toBe(true);
 
     room = applyOp(room, { type: "retro.setIcebreaker", game: "one-word" }, HOST, NOW);
@@ -554,7 +580,6 @@ describe("retrospective", () => {
     );
     expect(room.retro?.icebreakerRound).toBe(0);
     expect(room.retro?.icebreakerAnswers.filter((item) => item.game === "this-or-that")).toHaveLength(0);
-    expect(applyOp(room, { type: "retro.nextIcebreakerRound", step: 1 }, HOST, NOW).retro?.icebreakerRound).toBe(0);
 
     room = applyOp(room, { type: "retro.setPhase", phase: "brainstorm" }, HOST, NOW);
     expect(() =>
@@ -671,9 +696,6 @@ describe("retrospective", () => {
     expect(() => applyOp(room, { type: "retro.setIcebreaker", game: "weather" }, "person_alexdemo01", NOW)).toThrow(/host/);
     room = applyOp(room, { type: "retro.setIcebreaker", game: "this-or-that" }, HOST, NOW);
     expect(room.retro?.icebreaker).toBe("this-or-that");
-    expect(() => applyOp(room, { type: "retro.nextIcebreakerRound", step: 1 }, "person_alexdemo01", NOW)).toThrow(/host/);
-    room = applyOp(room, { type: "retro.nextIcebreakerRound", step: 1 }, HOST, NOW);
-    expect(room.retro?.icebreakerRound).toBe(1);
   });
 
   it("refuses votes before the vote phase and ignores a repeated phase change", () => {
@@ -700,10 +722,10 @@ describe("retrospective", () => {
     const cardId = room.retro?.cards[0]?.id ?? "";
     room = applyOp(room, { type: "retro.setPhase", phase: "discuss" }, HOST, NOW);
     expect(() => applyOp(room, { type: "retro.editCard", cardId, body: "Changed" }, HOST, NOW)).toThrow(/notes section/);
-    room = applyOp(room, { type: "retro.focusCard", cardId }, HOST, NOW);
-    expect(room.retro?.discussedCardId).toBe(cardId);
+    room = applyOp(room, { type: "retro.focusGroup", key: "start" }, HOST, NOW);
+    expect(room.retro?.discussedGroupKey).toBe("start");
     room = applyOp(room, { type: "retro.setPhase", phase: "vote" }, HOST, NOW);
-    expect(() => applyOp(room, { type: "retro.focusCard", cardId }, HOST, NOW)).toThrow(/discuss section/);
+    expect(() => applyOp(room, { type: "retro.focusGroup", key: "start" }, HOST, NOW)).toThrow(/discuss section/);
     room = applyOp(room, { type: "retro.vote", cardId, voting: true }, HOST, NOW);
     expect(room.retro?.cards[0]?.votes).toEqual([HOST]);
     room = applyOp(room, { type: "retro.setPhase", phase: "act" }, HOST, NOW);

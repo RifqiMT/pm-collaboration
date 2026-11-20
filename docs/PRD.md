@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-19 (evening — Health Check + Travel Wishlist) |
+| Last updated | 2026-11-20 (Lineup icebreaker) |
 
 ---
 
@@ -78,7 +78,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-RET1 | Host advances through icebreak, brainstorm, discuss, vote, act, summary | Must |
 | FR-RET2 | 62 templates at create, grouped into 8 shelves, searchable/filterable by shelf and column count | Must |
 | FR-RET3 | Brainstorm privacy: only own notes visible until discuss | Must |
-| FR-RET4 | Icebreaker games (20) with host selection, including Health Check (anonymous 1–7 scale) and Travel Wishlist (1–5 countries / 175 catalog) | Must |
+| FR-RET4 | Icebreaker games (21) with host selection, including Health Check (anonymous 1–7 scale), Travel Wishlist (1–5 countries / 175 catalog), and Lineup (host-named order of the people in the room) | Must |
 | FR-RET5 | This or That host-custom pairs (1–8) | Should |
 | FR-RET6 | Discuss status or author walk | Must |
 | FR-RET7 | Dot vote with configurable budget 1–10 (default 3) | Must |

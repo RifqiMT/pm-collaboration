@@ -36,7 +36,7 @@ export const ICEBREAKER_GROUPS = [
 
 export type IcebreakerGroup = (typeof ICEBREAKER_GROUPS)[number]["id"];
 
-export type IcebreakerMode = "word" | "choice" | "line" | "sprint" | "note" | "emoji" | "gif" | "draw" | "truths" | "pairs" | "scale" | "map";
+export type IcebreakerMode = "word" | "choice" | "line" | "sprint" | "note" | "emoji" | "gif" | "draw" | "truths" | "pairs" | "scale" | "map" | "order";
 
 export interface IcebreakerGame {
   id: IcebreakerId;
@@ -302,6 +302,16 @@ export const ICEBREAKERS: readonly IcebreakerGame[] = [
     mode: "map",
   },
   {
+    id: "lineup",
+    name: "Lineup",
+    blurb: "Put the room in an order.",
+    how: "The host names what the order means. Everyone arranges the people in the room, then the lineups are compared.",
+    prompt: "Order the room",
+    placeholder: "Years on the team",
+    group: "connection",
+    mode: "order",
+  },
+  {
     id: "two-truths",
     name: "Two Truths and a Lie",
     blurb: "Three statements. The room guesses the false one.",
@@ -345,6 +355,23 @@ export const ICEBREAKERS: readonly IcebreakerGame[] = [
 
 export function icebreakerById(id: string): IcebreakerGame {
   return ICEBREAKERS.find((game) => game.id === id) ?? ICEBREAKERS[0]!;
+}
+
+/** Every current participant, once, in the chosen order. */
+export function parsePeopleOrder(body: string, participantIds: readonly string[]): string[] | null {
+  const parts = body
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length !== participantIds.length) return null;
+  if (new Set(parts).size !== parts.length) return null;
+  const allowed = new Set(participantIds);
+  if (parts.some((id) => !allowed.has(id))) return null;
+  return parts;
+}
+
+export function formatPeopleOrder(ids: readonly string[]): string {
+  return ids.join(",");
 }
 
 export function icebreakerChoices(game: IcebreakerGame, round: number): readonly string[] {

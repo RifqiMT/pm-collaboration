@@ -89,7 +89,8 @@ export type IcebreakerId =
   | "shout-out"
   | "gratitude"
   | "health-check"
-  | "travel-wishlist";
+  | "travel-wishlist"
+  | "lineup";
 
 export type ColumnTone = "good" | "bad" | "idea" | "neutral";
 
@@ -177,7 +178,6 @@ export interface RetroState {
   columns: RetroColumn[];
   cards: RetroCard[];
   actions: ActionItem[];
-  discussedCardId: string | null;
   /** Discuss walks one status column or one author at a time. */
   discussionBy: DiscussionBy;
   /** Column id, author id, or "anonymous" for the group currently in focus. */
@@ -188,6 +188,8 @@ export interface RetroState {
   icebreakerRound: number;
   /** Host-written This or That pairs. Null uses the built-in pairs. */
   icebreakerPairs: IcebreakerPair[] | null;
+  /** Host-written title for the Lineup icebreaker. Null uses the built-in prompt. */
+  icebreakerOrderTitle: string | null;
   icebreakerAnswers: IcebreakerAnswer[];
 }
 
@@ -327,14 +329,13 @@ export type Op =
   | { type: "retro.setPhase"; phase: RetroPhase }
   | { type: "retro.setIcebreaker"; game: IcebreakerId }
   | { type: "retro.setIcebreakerPairs"; pairs: IcebreakerPair[] }
+  | { type: "retro.setOrderTitle"; title: string }
   | { type: "retro.answerIcebreaker"; body: string; round?: number }
   | { type: "retro.guessIcebreaker"; targetId: string; index: number }
   | { type: "retro.revealIcebreaker" }
-  | { type: "retro.nextIcebreakerRound"; step: number }
   | { type: "retro.setVotesPerPerson"; count: number }
   | { type: "retro.startTimer"; seconds: number; phase?: RetroPhase }
   | { type: "retro.clearTimer"; phase?: RetroPhase }
-  | { type: "retro.focusCard"; cardId: string | null }
   | { type: "retro.setDiscussionBy"; by: DiscussionBy }
   | { type: "retro.focusGroup"; key: string }
   | { type: "retro.raiseHand"; raised: boolean }

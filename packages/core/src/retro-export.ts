@@ -235,7 +235,8 @@ function answerRow(
   return {
     game: game.name,
     round: answer.round,
-    question: game.questions?.[answer.round] ?? game.prompt,
+    question:
+      answer.game === "lineup" ? retro.icebreakerOrderTitle || game.prompt : game.questions?.[answer.round] ?? game.prompt,
     author: answer.game === "health-check" ? "Anonymous" : person(answer.authorId) || "Someone",
     body:
       answer.game === "show-and-tell"
@@ -244,10 +245,21 @@ function answerRow(
           ? healthCheckExportText(answer.body)
           : answer.game === "travel-wishlist"
             ? travelWishlistExportText(answer.body)
-            : answer.body,
+            : answer.game === "lineup"
+              ? peopleOrderExportText(answer.body, person)
+              : answer.body,
     media: answer.game === "show-and-tell" ? showAndTellParts(answer.body).media : "",
     createdAt: answer.createdAt,
   };
+}
+
+function peopleOrderExportText(body: string, person: (id: string | null | undefined) => string): string {
+  return body
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((id, index) => `${index + 1}. ${person(id) || "Someone"}`)
+    .join(", ");
 }
 
 function fill(row: string[], values: Partial<Record<(typeof CSV_HEADER)[number], string>>): void {

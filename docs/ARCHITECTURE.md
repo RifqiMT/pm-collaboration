@@ -1,6 +1,6 @@
 # TeamCompass — Architecture
 
-**Last updated:** 2026-11-19 (evening — Health Check + Travel Wishlist)  
+**Last updated:** 2026-11-20 (Lineup icebreaker)  
 
 ---
 
@@ -34,7 +34,7 @@ TeamCompass is a **monorepo** with a shared domain library and two clients that 
 
 | Path | Package | Responsibility |
 | --- | --- | --- |
-| `packages/core` | `@cadence/core` | Types, `createRoom`, `applyOp`, `presentRoom`, scoring, content (62 templates + `searchRetroTemplates` + 20 icebreakers / Health Check), `countries.ts` (travel catalog), glossary, retro export, validation |
+| `packages/core` | `@cadence/core` | Types, `createRoom`, `applyOp`, `presentRoom`, scoring, content (62 templates + `searchRetroTemplates` + 21 icebreakers / Health Check / Lineup), `countries.ts` (travel catalog), glossary, retro export, validation |
 | `apps/web` | `@cadence/web` | Next.js App Router UI, API routes, JSON persistence, HTTP helpers |
 | `apps/mobile` | `@cadence/mobile` | Expo RN client (not in root workspaces; depends via `file:../../packages/core`) |
 
@@ -82,6 +82,7 @@ Not used: WebSockets, CRDTs, OT, or offline queues beyond optimistic local text 
 | Discuss raise hand | Queue in `raisedHands`; named notes highlight; anonymous authorship stays protected |
 | Health Check answers | Peers receive synthetic `health-…` author ids; export author is `Anonymous`; UI shows spreads/averages |
 | Travel Wishlist | Bodies store ISO codes; peers see names normally; CSV expands codes to country names |
+| Lineup answers | Bodies store every current participant id once; peers see ranked display names; CSV → `1. Name, 2. Name` |
 | Server operator | Can read file / Supabase / Redis document — trust the host environment |
 | Transport | No end-to-end encryption; use trusted network |
 
@@ -126,7 +127,7 @@ Details: [API.md](./API.md).
 | `/r/[code]` | `RoomApp` → `RetroBoard` / `ReviewBoard` / `RoadmapBoard` |
 | `/guide` | Definitions from `GLOSSARY` (`guide/page.tsx`) |
 
-Supporting modules: `use-room.ts` (poll + serialized ops), `identity.ts`, `shared-field.tsx`, `icebreaker-panel.tsx` (incl. Health Check `scale` UI), `travel-map.tsx` + `world-map-paths.ts` (Travel Wishlist map), `retro-ui.ts`, glyphs, `credit-footer.tsx` (layout shell), `.guide-link` entry points. Static flag SVGs live under `apps/web/public/flags/`. Core helpers: `content.ts` (`HEALTH_CHECK`, averages), `countries.ts` (175-country catalog).
+Supporting modules: `use-room.ts` (poll + serialized ops), `identity.ts`, `shared-field.tsx`, `icebreaker-panel.tsx` (incl. Health Check `scale` UI), `travel-map.tsx` + `world-map-paths.ts` (Travel Wishlist map), `people-order.tsx` (Lineup `order` UI), `retro-ui.ts`, glyphs, `credit-footer.tsx` (layout shell), `.guide-link` entry points. Static flag SVGs live under `apps/web/public/flags/`. Core helpers: `content.ts` (`HEALTH_CHECK`, averages, `parsePeopleOrder`), `countries.ts` (175-country catalog).
 
 ---
 

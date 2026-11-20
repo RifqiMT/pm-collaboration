@@ -26,8 +26,9 @@ import {
   type Op,
   type RoomView,
 } from "@cadence/core";
-import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+import { PeopleOrder } from "./people-order";
 
 const TravelMap = dynamic(() => import("./travel-map").then((mod) => mod.TravelMap), {
   loading: () => <p className="muted">Loading the map…</p>,
@@ -52,7 +53,8 @@ export function IcebreakerPanel({
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const mine = answers.find((answer) => answer.authorId === actorId);
   const nameOf = (id: string) => room.participants.find((person) => person.id === id)?.name ?? "Someone";
-  const prompt = game.questions?.[round] ?? game.prompt;
+  const prompt =
+    game.id === "lineup" ? retro.icebreakerOrderTitle || game.prompt : game.questions?.[round] ?? game.prompt;
 
   const group = ICEBREAKER_GROUPS.find((item) => item.id === game.group);
 
@@ -114,6 +116,9 @@ export function IcebreakerPanel({
               actorId={actorId}
               nameOf={nameOf}
               send={send}
+              host={host}
+              orderTitle={retro.icebreakerOrderTitle}
+              participants={room.participants}
               participantIds={room.participants.map((person) => person.id)}
             />
           </>
@@ -639,6 +644,9 @@ function Play({
   actorId,
   nameOf,
   send,
+  host,
+  orderTitle,
+  participants,
   participantIds,
 }: {
   game: IcebreakerGame;
@@ -648,8 +656,25 @@ function Play({
   actorId: string;
   nameOf: (id: string) => string;
   send: (op: Op) => Promise<boolean>;
+  host: boolean;
+  orderTitle: string | null;
+  participants: RoomView["participants"];
   participantIds: string[];
 }) {
+  if (game.mode === "order") {
+    return (
+      <PeopleOrder
+        host={host}
+        title={orderTitle}
+        participants={participants}
+        answers={answers}
+        mine={mine}
+        actorId={actorId}
+        nameOf={nameOf}
+        send={send}
+      />
+    );
+  }
   if (game.mode === "choice" || game.mode === "pairs" || game.mode === "note") {
     return <Choices game={game} round={round} answers={answers} mine={mine} nameOf={nameOf} send={send} />;
   }

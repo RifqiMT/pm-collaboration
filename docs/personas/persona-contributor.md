@@ -29,7 +29,7 @@
 
 - Joins via code; identity persists locally  
 - Adds/edits/moves/deletes own notes in brainstorm  
-- Participates in icebreaker games (including Health Check ratings and Travel Wishlist pins)  
+- Participates in icebreaker games (including Health Check ratings, Travel Wishlist pins, and Lineup ordering)  
 - Votes with remaining budget; does not edit notes in vote phase  
 - Takes or completes actions  
 - Signs checklist lines; posts feedback  

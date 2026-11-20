@@ -31,14 +31,15 @@
 
 **Acceptance criteria**
 
-- [ ] Host selects among 20 icebreakers  
+- [ ] Host selects among 21 icebreakers  
 - [ ] Participants submit answers within game-specific limits  
 - [ ] This or That supports host-written pairs (1–8) with distinct sides  
 - [ ] Two truths supports guess/reveal flows  
 - [ ] Health Check requires six scores from 1–7; peers see anonymized spreads/averages (not named authors); CSV author is Anonymous  
 - [ ] Travel Wishlist accepts one to five countries from the shared catalog; web map + flags; CSV/summary use country names  
+- [ ] Lineup lets the host name the order, then each person arranges every participant; a new title clears shared orders  
 
-**PRD:** FR-RET4, FR-RET5 · **Code:** `ICEBREAKERS`, `HEALTH_CHECK`, `countries.ts`, `icebreaker-panel.tsx`, `travel-map.tsx`, mobile icebreaker screens, icebreaker ops
+**PRD:** FR-RET4, FR-RET5 · **Code:** `ICEBREAKERS`, `HEALTH_CHECK`, `countries.ts`, `parsePeopleOrder`, `icebreaker-panel.tsx`, `travel-map.tsx`, `people-order.tsx`, `retro.setOrderTitle`, mobile Health/Travel/Lineup screens
 
 ---
 
