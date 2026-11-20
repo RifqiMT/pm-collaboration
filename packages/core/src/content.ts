@@ -1,4 +1,4 @@
-import { LIMITS, type ColumnTone, type IcebreakerPair, type IcebreakerId, type RetroColumn, type RetroTemplateId, type ReviewDecision, type ReviewState, type RoomKind } from "./types";
+import { LIMITS, type ColumnTone, type DirectionFrameworkId, type DirectionState, type IcebreakerPair, type IcebreakerId, type RetroColumn, type RetroTemplateId, type ReviewDecision, type ReviewState, type RoomKind } from "./types";
 
 export interface RitualCopy {
   kind: RoomKind;
@@ -37,6 +37,12 @@ export const RITUALS: RitualCopy[] = [
     name: "Roadmap",
     promise: "Score bets with RICE, and read complexity next to the business outcome.",
     steps: ["Outcome", "Score", "Complexity", "Sequence"],
+  },
+  {
+    kind: "direction",
+    name: "Product direction",
+    promise: "Write a product vision or a product strategy in a framework the team can read back.",
+    steps: ["Vision", "Strategy", "Statement"],
   },
 ];
 
@@ -2124,17 +2130,17 @@ export function checklistHow(kind: RoomKind, sectionId: string): string[] {
 
 function seedChecklist(sections: ReviewSeedSection[]): ReviewState {
   const mapped = sections.map((section) => ({
-    id: section.id,
-    title: section.title,
-    intent: section.intent,
-    items: section.items.map((item) => ({
-      id: item.id,
-      label: item.label,
-      detail: item.detail,
-      required: Boolean(item.required),
-      doneBy: [],
-      note: "",
-    })),
+      id: section.id,
+      title: section.title,
+      intent: section.intent,
+      items: section.items.map((item) => ({
+        id: item.id,
+        label: item.label,
+        detail: item.detail,
+        required: Boolean(item.required),
+        doneBy: [],
+        note: "",
+      })),
   }));
   return {
     goal: "",
@@ -2150,4 +2156,447 @@ function seedChecklist(sections: ReviewSeedSection[]): ReviewState {
 
 export function createChecklistState(kind: ChecklistKind): ReviewState {
   return seedChecklist(CHECKLIST_SECTIONS[kind]);
+}
+
+export interface DirectionField {
+  id: string;
+  label: string;
+  prompt: string;
+  placeholder: string;
+  /** Groups prompts the way the published board groups them. */
+  part?: string;
+}
+
+export interface DirectionFramework {
+  id: DirectionFrameworkId;
+  group: "vision" | "strategy";
+  name: string;
+  source: string;
+  summary: string;
+  how: string[];
+  fields: DirectionField[];
+}
+
+export const DIRECTION_FRAMEWORKS: DirectionFramework[] = [
+  {
+    id: "vision-board",
+    group: "vision",
+    name: "Product Vision Board",
+    source: "Roman Pichler",
+    summary: "The vision, who it is for, their needs, the product, the business goals, and the business model that makes the vision sustainable.",
+    how: [
+      "Write the positive change first. Features come after the needs.",
+      "Name a market segment and the customers and users in it. Put the most important need at the top.",
+      "Name three to five standout capabilities that set the product apart, and say whether you can build them.",
+      "State business goals as outcomes, in priority order, with a rough target when you have one.",
+      "Then fill the business model: competitors and their strengths, revenue, the main costs, and the channels you will actually use.",
+    ],
+    fields: [
+      {
+        id: "vb-vision",
+        part: "Vision",
+        label: "Vision",
+        prompt: "Why create this product? What positive change should it bring about?",
+        placeholder: "A guest with a broken trip reaches one agent who already has the booking.",
+      },
+      {
+        id: "vb-target",
+        part: "Vision",
+        label: "Target group",
+        prompt: "Which market or segment is this for? Who are the customers and the users?",
+        placeholder: "Customer service agents on a travel marketplace the size of Booking.com",
+      },
+      {
+        id: "vb-needs",
+        part: "Vision",
+        label: "Needs",
+        prompt: "Which problem does it solve, or which benefit does it offer? Put the most important need first.",
+        placeholder: "See the trip, the property, and the allowed change in one place",
+      },
+      {
+        id: "vb-product",
+        part: "Vision",
+        label: "Product",
+        prompt: "What is the product, and which three to five standout features set it apart? Can you build it?",
+        placeholder: "Unified Agent Platform: guest timeline, supplier status, and one resolution",
+      },
+      {
+        id: "vb-business",
+        part: "Vision",
+        label: "Business goals",
+        prompt: "How does the product benefit the company? Put the most important goal first.",
+        placeholder: "Higher first-contact resolution, and disrupted stays that stay booked",
+      },
+      {
+        id: "vb-competitors",
+        part: "Business model",
+        label: "Competitors",
+        prompt: "Who are the main competitors, and what are their strengths and weaknesses?",
+        placeholder: "A generic helpdesk runs the queue. A supplier portal knows the booking.",
+      },
+      {
+        id: "vb-revenue",
+        part: "Business model",
+        label: "Revenue streams",
+        prompt: "How will you monetize the product and create revenue?",
+        placeholder: "Part of the marketplace. Saved stays protect booking revenue.",
+      },
+      {
+        id: "vb-costs",
+        part: "Business model",
+        label: "Cost factors",
+        prompt: "What are the main costs to develop, market, sell, and service the product?",
+        placeholder: "Reservation integrations, policy content, and agent training",
+      },
+      {
+        id: "vb-channels",
+        part: "Business model",
+        label: "Channels",
+        prompt: "How will you market and sell it? Do those channels already exist?",
+        placeholder: "Inside the agent desktop, market by market, starting with stay changes",
+      },
+    ],
+  },
+  {
+    id: "positioning",
+    group: "vision",
+    name: "Positioning statement",
+    source: "Geoffrey Moore",
+    summary: "One sentence: the customer, the need, the product name, the category, the reason to buy, the alternative, and the difference.",
+    how: [
+      "Fill the blanks in order, then read them aloud as one sentence.",
+      "The target is a person who would recognize themselves. The need is urgent and based on what they do today.",
+      "Name the product, then a category the buyer already understands.",
+      "One key benefit: the compelling reason to buy, stated as an outcome.",
+      "The alternative is what they use now, including a spreadsheet or doing nothing. The difference is the reason they would switch, and something you can show.",
+    ],
+    fields: [
+      {
+        id: "mo-for",
+        label: "For",
+        prompt: "For which target customer?",
+        placeholder: "Customer service agents on a travel marketplace",
+      },
+      {
+        id: "mo-who",
+        label: "Who",
+        prompt: "Who have which need or opportunity?",
+        placeholder: "need to resolve a guest's trip change without another tool",
+      },
+      {
+        id: "mo-name",
+        label: "Product name",
+        prompt: "What is the product called?",
+        placeholder: "Unified Agent Platform",
+      },
+      {
+        id: "mo-category",
+        label: "Category",
+        prompt: "It is a member of which familiar category?",
+        placeholder: "service workspace",
+      },
+      {
+        id: "mo-benefit",
+        label: "Key benefit",
+        prompt: "That provides which compelling reason to buy?",
+        placeholder: "shows the booking, the supplier, and the allowed action together",
+      },
+      {
+        id: "mo-unlike",
+        label: "Unlike",
+        prompt: "Unlike which primary alternative?",
+        placeholder: "a generic helpdesk or a supplier portal opened beside the case",
+      },
+      {
+        id: "mo-difference",
+        label: "Difference",
+        prompt: "Our product does what that alternative does not?",
+        placeholder: "ties the trip, the policy, and the resolution to the same conversation",
+      },
+    ],
+  },
+  {
+    id: "playing-to-win",
+    group: "strategy",
+    name: "Playing to Win",
+    source: "A.G. Lafley and Roger Martin",
+    summary: "Five linked choices, the places you refuse, and the conditions that would have to be true.",
+    how: [
+      "Winning is a result in this market. A feature list is not an aspiration.",
+      "Where to play names the customers, the geography, the channel, the offer, and how much of the value chain you own. Where you will not play is the same choice.",
+      "Choose where to play and how to win together. How to win is a lower cost you can sustain, or a difference the customer will pay for, in that place.",
+      "Capabilities are the few that make the how-to-win real. Management systems measure those capabilities and keep the choices in force.",
+      "Ask what would have to be true about customers, capabilities, costs, and competitors. If an assumption is too heroic to bet on, change the choice.",
+    ],
+    fields: [
+      {
+        id: "ptw-aspiration",
+        part: "Strategy choice cascade",
+        label: "Winning aspiration",
+        prompt: "What does winning look like for this product?",
+        placeholder: "Be the workspace agents trust when a guest's trip breaks",
+      },
+      {
+        id: "ptw-where",
+        part: "Strategy choice cascade",
+        label: "Where to play",
+        prompt: "Which customers, geography, channel, offer, and stage of the value chain?",
+        placeholder: "Stay changes for guests, in the agent desktop, where we own the booking",
+      },
+      {
+        id: "ptw-not",
+        part: "Strategy choice cascade",
+        label: "Where we will not play",
+        prompt: "Which attractive places are you refusing?",
+        placeholder: "A guest chatbot that replaces the agent, and a desk sold to other brands",
+      },
+      {
+        id: "ptw-how",
+        part: "Strategy choice cascade",
+        label: "How to win",
+        prompt: "Will you win here on a lower cost you can sustain, or on a difference customers will pay for?",
+        placeholder: "Give the agent the trip and the policy, so the case ends in one contact",
+      },
+      {
+        id: "ptw-capabilities",
+        part: "Strategy choice cascade",
+        label: "Capabilities",
+        prompt: "Which few capabilities must be in place, and reinforce each other, to win this way?",
+        placeholder: "One trip timeline, live supplier status, and policy for that booking",
+      },
+      {
+        id: "ptw-systems",
+        part: "Strategy choice cascade",
+        label: "Management systems",
+        prompt: "Which measures and routines keep those capabilities and choices in place?",
+        placeholder: "A weekly first-contact review. New service work lands in this workspace.",
+      },
+      {
+        id: "ptw-true",
+        part: "What would have to be true",
+        label: "Conditions",
+        prompt: "What would have to be true about customers, your capabilities, your costs, and competitors?",
+        placeholder: "Agents resolve faster when the trip is on screen, and guest satisfaction holds.",
+      },
+    ],
+  },
+  {
+    id: "strategy-kernel",
+    group: "strategy",
+    name: "Strategy kernel",
+    source: "Richard Rumelt",
+    summary: "A diagnosis, the crux you can address, a guiding policy that rules work out, and actions that reinforce each other.",
+    how: [
+      "Start with what is going on and why. A growth target is a goal. The diagnosis is the challenge underneath it.",
+      "Name the crux: the hardest part of that challenge you can actually address. Leave the rest until this moves.",
+      "The guiding policy is a guardrail. Write down the popular work it rules out.",
+      "Actions have to reinforce each other. A list of unrelated projects is a backlog, not a strategy.",
+      "Before you keep it, check for fluff, a refusal to face the challenge, goals standing in for strategy, and objectives that miss the crux.",
+    ],
+    fields: [
+      {
+        id: "sk-diagnosis",
+        part: "Diagnosis",
+        label: "Diagnosis",
+        prompt: "What is going on, and why is that the challenge?",
+        placeholder: "Agents jump between the booking, the property, and a script, so the guest waits",
+      },
+      {
+        id: "sk-crux",
+        part: "Diagnosis",
+        label: "Crux",
+        prompt: "Which part of that challenge can you actually address, and would change the rest if you did?",
+        placeholder: "The agent cannot see the trip, the supplier, and the allowed action together",
+      },
+      {
+        id: "sk-policy",
+        part: "Guiding policy",
+        label: "Guiding policy",
+        prompt: "What overall approach will deal with that crux?",
+        placeholder: "Put the whole case in one workspace before adding another channel",
+      },
+      {
+        id: "sk-ruled-out",
+        part: "Guiding policy",
+        label: "Ruled out",
+        prompt: "Which popular work does this policy make the wrong work?",
+        placeholder: "A new guest chatbot, and extra queues that split the same trip",
+      },
+      {
+        id: "sk-actions",
+        part: "Coherent actions",
+        label: "Coherent actions",
+        prompt: "Which few actions carry out the policy and make each other more effective?",
+        placeholder: "Show the timeline, the supplier status, and one resolution in the open case",
+      },
+    ],
+  },
+  {
+    id: "dhm",
+    group: "strategy",
+    name: "DHM",
+    source: "Gibson Biddle",
+    summary: "Hypotheses for delight, a hard-to-copy advantage, and margin, plus the metric and tactic that test them.",
+    how: [
+      "Delight is a customer outcome people would describe as markedly better, not the name of a feature.",
+      "Hard to copy names a real advantage: brand, network effects, unique technology, or economies of scale. Switching costs, counter-positioning, a cornered resource, and process power count too.",
+      "Margin is the price, plan, or cost that leaves profit to invest in the next product. A lower price with no profit fails this test.",
+      "All three have to be true together. One of them on its own is a tactic.",
+      "Lock the hypothesis to one proxy metric and one tactic that can move that metric.",
+    ],
+    fields: [
+      {
+        id: "dhm-delight",
+        part: "DHM hypothesis",
+        label: "Delight",
+        prompt: "How will the product delight customers, in a way they would miss?",
+        placeholder: "A guest hears the answer in the first conversation, because the agent has the trip",
+      },
+      {
+        id: "dhm-hard",
+        part: "DHM hypothesis",
+        label: "Hard to copy",
+        prompt: "Which advantage makes that hard to copy: brand, network effects, unique technology, scale, or another real moat?",
+        placeholder: "Unique data: the booking, the property, and the policy are already ours",
+      },
+      {
+        id: "dhm-margin",
+        part: "DHM hypothesis",
+        label: "Margin",
+        prompt: "Which price, plan, or cost experiment keeps this profitable enough to fund the next improvement?",
+        placeholder: "Cost per contact falls, and a saved stay stays booked",
+      },
+      {
+        id: "dhm-metric",
+        part: "Strategy, metric, tactic",
+        label: "Proxy metric",
+        prompt: "Which one number tells you this hypothesis is working?",
+        placeholder: "Share of trip changes resolved in the first conversation",
+      },
+      {
+        id: "dhm-tactic",
+        part: "Strategy, metric, tactic",
+        label: "Tactic",
+        prompt: "Which project will you run next to move that metric?",
+        placeholder: "Open the stay, the property status, and the allowed change on the open case",
+      },
+    ],
+  },
+];
+
+export function directionFramework(id: DirectionFrameworkId): DirectionFramework {
+  return DIRECTION_FRAMEWORKS.find((item) => item.id === id) ?? DIRECTION_FRAMEWORKS[0]!;
+}
+
+export function directionParts(framework: DirectionFramework): { part: string; fields: DirectionField[] }[] {
+  const parts: { part: string; fields: DirectionField[] }[] = [];
+  for (const field of framework.fields) {
+    const part = field.part ?? "";
+    const last = parts[parts.length - 1];
+    if (last && last.part === part) last.fields.push(field);
+    else parts.push({ part, fields: [field] });
+  }
+  return parts;
+}
+
+export type DirectionReadbackRow = { label: string; text: string; part?: string };
+
+export type DirectionReadback =
+  | { mode: "empty" }
+  | { mode: "prose"; text: string }
+  | { mode: "rows"; rows: DirectionReadbackRow[] };
+
+function filledRows(rows: [string, string, string?][]): DirectionReadbackRow[] {
+  return rows
+    .filter(([, text]) => text.length > 0)
+    .map(([label, text, part]) => (part ? { label, text, part } : { label, text }));
+}
+
+export function directionReadback(direction: DirectionState): DirectionReadback {
+  const value = (id: string) => (direction.answers[id] ?? "").trim();
+  const framework = directionFramework(direction.framework);
+  if (framework.fields.every((field) => !value(field.id))) {
+    return { mode: "empty" };
+  }
+  if (direction.framework === "positioning") {
+    const customer = [value("mo-for") ? `For ${value("mo-for")}` : "", value("mo-who") ? `who ${value("mo-who")}` : ""]
+      .filter(Boolean)
+      .join(" ");
+    const name = value("mo-name");
+    const category = value("mo-category");
+    const benefit = value("mo-benefit");
+    const offer = [
+      name && category ? `${name} is a ${category}` : name || category,
+      benefit ? `that ${benefit}` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const contrast = [value("mo-unlike") ? `Unlike ${value("mo-unlike")}` : "", value("mo-difference") ? `our product ${value("mo-difference")}` : ""]
+      .filter(Boolean)
+      .join(", ");
+    const sentence = [customer, offer].filter(Boolean).join(", ");
+    const text = !contrast ? sentence : !sentence ? `${contrast}.` : `${sentence}. ${contrast}.`;
+    return { mode: "prose", text };
+  }
+  if (direction.framework === "playing-to-win") {
+    return {
+      mode: "rows",
+      rows: filledRows([
+        ["Winning looks like this", value("ptw-aspiration"), "Strategy choice cascade"],
+        ["Where we play", value("ptw-where"), "Strategy choice cascade"],
+        ["Where we will not play", value("ptw-not"), "Strategy choice cascade"],
+        ["How we win", value("ptw-how"), "Strategy choice cascade"],
+        ["Capabilities", value("ptw-capabilities"), "Strategy choice cascade"],
+        ["Systems", value("ptw-systems"), "Strategy choice cascade"],
+        ["What would have to be true", value("ptw-true"), "What would have to be true"],
+      ]),
+    };
+  }
+  if (direction.framework === "strategy-kernel") {
+    return {
+      mode: "rows",
+      rows: filledRows([
+        ["The challenge", value("sk-diagnosis"), "Diagnosis"],
+        ["The crux", value("sk-crux"), "Diagnosis"],
+        ["Our guiding policy", value("sk-policy"), "Guiding policy"],
+        ["We will not", value("sk-ruled-out"), "Guiding policy"],
+        ["We will", value("sk-actions"), "Coherent actions"],
+      ]),
+    };
+  }
+  if (direction.framework === "dhm") {
+    return {
+      mode: "rows",
+      rows: filledRows([
+        ["Delight", value("dhm-delight"), "DHM hypothesis"],
+        ["Hard to copy", value("dhm-hard"), "DHM hypothesis"],
+        ["Margin", value("dhm-margin"), "DHM hypothesis"],
+        ["Proxy metric", value("dhm-metric"), "Strategy, metric, tactic"],
+        ["Tactic", value("dhm-tactic"), "Strategy, metric, tactic"],
+      ]),
+    };
+  }
+  return {
+    mode: "rows",
+    rows: filledRows([
+      ["Vision", value("vb-vision"), "Vision"],
+      ["For", value("vb-target"), "Vision"],
+      ["Needs", value("vb-needs"), "Vision"],
+      ["Product", value("vb-product"), "Vision"],
+      ["Business", value("vb-business"), "Vision"],
+      ["Competitors", value("vb-competitors"), "Business model"],
+      ["Revenue", value("vb-revenue"), "Business model"],
+      ["Costs", value("vb-costs"), "Business model"],
+      ["Channels", value("vb-channels"), "Business model"],
+    ]),
+  };
+}
+
+export function directionStatement(direction: DirectionState): string {
+  const readback = directionReadback(direction);
+  if (readback.mode === "empty") {
+    return "The statement appears here as the room fills in the prompts.";
+  }
+  if (readback.mode === "prose") return readback.text;
+  return readback.rows.map((row) => `${row.label}: ${row.text}`).join("\n");
 }

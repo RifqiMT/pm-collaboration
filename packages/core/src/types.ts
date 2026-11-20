@@ -1,4 +1,4 @@
-export type RoomKind = "retro" | "planning" | "refinement" | "review" | "roadmap";
+export type RoomKind = "retro" | "planning" | "refinement" | "review" | "roadmap" | "direction";
 
 export type RetroTemplateId =
   | "start-stop-continue"
@@ -95,6 +95,14 @@ export type IcebreakerId =
 export type ColumnTone = "good" | "bad" | "idea" | "neutral";
 
 export type FrameworkId = "rice" | "ice" | "value-complexity";
+
+export type DirectionFrameworkId = "vision-board" | "positioning" | "playing-to-win" | "strategy-kernel" | "dhm";
+
+export interface DirectionState {
+  framework: DirectionFrameworkId;
+  /** Prompt answers. Keys are field ids. Switching framework keeps answers already written. */
+  answers: Record<string, string>;
+}
 
 export type ImpactLevel = 0.25 | 0.5 | 1 | 2 | 3;
 
@@ -281,6 +289,7 @@ export interface Room {
   retro: RetroState | null;
   review: ReviewState | null;
   roadmap: RoadmapState | null;
+  direction: DirectionState | null;
 }
 
 export interface RetroCardView {
@@ -317,6 +326,7 @@ export interface RoomView {
   retro: RetroView | null;
   review: ReviewState | null;
   roadmap: RoadmapState | null;
+  direction: DirectionState | null;
 }
 
 export interface Insight {
@@ -374,7 +384,9 @@ export type Op =
   | { type: "roadmap.setObjective"; objective: string }
   | { type: "roadmap.addInitiative" }
   | { type: "roadmap.patchInitiative"; initiativeId: string; patch: InitiativePatch }
-  | { type: "roadmap.deleteInitiative"; initiativeId: string };
+  | { type: "roadmap.deleteInitiative"; initiativeId: string }
+  | { type: "direction.setFramework"; framework: DirectionFrameworkId }
+  | { type: "direction.setAnswer"; fieldId: string; value: string };
 
 export interface InitiativePatch {
   title?: string;
@@ -433,6 +445,7 @@ export const LIMITS = {
   initiativeTitle: 120,
   outcome: 400,
   assumption: 400,
+  directionAnswer: 800,
 } as const;
 
 export const PALETTE = [

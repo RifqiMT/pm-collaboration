@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-20 (five rituals + retro PPT)  
+**Last updated:** 2026-11-20 (product direction)  
 
 ---
 
@@ -140,7 +140,7 @@ Hover (pointer devices): stronger border + `--shadow-lift`; ritual cards lift `-
 
 - Bordered card, not a dashboard grid of metrics  
 - Index `01…`, title, promise, detail, step list  
-- Kind-specific class `kind-retro|planning|refinement|review|roadmap`  
+- Kind-specific class `kind-retro|planning|refinement|review|roadmap|direction`  
 
 ### 5.4 Forms & fields
 
@@ -154,6 +154,7 @@ Hover (pointer devices): stronger border + `--shadow-lift`; ritual cards lift `-
 | Retro | Columns with glyphs that scale with note volume; phase tools; timers; Summary CSV/PPT downloads |
 | Planning / Refinement / Review | Shared checklist board (`ReviewBoard`) with ritual eyebrow, how-to steps, goal/focus, feedback, kind-scoped decision trio |
 | Roadmap | Initiative cards + score/complexity chart + insights |
+| Direction | Framework picker (vision vs strategy), part rail, prompt fields, live readback masthead (`.direction-*` / `.ritual.direction`) |
 
 ### 5.6 Icebreaker This or That
 
@@ -205,7 +206,7 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 ### 5.6e Definitions (`/guide`)
 
 - Quiet `.guide-link` in wordmark rows (home, room) and roadmap scoring help  
-- Guide page: legend for Variable / Metric / Formula kinds, jump nav by ritual (five groups), entry cards with plain / formula / example / where  
+- Guide page: legend for Variable / Metric / Formula kinds, jump nav by ritual (six groups), entry cards with plain / formula / example / where  
 - Kind chips use semantic tones without competing with ritual boards  
 - Mobile Guide mirrors the same content hierarchy without the web jump chrome  
 
@@ -214,6 +215,13 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 - Group `.summary-downloads` with copy + CSV/PPT actions (`.summary-download-btn`)  
 - PPT is primary for facilitator share-out; CSV remains available as ghost/secondary  
 - Keep export chrome in Summary only—do not promote downloads into earlier phases  
+
+### 5.6g Product direction
+
+- Masthead shows progress meter + live readback (sentence or grouped rows)  
+- Framework chips split Vision vs Strategy; calm selection, not competing hero chrome  
+- Part rail advances through framework sections; how-to panel stays optional/collapsible  
+- Prompt fields use `SharedField`; keep ink/paper tokens—avoid decorative strategy “canvas” kits  
 
 ### 5.7 Roadmap chart
 
@@ -286,6 +294,7 @@ Site-wide attribution sits at the bottom of the shell (web) and at the end of ho
 - Shape picker: `apps/web/src/components/new-room-form.tsx`, mobile create in `App.js`  
 - Icebreakers: `icebreaker-panel.tsx`, `travel-map.tsx`, `world-map-paths.ts`, `people-order.tsx`, `apps/web/public/flags/`  
 - PPT export: `apps/web/src/lib/retro-pptx.ts` (brand hex mirrored from CSS tokens)  
+- Product direction: `apps/web/src/components/direction-board.tsx`, mobile direction screen in `App.js`  
 - Definitions page: `apps/web/src/app/guide/page.tsx`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
 - Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  

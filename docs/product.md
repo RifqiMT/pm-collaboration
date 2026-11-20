@@ -1,6 +1,6 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-20 (five rituals + retro PPT export)  
+**Status:** Current as of repository state 2026-11-20 (product direction)  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
 **Canonical path:** `docs/product.md` (use this casing in links for case-sensitive hosts).
@@ -9,13 +9,14 @@
 
 ## 1. Product overview
 
-TeamCompass is a **shared collaboration room** for five sprint rituals:
+TeamCompass is a **shared collaboration room** for six rituals:
 
 1. **Retrospective** — warm up, write privately, discuss, vote, own actions, export a summary  
 2. **Sprint planning** — set a Sprint Goal, let Developers forecast what can be Done, and plan how  
 3. **Backlog refinement** — add detail, size, and order so an item can be selected later  
 4. **Sprint review** — inspect the Increment with stakeholders and adapt the Product Backlog  
 5. **Roadmap** — score initiatives with RICE, ICE, or value÷complexity, with complexity as a first-class lens  
+6. **Product direction** — write a product vision or a product strategy in a professional framework, then read it back as one statement  
 
 People join with a **six-character room code**. There are **no accounts**. Everyone who has the code edits the same board. The **web app** is the full room experience and hosts the API. The **phone app** (Expo) joins the same rooms over the same HTTP API and shared domain package.
 
@@ -47,9 +48,11 @@ Primary users are agile product and engineering teams running time-boxed rituals
 
 ### 3.1 Rooms and presence
 
-- Create a room by ritual kind (`retro` | `planning` | `refinement` | `review` | `roadmap`), optional title, host name, and (for retros) template  
-- Optional **demo** seed: 10 notes per retro column, checklist demos for planning / refinement / review, and 10 scored roadmap bets  
+- Create a room by ritual kind (`retro` | `planning` | `refinement` | `review` | `roadmap` | `direction`), optional title, host name, and (for retros) template  
+- Optional **demo** seed: 10 notes per retro column, checklist demos for planning / refinement / review, roadmap bets, and a filled product-direction example (`demoDirectionContent`)  
 - Planning and refinement store their board in `room.review` via `createChecklistState(kind)` (same checklist ops as sprint review; decisions are kind-scoped)  
+- Product direction stores `room.direction` (`DirectionState`: framework + answers map)  
+
  
 - Join by six-character code and display name  
 - Local identity persisted in browser `localStorage` / mobile AsyncStorage (`person_…` id + name)  
@@ -119,9 +122,26 @@ Inspect and adapt, with how-to steps on each part:
 - Ranked list with relative bar  
 - Inline link to roadmap Definitions (`/guide#guide-roadmap`)  
 
-### 3.7 Definitions (cross-cutting)
+### 3.7 Product direction
 
-Plain-English **variables**, **metrics**, and **formulas** for the rituals, shared from `@cadence/core` `GLOSSARY` (**31** entries across **5** groups: retro, planning, refinement, review, roadmap).
+A shared room for a product vision or a product strategy. Switching framework keeps answers already written. Each framework includes how to fill it in.
+
+**Vision**
+
+- **Product Vision Board** (Roman Pichler, extended board): vision, target group, needs, product, and business goals, then competitors, revenue streams, cost factors, and channels  
+- **Positioning statement** (Geoffrey Moore): for, who, product name, category, key benefit, alternative, and difference, read back as one sentence  
+
+**Strategy**
+
+- **Playing to Win** (Lafley and Martin): winning aspiration, where to play (customers, geography, channel, offer, value chain), where you will not play, how to win, capabilities, management systems, and what would have to be true  
+- **Strategy kernel** (Richard Rumelt): diagnosis, the crux, guiding policy, what that policy rules out, and coherent actions  
+- **DHM** (Gibson Biddle): delight, hard to copy, and margin, locked to one proxy metric and one tactic  
+
+The room reads the answers back as one statement. An example room fills every framework with a unified agent platform for customer service on a travel marketplace the size of Booking.com.
+
+### 3.8 Definitions (cross-cutting)
+
+Plain-English **variables**, **metrics**, and **formulas** for the rituals, shared from `@cadence/core` `GLOSSARY` (**33** entries across **6** groups: retro, planning, refinement, review, roadmap, and product direction).
 
 | Surface | Entry point |
 | --- | --- |
@@ -130,13 +150,13 @@ Plain-English **variables**, **metrics**, and **formulas** for the rituals, shar
 
 Kinds: Variable (something the team enters) · Metric (a number the board calculates) · Formula (the math behind a metric). Engineering catalog remains [VARIABLES.md](./VARIABLES.md).
 
-### 3.8 Platforms
+### 3.9 Platforms
 
 | Surface | Role |
 | --- | --- |
 | Web (`apps/web`) | Full UI, App Router pages (`/`, `/new`, `/r/[code]`, `/guide`), room API, persistence (`file` / `supabase` / `redis`) |
 | Mobile (`apps/mobile`) | Expo client: home / guide / create / room (2s poll; raise hand; no timer or vote-budget chrome) |
-| Core (`packages/core`) | Types, ops, privacy, scoring, content (21 icebreakers + checklist rituals), **countries**, demo seed, CSV export, **retro deck** (`retrospectiveDeck`), **glossary** |
+| Core (`packages/core`) | Types, ops, privacy, scoring, content (21 icebreakers + checklist rituals + direction frameworks), **countries**, demo seed, CSV export, **retro deck**, **glossary** (33/6) |
 | Credit | Site-wide developer credit footer on web; home/create on mobile (`credit-footer`) |
 
 ---
@@ -157,6 +177,7 @@ Kinds: Variable (something the team enters) · Metric (a number the board calcul
 12. **Health Check anonymity** is a peer-facing presentation rule: scores stay in the room document, but other clients never receive the real author id; CSV author is `Anonymous`.  
 13. **Travel Wishlist** stores ISO country codes only from `TRAVEL_COUNTRIES` (max 5); export and summary expand codes to names.  
 14. **Lineup** requires every current participant exactly once in the answer body; renaming the lineup clears previously shared orders so the room reorders under the new meaning.  
+15. **Product direction** answers are capped at 800 characters per field; a field must belong to the active framework; switching frameworks keeps prior answers; the board reads answers back via `directionReadback` / `directionStatement`. Direction ops are open to any joined actor (not host-gated).  
 
 Collaboration flow:
 

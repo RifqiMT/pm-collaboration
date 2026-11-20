@@ -31,9 +31,10 @@
 - Joins review rooms; may host  
 - Edits sprint goal and decision notes  
 - Watches checklist progress; adds evidence notes  
-- Creates roadmap room; switches frameworks  
+- Creates roadmap room; switches scoring frameworks  
 - Patches initiative fields; reads quadrant insights  
 - Sequences big bets vs do-first items  
+- Opens a **product direction** room for vision or strategy; fills frameworks and reads the statement back  
 
 ## Needs from the product
 

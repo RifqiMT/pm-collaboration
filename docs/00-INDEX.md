@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-20 (five rituals + retro PPT)  
+**Last documentation refresh:** 2026-11-20 (product direction)  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -56,8 +56,9 @@ This index is the reading map for product, engineering, design, and leadership s
 | Shape picker UI | `apps/web/.../new-room-form.tsx`, mobile create in `App.js`, `.shape-finder*` |
 | Health / Travel / Lineup UI | `icebreaker-panel.tsx`, `travel-map.tsx`, `people-order.tsx`, `public/flags/*.svg`; mobile counterparts in `App.js` |
 | Planning / refinement / review board | `review-board.tsx` + mobile checklist screens; kind-scoped decisions |
-| Demo seed data | `packages/core/src/demo.ts` (incl. planning + refinement demos) |
-| In-app Definitions glossary | `packages/core/src/glossary.ts` (31 entries / 5 groups) |
+| Product direction | `DIRECTION_FRAMEWORKS`, `directionReadback` / `directionStatement`; `direction-board.tsx`; mobile direction screen |
+| Demo seed data | `packages/core/src/demo.ts` (incl. planning + refinement + direction demos) |
+| In-app Definitions glossary | `packages/core/src/glossary.ts` (33 entries / 6 groups) |
 | Retro CSV export | `packages/core/src/retro-export.ts` |
 | Retro PPT deck | `packages/core/src/retro-deck.ts` → `apps/web/src/lib/retro-pptx.ts` (`pptxgenjs`) |
 | Web UI & polling | `apps/web/src/components/` |

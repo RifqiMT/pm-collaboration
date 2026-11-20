@@ -11,6 +11,8 @@ import {
   type RetroCard,
   type RetroColumn,
   type ReviewDecision,
+  type DirectionFrameworkId,
+  type DirectionState,
 } from "./types";
 
 const DEMO_NOTES_PER_COLUMN = 10;
@@ -2468,6 +2470,47 @@ export function demoRefinementContent(authors: DemoAuthor[], now: string): {
       "order-deps": "Depends on the Payments retry token. Owner: Payments. Needed before a Developer starts.",
       "order-call": "The room called the retry item Selectable. The Finance tile is Return until the data contract exists.",
       "order-next": "Next item to refine: the Finance recovery tile, once the data contract exists.",
+    },
+  };
+}
+
+export function demoDirectionContent(): { framework: DirectionFrameworkId; answers: DirectionState["answers"] } {
+  return {
+    framework: "vision-board",
+    answers: {
+      "vb-vision": "A guest whose trip breaks reaches one agent who already has the booking, the supplier, and the policy, and leaves with a resolution.",
+      "vb-target": "Customer service agents and their team leads on a travel marketplace the size of Booking.com.",
+      "vb-needs": "See the whole trip, the property or airline, and the allowed action, and resolve the case without opening another tool.",
+      "vb-product": "Unified Agent Platform: one guest timeline, supplier status, the policy for that booking, and the change, refund, or rebook the agent can make.",
+      "vb-business": "Raise first-contact resolution, shorten handle time, and keep disrupted stays on the platform instead of turning them into refunds.",
+      "vb-competitors": "Generic contact-center suites run the queue and miss the trip. Supplier portals know the booking and miss the conversation.",
+      "vb-revenue": "The platform is part of the marketplace. It protects booking revenue by saving stays, and it lowers the cost of each contact.",
+      "vb-costs": "The main costs are reservation and supplier integrations, policy content, agent training, and the suggested next action.",
+      "vb-channels": "Roll it out inside the agent desktop the service team already uses, market by market, starting with stay changes.",
+      "mo-for": "Customer service agents on a travel marketplace the size of Booking.com",
+      "mo-who": "need to resolve a guest's trip change without hunting through supplier tools",
+      "mo-name": "Unified Agent Platform",
+      "mo-category": "service workspace",
+      "mo-benefit": "shows the booking, the supplier, and the allowed action in the same conversation",
+      "mo-unlike": "a generic helpdesk or a supplier portal the agent has to open beside the case",
+      "mo-difference": "ties the trip, the policy, and the resolution to the conversation the agent already has open",
+      "ptw-aspiration": "Be the service workspace agents trust when a guest's trip breaks.",
+      "ptw-where": "Stay and flight changes for guests on our marketplace, inside the agent desktop, in markets where we own the booking.",
+      "ptw-not": "A guest chatbot that replaces the agent, a desk sold to other travel brands, and back-office finance.",
+      "ptw-how": "Win by giving the agent trip context and policy a generic contact-center suite does not have, so the case ends in one contact.",
+      "ptw-capabilities": "One trip timeline, live supplier status, policy that matches the booking, and an action the agent can take in the conversation.",
+      "ptw-systems": "A weekly review of first-contact resolution by case type. New service work has to land in this workspace.",
+      "ptw-true": "Agents resolve faster when the trip is already on screen, suppliers answer in time, and cost per contact falls while guest satisfaction holds.",
+      "sk-diagnosis": "Agents handle a disrupted stay by jumping between the booking, the property, the airline, and a script, so the guest waits and often calls again.",
+      "sk-crux": "The agent cannot see the trip, the supplier, and the allowed action at the same moment.",
+      "sk-policy": "Put the whole case in one workspace before we add another channel or another bot.",
+      "sk-ruled-out": "A new guest-facing chatbot, and more specialist queues that split the same trip across teams.",
+      "sk-actions": "Show the trip timeline, the supplier status, and one allowed resolution in the conversation the agent already has open.",
+      "dhm-delight": "A guest with a broken stay hears the answer in the first conversation, because the agent already has the trip.",
+      "dhm-hard": "Unique data: the booking, the property, and the policy live on our marketplace, which a generic helpdesk cannot see.",
+      "dhm-margin": "Cost per contact falls, and a saved stay stays on the platform instead of becoming a refund.",
+      "dhm-metric": "The share of trip-change contacts resolved in the first conversation, with guest satisfaction held.",
+      "dhm-tactic": "Open the stay, the property status, and the allowed change on the case the agent already has.",
     },
   };
 }

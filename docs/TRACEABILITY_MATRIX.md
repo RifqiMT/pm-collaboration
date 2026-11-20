@@ -2,7 +2,7 @@
 
 **Document type:** Requirements ↔ Stories ↔ Implementation ↔ Verification  
 **Product:** TeamCompass (`@cadence/*`)  
-**Last updated:** 2026-11-20 (five rituals + retro PPT)  
+**Last updated:** 2026-11-20 (product direction)  
 
 ---
 
@@ -22,7 +22,7 @@
 
 | Req ID | Requirement (short) | Story | Implementation | Verification | Status |
 | --- | --- | --- | --- | --- | --- |
-| FR-R1 | Create ritual room (5 kinds) | US-1.1 | `api/rooms/route.ts`, `new-room-form.tsx`, `createRoom`, `createChecklistState` | `room.test.ts` create flows | Implemented |
+| FR-R1 | Create ritual room (6 kinds) | US-1.1 | `api/rooms/route.ts`, `new-room-form.tsx`, `createRoom`, `createChecklistState`, `blankDirection` | `room.test.ts` create flows | Implemented |
 | FR-R2 | 6-char code | US-1.1 | `store.ts` `makeCode` | Manual + create API | Implemented |
 | FR-R3 | Join with code + name | US-1.2 | `…/join/route.ts`, `room-app.tsx` | Core join + full room | Implemented |
 | FR-R4 | Persist identity | US-1.3 | `identity.ts`, mobile AsyncStorage | Manual | Implemented |
@@ -84,6 +84,17 @@
 | FR-RM4 | Quadrants + insights | US-4.4 | `quadrantFor`, `insightFor` | Quadrant tests | Implemented |
 | FR-RM5 | Horizon + owner | US-4.5 | `Initiative` patch | Patch validation | Implemented |
 | FR-RM6 | Objective field | US-4.2 | `setObjective` | Core | Implemented |
+
+---
+
+## 5b. Product direction
+
+| Req ID | Requirement (short) | Story | Implementation | Verification | Status |
+| --- | --- | --- | --- | --- | --- |
+| FR-DIR1 | Vision frameworks | US-7.1 | `DIRECTION_FRAMEWORKS` (vision-board, positioning), `direction-board.tsx`, mobile | `room.test.ts` direction cases | Implemented |
+| FR-DIR2 | Strategy frameworks | US-7.1 | Playing to Win, strategy kernel, DHM (+ metric/tactic) | Framework switch test | Implemented |
+| FR-DIR3 | How-to per framework | US-7.1 | `DirectionFramework.how`, direction board how panel | Manual + content coverage | Implemented |
+| FR-DIR4 | Statement and kept answers | US-7.1 | `directionReadback` / `directionStatement`, `direction.setAnswer` keeps answers on switch | Demo seed + statement test | Implemented |
 
 ---
 

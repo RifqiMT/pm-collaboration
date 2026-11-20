@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { createIdentityId, initials, readIdentity, writeIdentity, type Identity } from "./identity";
 import { RetroBoard } from "./retro-board";
 import { ReviewBoard } from "./review-board";
+import { DirectionBoard } from "./direction-board";
 import { RoadmapBoard } from "./roadmap-board";
 import { SharedField } from "./shared-field";
 import { useRoom } from "./use-room";
@@ -150,6 +151,7 @@ export function RoomApp({ code }: { code: string }) {
 function Board({ room, actorId, send }: { room: RoomView; actorId: string; send: (op: Op) => Promise<boolean> }) {
   if (room.kind === "retro") return <RetroBoard room={room} actorId={actorId} send={send} />;
   if (isChecklistKind(room.kind)) return <ReviewBoard room={room} actorId={actorId} send={send} />;
+  if (room.kind === "direction") return <DirectionBoard room={room} send={send} />;
   return <RoadmapBoard room={room} actorId={actorId} send={send} />;
 }
 

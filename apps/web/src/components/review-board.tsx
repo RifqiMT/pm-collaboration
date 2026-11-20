@@ -9,7 +9,7 @@ import {
   type Op,
   type RoomView,
 } from "@cadence/core";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { initials } from "./identity";
 import { formatElapsed } from "./retro-ui";
 import { SharedField } from "./shared-field";
@@ -30,7 +30,9 @@ export function ReviewBoard({
   send: (op: Op) => Promise<boolean>;
 }) {
   const review = room.review;
+  const howId = useId();
   const [openNotes, setOpenNotes] = useState<Record<string, boolean>>({});
+  const [howOpen, setHowOpen] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -39,6 +41,10 @@ export function ReviewBoard({
     const timer = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(timer);
   }, [review?.activeSectionId, review?.stopwatchRunningSince, Boolean(review)]);
+
+  useEffect(() => {
+    setHowOpen(false);
+  }, [review?.activeSectionId]);
 
   if (!review) return null;
 
@@ -58,7 +64,9 @@ export function ReviewBoard({
   const how = checklistHow(room.kind, activeSection.id);
   const requiredOpen = progress.requiredTotal - progress.requiredDone;
   const sectionDone = activeSection.items.filter((item) => item.doneBy.length > 0).length;
+  const sectionOpen = activeSection.items.length - sectionDone;
   const activeElapsed = checklistStopwatchMs(review, activeSection.id, now);
+  const circumference = 188.4;
 
   const goToSection = (sectionId: string) => {
     if (sectionId === activeSection.id) return;
@@ -67,19 +75,19 @@ export function ReviewBoard({
 
   return (
     <div className={`ritual review kind-${room.kind}`}>
-      <header className="ritual-hero review-hero">
-        <div className="ritual-hero-main">
-          <div className="ritual-hero-copy">
+      <header className="review-masthead">
+        <div className="review-masthead-main">
+          <div className="review-masthead-copy">
             <p className="eyebrow">{ritual.eyebrow}</p>
             <h2>{ritual.headline}</h2>
             <p>{ritual.lede}</p>
           </div>
-          <section className="ritual-focus" aria-label={ritual.goalLabel}>
-            <div className="ritual-focus-label">
+          <section className="review-goal" aria-label={ritual.goalLabel}>
+            <div className="review-goal-label">
               <span className="eyebrow">{ritual.goalLabel}</span>
               <span>{ritual.goalHint}</span>
             </div>
-            <span className="field-shell ritual-focus-shell">
+            <span className="field-shell review-goal-shell">
               <SharedField
                 value={review.goal}
                 onCommit={(goal) => send({ type: "review.setGoal", goal })}
@@ -88,18 +96,26 @@ export function ReviewBoard({
                 multiline
                 rows={2}
                 maxLength={240}
-                className="field-control ritual-focus-field"
+                className="field-control review-goal-field"
               />
             </span>
           </section>
         </div>
-        <aside className="ritual-hero-aside review-progress" aria-label="Required checklist progress">
-          <p className="eyebrow">{ritual.progressLabel}</p>
-          <strong className="ritual-hero-stat">{percent}%</strong>
-          <div className="review-meter-bar" aria-hidden="true">
-            <span style={{ width: `${percent}%` }} />
+        <div className="review-meter" aria-label="Required checklist progress">
+          <div className="review-meter-ring" aria-hidden="true">
+            <svg viewBox="0 0 72 72">
+              <circle className="review-meter-track" cx="36" cy="36" r="30" />
+              <circle
+                className="review-meter-progress"
+                cx="36"
+                cy="36"
+                r="30"
+                style={{ strokeDasharray: `${(percent / 100) * circumference} ${circumference}` }}
+              />
+            </svg>
+            <strong>{percent}%</strong>
           </div>
-          <ul className="ritual-hero-chips">
+          <ul>
             <li>
               <span>Required</span>
               <strong>
@@ -110,17 +126,15 @@ export function ReviewBoard({
               <span>{requiredOpen > 0 ? "Open" : "Status"}</span>
               <strong>{requiredOpen > 0 ? requiredOpen : "Clear"}</strong>
             </li>
-            {decisionMeta ? (
-              <li>
-                <span>Call</span>
-                <strong>{decisionMeta.label}</strong>
-              </li>
-            ) : null}
+            <li>
+              <span>Call</span>
+              <strong>{decisionMeta ? decisionMeta.label : "—"}</strong>
+            </li>
           </ul>
-        </aside>
+        </div>
       </header>
 
-      <div className="review-layout">
+      <div className="review-stage-wrap">
         <div className="review-main">
           <nav
             className="review-steps"
@@ -182,63 +196,69 @@ export function ReviewBoard({
             })}
           </nav>
 
-          <section className="review-stage" key={activeSection.id}>
-            <header className="review-stage-head">
+          <section className="review-studio" key={activeSection.id}>
+            <header className="review-studio-head">
               <div>
                 <p className="eyebrow">
-                  Step {sectionIndex + 1} of {review.sections.length}
-                  {sectionDone === activeSection.items.length
-                    ? " · Clear"
-                    : ` · ${activeSection.items.length - sectionDone} open`}
+                  Step {String(sectionIndex + 1).padStart(2, "0")} of {String(review.sections.length).padStart(2, "0")}
                   {" · "}
-                  <span className="review-stage-clock" title="Stopwatch">
-                    <StopwatchIcon />
-                    {formatElapsed(activeElapsed)}
-                  </span>
+                  {sectionOpen === 0 ? "Clear" : `${sectionOpen} open`}
                 </p>
                 <h3>{activeSection.title}</h3>
                 <p>{activeSection.intent}</p>
               </div>
-              <div className="review-stage-nav">
-                <button
-                  type="button"
-                  className="btn tiny ghost"
-                  disabled={sectionIndex <= 0}
-                  onClick={() => goToSection(review.sections[sectionIndex - 1]!.id)}
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  className="btn tiny primary"
-                  disabled={sectionIndex >= review.sections.length - 1}
-                  onClick={() => goToSection(review.sections[sectionIndex + 1]!.id)}
-                >
-                  Next section
-                </button>
+              <div className="review-studio-tools">
+                <span className="review-studio-clock" title="Stopwatch">
+                  <StopwatchIcon />
+                  {formatElapsed(activeElapsed)}
+                </span>
+                <div className="review-stage-nav">
+                  <button
+                    type="button"
+                    className="btn tiny ghost"
+                    disabled={sectionIndex <= 0}
+                    onClick={() => goToSection(review.sections[sectionIndex - 1]!.id)}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    className="btn tiny primary"
+                    disabled={sectionIndex >= review.sections.length - 1}
+                    onClick={() => goToSection(review.sections[sectionIndex + 1]!.id)}
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </header>
 
             {how.length > 0 ? (
-              <aside className="review-how" aria-label="How to do it">
-                <header className="review-how-head">
-                  <div>
-                    <p className="eyebrow">How to do it</p>
-                    <strong>Work this section in order</strong>
-                  </div>
-                  <span className="review-how-count">{how.length}</span>
-                </header>
-                <ol>
-                  {how.map((step, index) => (
-                    <li key={step}>
-                      <span className="review-how-step" aria-hidden="true">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <p>{step}</p>
-                    </li>
-                  ))}
-                </ol>
-              </aside>
+              <div className="review-guide">
+                <button
+                  type="button"
+                  className={`review-guide-toggle${howOpen ? " open" : ""}`}
+                  aria-expanded={howOpen}
+                  aria-controls={howId}
+                  onClick={() => setHowOpen((value) => !value)}
+                >
+                  <span>
+                    <span className="eyebrow">How to do it</span>
+                    <strong>{howOpen ? "Hide facilitation steps" : "Show facilitation steps"}</strong>
+                  </span>
+                  <em aria-hidden="true">{howOpen ? "−" : "+"}</em>
+                </button>
+                {howOpen ? (
+                  <ol id={howId} className="review-guide-list">
+                    {how.map((step, index) => (
+                      <li key={step}>
+                        <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                        <p>{step}</p>
+                      </li>
+                    ))}
+                  </ol>
+                ) : null}
+              </div>
             ) : null}
 
             <ul className="review-checks">
@@ -329,7 +349,7 @@ export function ReviewBoard({
           <section className="review-outcome">
             <header className="review-outcome-head">
               <p className="eyebrow">{ritual.decisionHeading}</p>
-              <h2>{decisionMeta ? decisionMeta.label : "Not called"}</h2>
+              <h3>{decisionMeta ? decisionMeta.label : "Not called"}</h3>
               <p>{decisionMeta ? decisionMeta.detail : ritual.decisionIdle}</p>
             </header>
             <div className="decision-pills" role="radiogroup" aria-label={ritual.decisionHeading}>
@@ -337,7 +357,11 @@ export function ReviewBoard({
                 <button
                   key={decision.id}
                   type="button"
-                  className={review.decision === decision.id ? `decision-pill on ${decision.id}` : `decision-pill ${decision.id}`}
+                  className={
+                    review.decision === decision.id
+                      ? `decision-pill on ${decision.id}`
+                      : `decision-pill ${decision.id}`
+                  }
                   aria-pressed={review.decision === decision.id}
                   onClick={() =>
                     void send({
@@ -373,7 +397,9 @@ export function ReviewBoard({
           <section className="review-feedback">
             <header className="review-outcome-head">
               <p className="eyebrow">Live feedback</p>
-              <h2>{review.feedback.length || "None"} yet</h2>
+              <h3>
+                {review.feedback.length === 0 ? "None yet" : `${review.feedback.length} note${review.feedback.length === 1 ? "" : "s"}`}
+              </h3>
               <p>{ritual.feedbackLede}</p>
             </header>
             <FeedbackComposer send={send} placeholder={ritual.feedbackLede} />

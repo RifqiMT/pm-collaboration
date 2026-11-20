@@ -1,7 +1,7 @@
 # TeamCompass — Product Metrics & OKRs
 
 **Audience:** Product team, engineering leads, facilitators of internal adoption  
-**Last updated:** 2026-11-20 (five rituals + retro PPT)  
+**Last updated:** 2026-11-20 (product direction)  
 **Note:** TeamCompass MVP does not yet ship an analytics pipeline. Metrics below define what to measure when instrumentation is added, plus qualitative proxies available today from `rooms.json` and meeting outcomes.
 
 ---
@@ -66,6 +66,8 @@
 | `ppt_export_rate` | PPT export rate | PPT downloads / retros reaching summary | Inform share-out quality; no hard target yet |
 | `planning_decision_rate` | Planning call recorded | Planning rooms with non-null decision / planning rooms | ≥ 85% |
 | `refinement_decision_rate` | Refinement call recorded | Refinement rooms with non-null decision / refinement rooms | ≥ 85% |
+| `direction_completion_rate` | Direction fields filled | Filled prompts / prompts on active framework at leave | ≥ 70% when used |
+| `direction_framework_mix` | Direction framework mix | Creates/switches by `DirectionFrameworkId` | Inform method preference; no hard target |
 | `raise_hand_rate` | Discuss raise-hand usage | Retros with ≥1 raise-hand op in Discuss / retros reaching Discuss | Inform facilitation quality; no hard target yet |
 | `guide_open_rate` | Definitions opens | Sessions that open `/guide` or mobile Guide / total sessions | Inform onboarding clarity; no hard target yet |
 

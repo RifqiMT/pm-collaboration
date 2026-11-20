@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { columnMark, previewMediaCandidates, RETRO_TEMPLATE_GROUPS, RETRO_TEMPLATES, RITUALS, checklistHow, retroColumnCounts, searchRetroTemplates, truthDisplayOrder } from "./content";
+import { columnMark, previewMediaCandidates, DIRECTION_FRAMEWORKS, RETRO_TEMPLATE_GROUPS, RETRO_TEMPLATES, RITUALS, checklistHow, directionStatement, retroColumnCounts, searchRetroTemplates, truthDisplayOrder } from "./content";
 import { formatScore, formulaLine, scoreInitiative, scoreRoadmap } from "./scoring";
 import { retrospectiveExport } from "./retro-export";
 import {
@@ -241,7 +241,7 @@ describe("media previews", () => {
 
 describe("rituals", () => {
   it("offers the collaboration rooms", () => {
-    expect(RITUALS.map((ritual) => ritual.kind)).toEqual(["retro", "planning", "refinement", "review", "roadmap"]);
+    expect(RITUALS.map((ritual) => ritual.kind)).toEqual(["retro", "planning", "refinement", "review", "roadmap", "direction"]);
   });
 });
 
@@ -951,6 +951,68 @@ describe("sprint planning and backlog refinement", () => {
     const refinementItems = refinement.review?.sections.flatMap((section) => section.items) ?? [];
     expect(refinementItems.every((item) => item.note.length > 40)).toBe(true);
     expect(refinementItems.some((item) => item.id === "detail-user")).toBe(true);
+  });
+});
+
+describe("product direction", () => {
+  it("stores a vision, keeps it when the framework changes, and reads a strategy back", () => {
+    let room = createRoom(
+      { code: "DIRECT", kind: "direction", title: "Direction", hostId: HOST, hostName: "Rifqi" },
+      NOW,
+    );
+    expect(room.direction?.framework).toBe("vision-board");
+    expect(room.review).toBeNull();
+    expect(room.roadmap).toBeNull();
+    room = applyOp(
+      room,
+      { type: "direction.setAnswer", fieldId: "vb-vision", value: "Merchants recover a failed payout without support." },
+      HOST,
+      NOW,
+    );
+    expect(directionStatement(room.direction!).startsWith("Vision:")).toBe(true);
+    expect(() => applyOp(room, { type: "direction.setAnswer", fieldId: "ptw-where", value: "Not yet" }, HOST, NOW)).toThrow(
+      /not on this framework/,
+    );
+    room = applyOp(room, { type: "direction.setFramework", framework: "playing-to-win" }, HOST, NOW);
+    expect(room.direction?.answers["vb-vision"]).toContain("Merchants");
+    room = applyOp(
+      room,
+      { type: "direction.setAnswer", fieldId: "ptw-where", value: "Mid-size marketplaces. Not payroll." },
+      HOST,
+      NOW,
+    );
+    expect(directionStatement(room.direction!)).toContain("Where we play");
+    expect(() => applyOp(room, { type: "direction.setFramework", framework: "rice" as never }, HOST, NOW)).toThrow(
+      /vision or strategy/,
+    );
+  });
+
+  it("seeds every framework in an example room", () => {
+    const room = createRoom(
+      { code: "DIRDEM", kind: "direction", title: "Direction", hostId: HOST, hostName: "Rifqi", demo: true },
+      NOW,
+    );
+    const answers = room.direction?.answers ?? {};
+    const shortOnPurpose = new Set(["mo-name", "mo-category"]);
+    for (const framework of DIRECTION_FRAMEWORKS) {
+      for (const field of framework.fields) {
+        const text = answers[field.id] ?? "";
+        expect(text.length, field.id).toBeGreaterThan(0);
+        if (!shortOnPurpose.has(field.id)) expect(text.length, field.id).toBeGreaterThan(40);
+      }
+    }
+    expect(room.direction?.framework).toBe("vision-board");
+    const filled = room.direction!;
+    expect(directionStatement(filled)).toContain("Competitors:");
+    expect(directionStatement({ ...filled, framework: "positioning" })).toContain("is a");
+    expect(directionStatement({ ...filled, framework: "positioning" })).toContain("Unlike");
+    expect(directionStatement({ ...filled, framework: "playing-to-win" })).toContain("What would have to be true");
+    expect(directionStatement({ ...filled, framework: "strategy-kernel" })).toContain("The crux");
+    expect(directionStatement({ ...filled, framework: "dhm" })).toContain("Proxy metric");
+    expect(answers["vb-product"]).toContain("Unified Agent Platform");
+    expect(answers["mo-for"]).toContain("Booking.com");
+    expect(answers["ptw-where"]).toMatch(/stay and flight/i);
+    expect(directionStatement({ ...filled, framework: "positioning" })).toContain("Unified Agent Platform is a service workspace");
   });
 });
 

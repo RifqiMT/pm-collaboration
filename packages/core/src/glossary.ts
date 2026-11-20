@@ -285,4 +285,25 @@ export const GLOSSARY: GlossaryGroup[] = [
       },
     ],
   },
+  {
+    id: "direction",
+    title: "Product direction",
+    intro: "These words describe a product vision and a product strategy.",
+    entries: [
+      {
+        id: "product-vision",
+        name: "Product vision",
+        kind: "variable",
+        plain: "A product vision is the future the product is trying to make true. It names who it is for, the needs it meets, the product, the business goals, and the competitors, revenue, costs, and channels around it. A positioning statement says who it is for, the need, the product name, the category, the benefit, the alternative, and the difference.",
+        where: "Product direction, on the Product Vision Board or the positioning statement.",
+      },
+      {
+        id: "product-strategy",
+        name: "Product strategy",
+        kind: "variable",
+        plain: "A product strategy is the set of choices for how the team will reach the vision. It says where you will play, how you will win, what would have to be true, the challenge and its crux, and how the product delights customers in a way that is hard to copy and still funds the next product.",
+        where: "Product direction, on Playing to Win, the strategy kernel, or DHM.",
+      },
+    ],
+  },
 ];

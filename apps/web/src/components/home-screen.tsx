@@ -11,6 +11,7 @@ const detail: Record<RoomKind, string> = {
   refinement: "An ongoing pass over the Product Backlog: add detail, split what cannot finish in one Sprint, let Developers size it, and let the Product Owner order it.",
   review: "Inspect the Sprint Goal and the Increment with stakeholders, then adapt the Product Backlog. The call is release, adapt, or hold.",
   roadmap: "Score each bet next to the business outcome, then read the complexity.",
+  direction: "Fill a published vision or strategy board, then read the direction back as one statement.",
 };
 
 export function HomeScreen() {
@@ -58,7 +59,7 @@ export function HomeScreen() {
       </header>
       <section className="hero">
         <p className="eyebrow">Sprint rooms</p>
-        <h1>Planning, refinement, reviews, retros, and roadmaps on one board.</h1>
+        <h1>Planning, refinement, reviews, retros, roadmaps, and direction on one board.</h1>
         <p className="lede">
           Helps teams align on direction, review progress, and decide what comes next. Share a six-character code.
           Everyone sees the same notes, the same checklist, and the same score. No accounts.

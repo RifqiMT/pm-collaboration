@@ -32,6 +32,10 @@ import {
   retroColumnCounts,
   searchRetroTemplates,
   RITUALS,
+  DIRECTION_FRAMEWORKS,
+  directionFramework,
+  directionParts,
+  directionStatement,
   checklistProgress,
   checklistRitual,
   checklistHow,
@@ -317,7 +321,9 @@ function Home({ server, onServer, onCreate, onOpen, onGuide }) {
           key={ritual.kind}
           style={({ pressed }) => [
             styles.card,
-            ritual.kind === "review"
+            ritual.kind === "direction"
+              ? styles.accentDirection
+              : ritual.kind === "review"
               ? styles.accentReview
               : ritual.kind === "roadmap"
                 ? styles.accentRoadmap
@@ -513,7 +519,7 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
         <Text style={styles.ghostText}>Start from an example</Text>
       </Pressable>
       <Text style={styles.meta}>
-        Ten notes in every retro column, a finished sprint review, or ten scored roadmap bets.
+        Ten notes in every retro column, a finished checklist, ten scored roadmap bets, or a unified agent platform for customer service on a travel marketplace.
       </Text>
       <CreditFooter />
     </ScrollView>
@@ -652,6 +658,7 @@ function Room({ server, code, identity, onIdentity, onBack }) {
       {room?.kind === "retro" && room.retro ? <Retro room={room} actorId={actor.id} send={send} /> : null}
       {room && isChecklistKind(room.kind) && room.review ? <Review room={room} actorId={actor.id} send={send} /> : null}
       {room?.kind === "roadmap" && room.roadmap ? <Roadmap room={room} send={send} /> : null}
+      {room?.kind === "direction" && room.direction ? <Direction room={room} send={send} /> : null}
     </ScrollView>
   );
 }
@@ -1875,6 +1882,70 @@ function Review({ room, actorId, send }) {
       >
         <Text style={styles.ghostText}>Add feedback</Text>
       </Pressable>
+    </View>
+  );
+}
+
+function Direction({ room, send }) {
+  const direction = room.direction;
+  const framework = directionFramework(direction.framework);
+  const statement = directionStatement(direction);
+  const groups = [
+    { id: "vision", label: "Product vision" },
+    { id: "strategy", label: "Product strategy" },
+  ];
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={styles.card}>
+        <Text style={styles.kicker}>{framework.group === "vision" ? "Vision" : "Strategy"}</Text>
+        <Text style={styles.cardTitle}>{framework.name}</Text>
+        <Text style={styles.lede}>{statement}</Text>
+      </View>
+      {groups.map((group) => (
+        <View key={group.id} style={{ gap: 8 }}>
+          <Text style={styles.kicker}>{group.label}</Text>
+          <View style={styles.row}>
+            {DIRECTION_FRAMEWORKS.filter((item) => item.group === group.id).map((item) => (
+              <Pressable
+                key={item.id}
+                style={[styles.chip, direction.framework === item.id ? styles.chipOn : null]}
+                onPress={() => send({ type: "direction.setFramework", framework: item.id })}
+              >
+                <Text style={direction.framework === item.id ? styles.chipTextOn : styles.chipText}>{item.name}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      ))}
+      <View style={styles.card}>
+        <Text style={styles.meta}>{framework.source}</Text>
+        <Text style={styles.lede}>{framework.summary}</Text>
+        <Text style={styles.kicker}>How to do it</Text>
+        {framework.how.map((step, index) => (
+          <Text key={step} style={styles.meta}>{index + 1}. {step}</Text>
+        ))}
+        {directionParts(framework).map((part) => (
+          <View key={part.part || "prompts"} style={{ gap: 8 }}>
+            {part.part ? <Text style={styles.kicker}>{part.part}</Text> : null}
+            {part.fields.map((field) => (
+              <View key={field.id} style={{ gap: 4 }}>
+                <Text style={styles.label}>{field.label}</Text>
+                <Text style={styles.meta}>{field.prompt}</Text>
+                <TextInput
+                  key={`${field.id}:${direction.answers[field.id] ?? ""}`}
+                  style={[styles.input, { minHeight: 72 }]}
+                  multiline
+                  defaultValue={direction.answers[field.id] ?? ""}
+                  placeholder={field.placeholder}
+                  onEndEditing={(event) =>
+                    send({ type: "direction.setAnswer", fieldId: field.id, value: event.nativeEvent.text })
+                  }
+                />
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
     </View>
   );
 }

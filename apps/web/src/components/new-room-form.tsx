@@ -13,6 +13,7 @@ const titles: Record<RoomKind, string> = {
   refinement: "Backlog refinement",
   review: "Sprint review",
   roadmap: "Roadmap bets",
+  direction: "Product direction",
 };
 
 const stepHint: Record<Exclude<RoomKind, "retro">, Record<string, string>> = {
@@ -40,6 +41,11 @@ const stepHint: Record<Exclude<RoomKind, "retro">, Record<string, string>> = {
     Complexity: "Technical difficulty, dependencies, and uncertainty.",
     Sequence: "A high score with high complexity is a bet to order, not a task for Monday.",
   },
+  direction: {
+    Vision: "Product Vision Board or a positioning statement. This is the future you are aiming at.",
+    Strategy: "Playing to Win, the strategy kernel, or DHM. This is how you will get there.",
+    Statement: "Read the prompts back as one direction the team can repeat.",
+  },
 };
 
 const kindBlurb: Record<RoomKind, string> = {
@@ -48,6 +54,7 @@ const kindBlurb: Record<RoomKind, string> = {
   refinement: "Detail, split, size, and order on the Product Backlog. No Sprint starts here.",
   review: "Inspect the Increment with stakeholders, then adapt the Product Backlog.",
   roadmap: "Score bets, then read them against complexity.",
+  direction: "A product vision or a product strategy, on the full published board.",
 };
 
 export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
@@ -221,7 +228,7 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
               </button>
             </div>
             <p className="muted setup-note">
-              An example fills the session. A retrospective gets ten notes in every column. Sprint planning, backlog refinement, and the sprint review each get a finished checklist, evidence, feedback, and that room's decision. A roadmap gets ten scored bets.
+              An example fills the session. A retrospective gets ten notes in every column. Sprint planning, backlog refinement, and the sprint review each get a finished checklist, evidence, feedback, and that room's decision. A roadmap gets ten scored bets. A product direction fills every vision and strategy framework with a unified agent platform for customer service on a travel marketplace.
             </p>
           </form>
         </aside>

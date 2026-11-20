@@ -52,9 +52,9 @@ export function RoadmapBoard({
       return ids[0] ?? null;
     });
   }, [ranked]);
-  const selected = ranked.find((item) => item.initiative.id === selectedId) ?? null;
 
   if (!roadmap) return null;
+  const selected = ranked.find((item) => item.initiative.id === selectedId) ?? null;
   const framework = FRAMEWORKS.find((item) => item.id === roadmap.framework) ?? FRAMEWORKS[0]!;
   const counts = countQuadrants(ranked);
   const topScore = ranked[0] ? formatScore(ranked[0].score) : "—";
@@ -64,19 +64,19 @@ export function RoadmapBoard({
 
   return (
     <div className="ritual roadmap">
-      <header className="ritual-hero roadmap-hero">
-        <div className="ritual-hero-main">
-          <div className="ritual-hero-copy">
-            <p className="eyebrow">Roadmap</p>
+      <header className="roadmap-masthead">
+        <div className="roadmap-masthead-main">
+          <div className="roadmap-masthead-copy">
+            <p className="eyebrow">Roadmap planning</p>
             <h2>Score the bets. Sequence the hard ones.</h2>
             <p>Write the business outcome first. The number helps you compare—it does not decide for you.</p>
           </div>
-          <section className="ritual-focus" aria-label="Roadmap objective">
-            <div className="ritual-focus-label">
+          <section className="roadmap-objective" aria-label="Roadmap objective">
+            <div className="roadmap-objective-label">
               <span className="eyebrow">Objective</span>
               <span>The outcome this board is trying to move</span>
             </div>
-            <span className="field-shell ritual-focus-shell">
+            <span className="field-shell roadmap-objective-shell">
               <SharedField
                 value={roadmap.objective}
                 onCommit={(objective) => send({ type: "roadmap.setObjective", objective })}
@@ -85,27 +85,29 @@ export function RoadmapBoard({
                 multiline
                 rows={2}
                 maxLength={240}
-                className="field-control ritual-focus-field"
+                className="field-control roadmap-objective-field"
               />
             </span>
           </section>
         </div>
-        <aside className="ritual-hero-aside roadmap-pulse" aria-label="Roadmap snapshot">
+        <aside className="roadmap-pulse" aria-label="Roadmap snapshot">
           <p className="eyebrow">Snapshot</p>
-          <dl>
-            <div>
-              <dt>Bets</dt>
-              <dd>{ranked.length}</dd>
-            </div>
-            <div>
-              <dt>Top score</dt>
-              <dd>{topScore}</dd>
-            </div>
-            <div>
-              <dt>Framework</dt>
-              <dd>{framework.name}</dd>
-            </div>
-          </dl>
+          <strong className="roadmap-pulse-top">{topScore}</strong>
+          <span className="roadmap-pulse-caption">Top score</span>
+          <ul>
+            <li>
+              <span>Bets</span>
+              <strong>{ranked.length}</strong>
+            </li>
+            <li>
+              <span>Model</span>
+              <strong>{framework.name}</strong>
+            </li>
+            <li>
+              <span>Do first</span>
+              <strong>{counts["do-first"]}</strong>
+            </li>
+          </ul>
         </aside>
       </header>
 
@@ -148,7 +150,7 @@ export function RoadmapBoard({
           <header className="rank-list-head">
             <div>
               <p className="eyebrow">Ranked bets</p>
-              <h2>Initiatives</h2>
+              <h3>Initiatives</h3>
             </div>
             <button type="button" className="btn primary" onClick={() => void send({ type: "roadmap.addInitiative" })}>
               Add initiative
@@ -156,8 +158,8 @@ export function RoadmapBoard({
           </header>
           {ranked.length === 0 ? (
             <div className="roadmap-empty">
-              <p>No bets yet</p>
-              <span>Add an initiative and write the outcome before you score it.</span>
+              <strong>No bets yet</strong>
+              <p>Add an initiative and write the outcome before you score it.</p>
             </div>
           ) : (
             <ol className="bet-list">
@@ -226,7 +228,7 @@ function InitiativeEditor({
     <section className="editor roadmap-editor">
       <header className="editor-head">
         <p className="eyebrow">Selected bet</p>
-        <h2>{initiative.title || "Untitled initiative"}</h2>
+        <h3>{initiative.title || "Untitled initiative"}</h3>
         <p className={`insight ${item.insight.tone}`}>
           <strong>{item.insight.title}</strong>
           {item.insight.detail}
@@ -787,7 +789,7 @@ function Scatter({
       <header className="scatter-head">
         <div>
           <p className="eyebrow">Portfolio read</p>
-          <h2>Score against complexity</h2>
+          <h3>Score against complexity</h3>
           <p>Select a ranked bet on the chart or in the list. Guides mark median score and high complexity (3.5).</p>
         </div>
         <ul className="scatter-key" aria-label="Quadrant key">

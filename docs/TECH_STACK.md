@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-20 (five rituals + retro PPT)  
+**Last updated:** 2026-11-20 (product direction)  
 
 ---
 

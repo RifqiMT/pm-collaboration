@@ -5,7 +5,7 @@
 **CORS:** `Access-Control-Allow-Origin: *`  
 **Caching:** `Cache-Control: no-store`  
 **Runtime:** Node.js (`force-dynamic`)  
-**Last updated:** 2026-11-20 (five rituals + retro PPT)  
+**Last updated:** 2026-11-20 (product direction)  
 
 ---
 
@@ -36,7 +36,7 @@
 
 | Field | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `kind` | `"retro" \| "planning" \| "refinement" \| "review" \| "roadmap"` | Yes | Ritual type. Planning and refinement use the review checklist ops. |
+| `kind` | `"retro" \| "planning" \| "refinement" \| "review" \| "roadmap" \| "direction"` | Yes | Ritual type. Planning and refinement use the review checklist ops. Direction uses `direction.setFramework` and `direction.setAnswer`. |
 | `title` | string | No | Max 80 |
 | `hostName` | string | No | Max 40 |
 | `hostId` | string | No | Stable `person_…` id |
@@ -155,6 +155,15 @@ These ops apply when the room has a checklist (`review`, `planning`, or `refinem
 | `roadmap.deleteInitiative` | `initiativeId` |
 
 `InitiativePatch` may include title, outcome, assumption, RICE/ICE/value fields, complexity fields, horizon, ownerId.
+
+### Product direction
+
+| `type` | Fields |
+| --- | --- |
+| `direction.setFramework` | `framework`: `vision-board`, `positioning`, `playing-to-win`, `strategy-kernel`, or `dhm` |
+| `direction.setAnswer` | `fieldId`, `value` (max 800). The field must belong to the current framework. |
+
+Switching framework keeps answers already stored. A prompt from another framework returns 400.
 
 ---
 

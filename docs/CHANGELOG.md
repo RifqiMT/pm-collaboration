@@ -13,13 +13,15 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **Developer credit footer** on web (all pages) and mobile (home + create): “Developed, managed, and maintained by Rifqi Tjahyono” with LinkedIn, personal-website, [GitHub](https://github.com/RifqiMT/pm-collaboration), and [article](https://rifqi-tjahyono.com/%f0%9f%93%9d-sticky-note-chaos-to-team-clarity-reflect-together-review-progress-and-decide-what-comes-next-%f0%9f%a4%9d%f0%9f%a7%ad/) icon links.  
 - **Start from an example** loads a demo session: 10 notes in every column of every retrospective shape, a sprint review with evidence on every checklist item, and a 10-bet roadmap across all four quadrants.  
 - **Raise hand** in Discuss: ordered speaking queue; named notes highlight; anonymous authorship stays protected; queue clears on phase change (web + mobile).
-- **Definitions**: plain-English variables, metrics, and formulas for retrospective, planning, refinement, sprint review, and roadmap (`GLOSSARY` — 31 entries / 5 groups). Web `/guide`; mobile Guide screen; linked from home, room chrome, and roadmap scoring help.
+- **Definitions**: plain-English variables, metrics, and formulas for retrospective, planning, refinement, sprint review, roadmap, and product direction (`GLOSSARY` — 33 entries / 6 groups). Web `/guide`; mobile Guide screen; linked from home, room chrome, and roadmap scoring help.
 - **62 retrospective shapes** across eight shelves (Classic 13 · Film 10 · Series 9 · Anime 5 · Games 9 · Sport 14 · Music 1 · Food 1). Newer themes include TACO, 4Ps, Marie Kondo, KALM, ALC, Digimon, Star Trek, F1, MotoGP, World Cup, Super Mario, Mario Kart, Pac-Man, Pizza, Cricket, Basketball, Field Hockey, Tennis, Volleyball, Table Tennis, Baseball, Rugby, Golf, Olympics, eSports, DOTA, Resident Evil, and Assassin's Creed. Demo seed writes ten theme-specific notes per column.
 - **Shape picker** on create: searchable shelves, column-count filters (3 / 4 / 5), A–Z lists, and live column titles/hints before create (web + mobile).
 - **Health Check** icebreaker: six statements rated from strongly disagree to strongly agree (1–7). The room sees the spread of answers and averages, not who chose each point. Web and mobile.
 - **Travel Wishlist** icebreaker: pick up to five countries on the map from a 175-country catalog. Each selected country shows a rounded flag. Names stay with the wishlist. The summary and CSV use country names. Web interactive map; mobile uses the same country list.
 - **Lineup** icebreaker: the host names what the order means. Everyone arranges the people in the room. Saving a new title clears orders already shared. Web and mobile.
 - **Sprint planning, backlog refinement, and sprint review** follow the Scrum Guide; each part includes how to run it. Planning: Why / What / How / Sprint Backlog (Forecast, Narrow, or No goal). Refinement: Detail / Split / Size / Order (Selectable, Split, or Return). Review: Sprint Goal / Increment / Stakeholders / Adapt (Release, Adapt, or Hold).
+- **Product direction example**: a unified agent platform for customer service on a travel marketplace the size of Booking.com, filled across every vision and strategy framework.
+- **Product direction**: write a product vision or a product strategy. Frameworks follow the published boards: Roman Pichler's extended Product Vision Board (vision plus competitors, revenue, costs, and channels), Geoffrey Moore's positioning sentence (including the product name), the Playing to Win cascade with where you will not play and what would have to be true, Rumelt's kernel with the crux and what the policy rules out, and Gibson Biddle's DHM locked to a proxy metric and a tactic. Each includes how to fill it in. The room reads the answers back as one statement. Switching framework keeps answers already written. Web and mobile.
 - **Retro PPT export** on Summary: consultant-style deck (icebreaker, durations, discuss order, overview, categories, top votes, actions) alongside CSV. Web-first.
 
 ### Added — Engineering
@@ -35,7 +37,8 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - `IcebreakerMode` extended with `scale`, `map`, and `order`; `HEALTH_CHECK` helpers + `health-check.test.ts`; `countries.ts` (175 countries); `parsePeopleOrder` / `formatPeopleOrder`; health peer anonymization; CSV transforms for health / travel / lineup / show-and-tell.  
 - Web icebreaker surfaces: `travel-map.tsx`, `people-order.tsx`, `.health-*` / `.wish-map*` / `.order-*` CSS; mobile Health / Travel / Lineup screens.  
 - `retro.setOrderTitle` (host); removed `retro.nextIcebreakerRound` and `retro.focusCard` / `discussedCardId`.  
-- `RoomKind` includes `planning` and `refinement`. Both store a `ReviewState` from `createChecklistState`. `review.setDecision` is kind-scoped (nine stored ids; cross-kind rejected). Checklist stopwatch via `checklistStopwatchMs`. Demo seeds: `demoPlanningContent` / `demoRefinementContent`.  
+- `RoomKind` includes `planning`, `refinement`, and `direction`. Planning/refinement store `ReviewState` from `createChecklistState`. Direction stores `DirectionState` with `DIRECTION_FRAMEWORKS` (5). `review.setDecision` is kind-scoped. Checklist stopwatch via `checklistStopwatchMs`. Demo seeds: planning / refinement / direction.  
+- `direction.setFramework` / `direction.setAnswer` (field must belong to current framework; answers kept on switch; `LIMITS.directionAnswer` 800). Web `direction-board.tsx` + `.direction-*` CSS; mobile direction screen.  
 - `retrospectiveDeck` (`retro-deck.ts`) + web `buildRetroPptx` (`pptxgenjs` ^3.12) + `.summary-downloads*` UI; deck/pptx vitest coverage.
 
 ### Documentation
@@ -47,7 +50,8 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **2026-11-19 refresh:** 62-template shelves + shape picker documented; CSV §13 examples match export writers; glossary timer/dot copy no longer claims host-only; DESIGN shape-finder section; suite stamps updated.  
 - **2026-11-19 evening refresh:** documented Health Check + Travel Wishlist end-to-end; aligned remaining “18 icebreakers” → **20**.  
 - **2026-11-20 refresh:** documented Lineup; icebreaker count **21**; removed stale next-round / focus-card host claims.  
-- **2026-11-20 evening refresh:** five rituals (planning + refinement checklists); glossary 31/5; retro PPT deck end-to-end; FR-R1 / epic-01 / VARIABLES `kind` / ARCHITECTURE room model aligned; epic-06 linked.
+- **2026-11-20 evening refresh:** planning + refinement checklists; glossary then 31/5; retro PPT deck; epic-06.  
+- **2026-11-20 night refresh:** sixth ritual **product direction** (`DIRECTION_FRAMEWORKS`, readback/statement, FR-DIR1–4, epic-07); glossary **33/6**; FR-R1 / VARIABLES / DESIGN / ARCHITECTURE / GUARDRAILS aligned to six kinds.
 
 ---
 

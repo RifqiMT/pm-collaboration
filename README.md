@@ -2,7 +2,7 @@
 
 **Helps teams align on direction, review progress, and decide what comes next.**
 
-TeamCompass is a shared collaboration room for five sprint rituals—**retrospective**, **sprint planning**, **backlog refinement**, **sprint review**, and **roadmap scoring**. A team joins with a six-character code and edits one board together. The web app is the full room and hosts the API. The phone app joins the same rooms. There are no accounts.
+TeamCompass is a shared collaboration room for six rituals—**retrospective**, **sprint planning**, **backlog refinement**, **sprint review**, **roadmap scoring**, and **product direction**. A team joins with a six-character code and edits one board together. The web app is the full room and hosts the API. The phone app joins the same rooms. There are no accounts.
 
 | | |
 | --- | --- |
@@ -22,6 +22,7 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 3. **Backlog refinement** — Ongoing Product Backlog work: detail, split, Developer sizing, and Product Owner order. Selectable, split, or return.  
 4. **Sprint review** — Inspect the Sprint Goal and the Increment with stakeholders, then adapt the Product Backlog: release / adapt / hold  
 5. **Roadmap** — Score bets with RICE, ICE, or value÷complexity; complexity sits beside the business outcome  
+6. **Product direction** — A product vision or a product strategy, using a professional framework, read back as one statement  
 
 ### Product benefits
 
@@ -44,7 +45,8 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Refinement | Detail / Split / Size / Order (how-to on each). Selectable / Split / Return (`ready` / `split` / `park`) |
 | Review | Sprint Goal, Increment, stakeholders, adapt backlog. Release / Adapt / Hold (`ship` / `iterate` / `hold`) |
 | Roadmap | RICE / ICE / value÷complexity, complexity index, median & 3.5 guides, quadrants, insights |
-| Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` 31 entries / 5 groups) |
+| Direction | Extended Product Vision Board, Moore positioning, Playing to Win cascade, Rumelt kernel, and DHM with a metric and a tactic. Each framework includes how to fill it in. |
+| Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` 33 entries / 6 groups) |
 | Platforms | Next.js web + Expo mobile + shared TypeScript core |
 | Credit | Developer credit footer (web site-wide; mobile home/create) |
 
@@ -111,7 +113,11 @@ Shared checklist topics **Sprint Goal / Increment / Stakeholders / Adapt**, each
 
 Initiatives carry outcome, assumption, score inputs, complexity (technical · dependency · uncertainty), horizon, and owner. High complexity starts at **3.5**. Strong score + high complexity = **big bet**; strong + lower complexity = **do first**.
 
-Scoring variables and formulas: [docs/VARIABLES.md](docs/VARIABLES.md) · product detail: [docs/product.md](docs/product.md)
+### Product direction
+
+Pick a vision or strategy framework (Product Vision Board, Moore positioning, Playing to Win, Rumelt kernel, or DHM). Fill the prompts with how-to guidance. Switching frameworks keeps answers. The board reads answers back as one statement.
+
+Scoring and direction variables: [docs/VARIABLES.md](docs/VARIABLES.md) · product detail: [docs/product.md](docs/product.md)
 
 ---
 
@@ -159,7 +165,7 @@ pm-collaboration/
 ├── packages/core     # Room rules, privacy, scoring, content, countries, glossary, export
 ├── apps/web          # Next.js UI (/guide, travel map, lineup order) + room API + store
 ├── apps/mobile       # Expo iOS/Android client (home / guide / create / room)
-└── docs/             # Product documentation suite (current as of 2026-11-20 evening)
+└── docs/             # Product documentation suite (current as of 2026-11-20 — product direction)
 ```
 
 ---

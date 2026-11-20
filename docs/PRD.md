@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-20 (five rituals + retro PPT) |
+| Last updated | 2026-11-20 (product direction) |
 
 ---
 
@@ -62,7 +62,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-R1 | User can create a room for retro, planning, refinement, review, or roadmap | Must |
+| FR-R1 | User can create a room for retro, planning, refinement, review, roadmap, or product direction | Must |
 | FR-R2 | System issues a unique 6-character room code (ambiguous chars excluded) | Must |
 | FR-R3 | User can join with code + display name | Must |
 | FR-R4 | Identity persists locally across sessions on the same device | Should |
@@ -128,7 +128,16 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-RM5 | Horizon now/next/later and owner | Should |
 | FR-RM6 | Objective field for the board | Should |
 
-### 4.7 Platforms & API
+### 4.7 Product direction
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-DIR1 | Vision frameworks: extended Product Vision Board and Moore positioning statement | Must |
+| FR-DIR2 | Strategy frameworks: Playing to Win cascade, Rumelt kernel, and DHM with metric and tactic | Must |
+| FR-DIR3 | Each framework shows how to fill it in | Must |
+| FR-DIR4 | Answers read back as one statement; switching framework keeps answers | Must |
+
+### 4.8 Platforms & API
 
 | ID | Requirement | Priority |
 | --- | --- | --- |

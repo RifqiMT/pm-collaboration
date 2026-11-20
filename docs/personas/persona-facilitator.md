@@ -35,6 +35,7 @@
 - Adjusts vote budget on web when needed (open to joined actors; not host-only); drives action assignment  
 - Opens Summary and downloads CSV and PPT (health answers export as Anonymous; travel as country names; lineup as ranked names)  
 - Hosts planning or refinement checklists when the team needs a Forecast / Selectable call  
+- May open a product direction room when the team needs a shared vision or strategy statement  
 
 ## Needs from the product
 

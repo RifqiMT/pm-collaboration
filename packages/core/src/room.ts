@@ -1,6 +1,8 @@
 import {
   ICEBREAKERS,
   RETRO_TEMPLATES,
+  DIRECTION_FRAMEWORKS,
+  directionFramework,
   checklistDecisions,
   columnsFor,
   createChecklistState,
@@ -20,7 +22,7 @@ import {
   truthDisplayOrder,
   type IcebreakerGame,
 } from "./content";
-import { demoActions, demoNotesForColumns, demoPlanningContent, demoRefinementContent, demoReviewContent, demoRoadmapContent } from "./demo";
+import { demoActions, demoDirectionContent, demoNotesForColumns, demoPlanningContent, demoRefinementContent, demoReviewContent, demoRoadmapContent } from "./demo";
 import { formatTravelWishlist, parseTravelWishlist } from "./countries";
 import { createId } from "./ids";
 import {
@@ -60,6 +62,8 @@ import {
   type RoadmapState,
   type Room,
   type RoomKind,
+  type DirectionFrameworkId,
+  type DirectionState,
   type RoomView,
 } from "./types";
 
@@ -67,6 +71,7 @@ const PHASES: RetroPhase[] = ["icebreak", "brainstorm", "discuss", "vote", "act"
 const DISCUSSION_BY: DiscussionBy[] = ["status", "author"];
 const ICEBREAKER_IDS = ICEBREAKERS.map((game) => game.id);
 const FRAMEWORKS: FrameworkId[] = ["rice", "ice", "value-complexity"];
+const DIRECTION_IDS: DirectionFrameworkId[] = DIRECTION_FRAMEWORKS.map((item) => item.id);
 const HORIZONS: Horizon[] = ["now", "next", "later"];
 const DECISIONS: ReviewDecision[] = ["ship", "iterate", "hold", "commit", "reshape", "defer", "ready", "split", "park"];
 const FEEDBACK: FeedbackKind[] = ["praise", "change", "question"];
@@ -86,8 +91,11 @@ export function createRoom(input: CreateRoomInput, now: string): Room {
   if (!/^[A-Z0-9]{6}$/.test(input.code)) {
     throw new CadenceError("Room code must be 6 letters or numbers.", "code");
   }
-  if (!["retro", "planning", "refinement", "review", "roadmap"].includes(input.kind)) {
-    throw new CadenceError("Choose a retrospective, a sprint planning, a backlog refinement, a sprint review, or a roadmap.", "kind");
+  if (!["retro", "planning", "refinement", "review", "roadmap", "direction"].includes(input.kind)) {
+    throw new CadenceError(
+      "Choose a retrospective, a sprint planning, a backlog refinement, a sprint review, a roadmap, or a product direction.",
+      "kind",
+    );
   }
   const host = makeParticipant(input.hostId, input.hostName, 0, now);
   const title = cleanLine(input.title, LIMITS.title, "Title");
@@ -108,6 +116,7 @@ export function createRoom(input: CreateRoomInput, now: string): Room {
     retro: null,
     review: null,
     roadmap: null,
+    direction: null,
   };
 
   if (input.kind === "retro") {
@@ -115,8 +124,10 @@ export function createRoom(input: CreateRoomInput, now: string): Room {
   } else if (isChecklistKind(input.kind)) {
     room.review = createChecklistState(input.kind);
     startChecklistStopwatchIfNeeded(room.review, now);
-  } else {
+  } else if (input.kind === "roadmap") {
     room.roadmap = blankRoadmap();
+  } else {
+    room.direction = blankDirection();
   }
 
   if (input.demo) fillDemo(room, host.id, now);
@@ -228,6 +239,10 @@ export function applyOp(room: Room, op: Op, actorId: string, now: string): Room 
     case "roadmap.deleteInitiative":
       changed = applyRoadmap(next, op, now);
       break;
+    case "direction.setFramework":
+    case "direction.setAnswer":
+      changed = applyDirection(next, op);
+      break;
     default:
       throw new CadenceError("Unknown update.", "op");
   }
@@ -254,6 +269,7 @@ export function presentRoom(room: Room, actorId: string | null, now: string): Ro
     retro: room.retro ? presentRetro(room.retro, actorId, names) : null,
     review: room.review ? presentReview(room.review) : null,
     roadmap: room.roadmap ? structuredClone(room.roadmap) : null,
+    direction: room.direction ? structuredClone(room.direction) : null,
   };
 }
 
@@ -460,6 +476,10 @@ export function parseOp(input: unknown): Op {
       };
     case "roadmap.deleteInitiative":
       return { type, initiativeId: expectString(record.initiativeId, "Initiative") };
+    case "direction.setFramework":
+      return { type, framework: expectEnum(record.framework, DIRECTION_IDS, "Framework") };
+    case "direction.setAnswer":
+      return { type, fieldId: expectString(record.fieldId, "Prompt"), value: String(record.value ?? "") };
     default:
       throw new CadenceError("Unknown update.", "op");
   }
@@ -695,9 +715,9 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
       const phase = op.phase ?? retro.phase;
       if (!retro.timers[phase]) {
         if (phase === retro.phase && retro.timerEndsAt) {
-          retro.timerEndsAt = null;
-          return true;
-        }
+      retro.timerEndsAt = null;
+      return true;
+    }
         return false;
       }
       const next = { ...retro.timers };
@@ -959,22 +979,22 @@ function presentRetro(retro: RetroState, actorId: string | null, names: Map<stri
   const cards: RetroCardView[] = source.cards
     .filter((card) => !conceal || (actorId != null && card.authorId === actorId))
     .map((card) => {
-      const mine = actorId != null && card.authorId === actorId;
+    const mine = actorId != null && card.authorId === actorId;
       const hideAuthor = card.anonymous;
-      return {
-        id: card.id,
-        columnId: card.columnId,
+    return {
+      id: card.id,
+      columnId: card.columnId,
         body: card.body,
-        authorId: hideAuthor ? null : card.authorId,
+      authorId: hideAuthor ? null : card.authorId,
         authorName: hideAuthor ? null : names.get(card.authorId) ?? "Someone",
-        anonymous: card.anonymous,
-        votes: conceal ? card.votes.filter((id) => id === actorId) : [...card.votes],
-        voteCount: card.votes.length,
-        createdAt: card.createdAt,
+      anonymous: card.anonymous,
+      votes: conceal ? card.votes.filter((id) => id === actorId) : [...card.votes],
+      voteCount: card.votes.length,
+      createdAt: card.createdAt,
         hidden: false,
-        mine,
-      };
-    });
+      mine,
+    };
+  });
   const presented = structuredClone(source);
   const template = RETRO_TEMPLATES[presented.templateId];
   presented.columns = presented.columns.map((column) => {
@@ -1527,6 +1547,35 @@ function blankRoadmap(): RoadmapState {
   return { framework: "rice", objective: "", initiatives: [] };
 }
 
+function blankDirection(): DirectionState {
+  return { framework: "vision-board", answers: {} };
+}
+
+function applyDirection(room: Room, op: Op): boolean {
+  const direction = requireDirection(room);
+  switch (op.type) {
+    case "direction.setFramework": {
+      if (!DIRECTION_IDS.includes(op.framework)) {
+        throw new CadenceError("Choose a vision or strategy framework.", "framework");
+      }
+      if (direction.framework === op.framework) return false;
+      direction.framework = op.framework;
+      return true;
+    }
+    case "direction.setAnswer": {
+      const framework = directionFramework(direction.framework);
+      const field = framework.fields.find((item) => item.id === op.fieldId);
+      if (!field) throw new CadenceError("That prompt is not on this framework.", "field");
+      const value = cleanBlock(op.value, LIMITS.directionAnswer, field.label);
+      if ((direction.answers[field.id] ?? "") === value) return false;
+      direction.answers = { ...direction.answers, [field.id]: value };
+      return true;
+    }
+    default:
+      return false;
+  }
+}
+
 function blankInitiative(): Initiative {
   return {
     id: createId("bet"),
@@ -1622,6 +1671,12 @@ function fillDemo(room: Room, hostId: string, now: string): void {
     room.roadmap.objective = seed.objective;
     room.roadmap.initiatives = seed.initiatives;
   }
+
+  if (room.direction) {
+    const seed = demoDirectionContent();
+    room.direction.framework = seed.framework;
+    room.direction.answers = seed.answers;
+  }
 }
 
 function check(review: ReviewState, itemId: string, actorId: string) {
@@ -1652,6 +1707,11 @@ function requireReview(room: Room): ReviewState {
 function requireRoadmap(room: Room): RoadmapState {
   if (!room.roadmap) throw new CadenceError("This room is not a roadmap.", "kind");
   return room.roadmap;
+}
+
+function requireDirection(room: Room): DirectionState {
+  if (!room.direction) throw new CadenceError("This room is not a product direction.", "kind");
+  return room.direction;
 }
 
 function assertDiscussionGroup(retro: RetroState, key: string) {

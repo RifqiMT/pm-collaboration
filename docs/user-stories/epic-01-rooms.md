@@ -7,16 +7,17 @@
 ## US-1.1 Create a ritual room
 
 **As** Maya (Facilitator)  
-**I want** to create a retrospective, sprint planning, backlog refinement, sprint review, or roadmap room  
+**I want** to create a retrospective, sprint planning, backlog refinement, sprint review, roadmap, or product direction room  
 **So that** my team can join one shared board immediately  
 
 **Acceptance criteria**
 
-- [ ] Choosing a ritual on the home page opens create with that `kind` (`retro` \| `planning` \| `refinement` \| `review` \| `roadmap`)  
+- [ ] Choosing a ritual on the home page opens create with that `kind` (`retro` \| `planning` \| `refinement` \| `review` \| `roadmap` \| `direction`)  
 - [ ] Submitting create returns a 6-character code and navigates to `/r/[code]`  
 - [ ] Creator is host (`hostId`) and a participant  
 - [ ] Optional title and host name are persisted within limits  
 - [ ] Planning and refinement seed a checklist board (`room.review`) with kind-scoped decisions  
+- [ ] Product direction seeds `room.direction` with a framework and empty answers (demo fills every framework)  
 
 **PRD:** FR-R1, FR-R2 · **Code:** `POST /api/rooms`, `new-room-form.tsx`, `createRoom`
 
