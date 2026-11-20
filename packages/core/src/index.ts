@@ -4,6 +4,7 @@ export * from "./content";
 export * from "./countries";
 export * from "./scoring";
 export * from "./retro-export";
+export * from "./retro-deck";
 export {
   applyOp,
   checklistProgress,
@@ -14,6 +15,7 @@ export {
   discussionGroups,
   presentRoom,
   sectionStopwatchMs,
+  checklistStopwatchMs,
   votesLeft,
   type CreateRoomInput,
   type DiscussionGroup,

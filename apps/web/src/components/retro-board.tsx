@@ -3,6 +3,7 @@
 import {
   discussionGroups,
   retrospectiveCsv,
+  retrospectiveDeck,
   retrospectiveExport,
   showAndTellMediaSources,
   RETRO_TEMPLATES,
@@ -22,6 +23,7 @@ import { IcebreakerPanel } from "./icebreaker-panel";
 import { RetroGlyph } from "./retro-glyphs";
 import { SharedField } from "./shared-field";
 import { initials } from "./identity";
+import { buildRetroPptx } from "../lib/retro-pptx";
 import {
   RETRO_PHASES,
   authorLabel,
@@ -808,22 +810,16 @@ function avatarStyle(
 function SummaryPanel({ room }: { room: RoomView }) {
   const data = retrospectiveExport(room);
   const retro = room.retro;
+  const [pptPending, setPptPending] = useState(false);
   if (!data || !retro) return null;
   const dots = data.notes.reduce((sum, note) => sum + note.votes, 0);
   const open = data.actions.filter((action) => !action.done).length;
 
-  function download() {
+  function downloadCsv() {
     try {
       const csv = retrospectiveCsv(room);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `teamcompass-${room.code}-retrospective.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      triggerDownload(blob, `teamcompass-${room.code}-retrospective.csv`);
     } catch (error) {
       console.error("[cadence] csv download failed", {
         message: error instanceof Error ? error.message : "unknown",
@@ -831,30 +827,73 @@ function SummaryPanel({ room }: { room: RoomView }) {
     }
   }
 
+  async function downloadPpt() {
+    if (pptPending) return;
+    setPptPending(true);
+    try {
+      const deck = retrospectiveDeck(room);
+      if (!deck) throw new Error("No retrospective data to export.");
+      const blob = await buildRetroPptx(deck);
+      triggerDownload(blob, `teamcompass-${room.code}-retrospective.pptx`);
+    } catch (error) {
+      console.error("[cadence] ppt download failed", {
+        message: error instanceof Error ? error.message : "unknown",
+      });
+    } finally {
+      setPptPending(false);
+    }
+  }
+
+  const doneActions = data.actions.length - open;
+
   return (
     <section className="summary-board" aria-label="Summary">
       <div className="summary-toolbar">
-        <div className="summary-stats">
-          <p>
-            <strong>{data.notes.length}</strong>
-            <span>{data.notes.length === 1 ? "Note" : "Notes"}</span>
-          </p>
-          <p>
-            <strong>{dots}</strong>
-            <span>{dots === 1 ? "Dot" : "Dots"}</span>
-          </p>
-          <p>
-            <strong>{data.actions.length}</strong>
-            <span>{open === 0 ? "Actions" : `${open} open`}</span>
-          </p>
-          <p>
-            <strong>{data.people.length}</strong>
-            <span>{data.people.length === 1 ? "Person" : "People"}</span>
-          </p>
+        <ul className="summary-stats" aria-label="Session totals">
+          <li className="summary-stat">
+            <span className="summary-stat-label">Notes</span>
+            <strong className="summary-stat-value">{data.notes.length}</strong>
+            <span className="summary-stat-hint">Captured</span>
+          </li>
+          <li className="summary-stat">
+            <span className="summary-stat-label">Dots</span>
+            <strong className="summary-stat-value">{dots}</strong>
+            <span className="summary-stat-hint">{dots === 1 ? "Vote cast" : "Votes cast"}</span>
+          </li>
+          <li className="summary-stat">
+            <span className="summary-stat-label">Actions</span>
+            <strong className="summary-stat-value">{data.actions.length}</strong>
+            <span className={`summary-stat-hint${open === 0 ? " ok" : " warn"}`}>
+              {data.actions.length === 0 ? "None yet" : open === 0 ? "All done" : `${open} open · ${doneActions} done`}
+            </span>
+          </li>
+          <li className="summary-stat">
+            <span className="summary-stat-label">People</span>
+            <strong className="summary-stat-value">{data.people.length}</strong>
+            <span className="summary-stat-hint">In the room</span>
+          </li>
+        </ul>
+        <div className="summary-downloads" role="group" aria-label="Export summary">
+          <div className="summary-downloads-copy">
+            <p className="eyebrow">Export</p>
+            <strong>Take the room with you</strong>
+          </div>
+          <div className="summary-download-actions">
+            <button type="button" className="btn ghost summary-download-btn" onClick={downloadCsv}>
+              <CsvIcon />
+              CSV
+            </button>
+            <button
+              type="button"
+              className="btn primary summary-download-btn"
+              onClick={() => void downloadPpt()}
+              disabled={pptPending}
+            >
+              <PptIcon />
+              {pptPending ? "Building…" : "PPT"}
+            </button>
+          </div>
         </div>
-        <button type="button" className="btn primary" onClick={download}>
-          Download CSV
-        </button>
       </div>
 
       <div className="summary-columns">
@@ -926,6 +965,39 @@ function SummaryPicture({ media, alt }: { media: string; alt: string }) {
   const src = showAndTellMediaSources(media)[0];
   if (!src) return null;
   return <img className="gif-preview" src={src} alt={alt || "Picture"} />;
+}
+
+function triggerDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function CsvIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M3 2.5h6.2L13 6.3V13.5A1.5 1.5 0 0 1 11.5 15h-8A1.5 1.5 0 0 1 2 13.5v-10A1.5 1.5 0 0 1 3.5 2L3 2.5Zm6 .7V6h2.8L9 3.2ZM4.2 8.2h7.6v1.1H4.2V8.2Zm0 2.3h7.6v1.1H4.2v-1.1Zm0 2.3h5.2v1.1H4.2v-1.1Z"
+      />
+    </svg>
+  );
+}
+
+function PptIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M2.5 2h8.2L14 5.3V13.5A1.5 1.5 0 0 1 12.5 15h-10A1.5 1.5 0 0 1 1 13.5v-10A1.5 1.5 0 0 1 2.5 2Zm7.7 1.2V5.8H13L10.2 3.2ZM4.2 7.4h3.1c1.5 0 2.5.8 2.5 2.1S8.8 11.6 7.3 11.6H5.4v2.1H4.2V7.4Zm1.2 1.1v2h1.8c.8 0 1.3-.4 1.3-1s-.5-1-1.3-1H5.4Z"
+      />
+    </svg>
+  );
 }
 
 function ActionsPanel({

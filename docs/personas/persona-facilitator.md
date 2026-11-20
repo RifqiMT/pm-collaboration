@@ -33,7 +33,8 @@
 - Advances phases; starts 3/5/8 minute timers (or Custom 1–60 on web)—timers are open to any joined person on web  
 - Chooses discuss walk (status vs author), focuses groups, and uses the raise-hand queue to manage speaking  
 - Adjusts vote budget on web when needed (open to joined actors; not host-only); drives action assignment  
-- Opens Summary and downloads CSV (health answers export as Anonymous; travel as country names)  
+- Opens Summary and downloads CSV and PPT (health answers export as Anonymous; travel as country names; lineup as ranked names)  
+- Hosts planning or refinement checklists when the team needs a Forecast / Selectable call  
 
 ## Needs from the product
 
@@ -41,10 +42,10 @@
 | --- | --- |
 | Host authority | Host-gated phase, icebreaker, discussion mode (timers/vote budget open on web) |
 | Clear sections | Each retro phase shows only that section’s work |
-| Timing | Per-section countdown + stopwatch |
+| Timing | Per-section countdown + stopwatch (retro + checklist sections) |
 | Trustworthy privacy | Server-side brainstorm filtering; Health Check peer anonymization |
-| Closure | Actions + CSV; review ship/iterate/hold |
+| Closure | Actions + CSV/PPT; planning / refinement / review calls |
 
 ## Success looks like
 
-A 60-minute retro ends with three owned actions, a CSV in Slack, and no one saying “my note showed too early.”
+A 60-minute retro ends with three owned actions, a PPT in Slack, and no one saying “my note showed too early.”

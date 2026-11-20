@@ -12,7 +12,7 @@
 
 **Acceptance criteria**
 
-- [ ] New review rooms receive seeded sections and items from `createReviewState`  
+- [ ] New review rooms receive seeded sections and items from `createChecklistState("review")`  
 - [ ] Required items are marked  
 - [ ] Progress reflects required items signed  
 
@@ -84,12 +84,13 @@
 ## US-3.6 Release decision
 
 **As** Priya  
-**I want** to record ship, iterate, or hold with notes  
+**I want** to record Release, Adapt, or Hold with notes (stored `ship` / `iterate` / `hold`)  
 **So that** the meeting has a durable outcome  
 
 **Acceptance criteria**
 
-- [ ] Decision is one of ship | iterate | hold | null  
+- [ ] UI labels are Release / Adapt / Hold; stored ids are `ship` \| `iterate` \| `hold` \| null  
+- [ ] Planning/refinement decision ids are rejected on a review room  
 - [ ] Decision notes persist (≤2000)  
 
-**PRD:** FR-REV6 · **Code:** `review.setDecision`, `review.setDecisionNotes`
+**PRD:** FR-REV6 · **Code:** `review.setDecision`, `checklistDecisions("review")`, `review.setDecisionNotes`

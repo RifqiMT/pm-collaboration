@@ -79,6 +79,8 @@ export const styles = StyleSheet.create({
   },
   accentRetro: { backgroundColor: "#fff8f5" },
   accentReview: { backgroundColor: "#f5f8ff" },
+  accentPlanning: { backgroundColor: "#fff8f1" },
+  accentRefinement: { backgroundColor: "#f7f5ff" },
   accentRoadmap: { backgroundColor: "#f4faf6" },
   cardTitle: { fontSize: 20, fontWeight: "600", color: colors.ink, letterSpacing: -0.3 },
   row: { flexDirection: "row", gap: 8, flexWrap: "wrap", alignItems: "center" },

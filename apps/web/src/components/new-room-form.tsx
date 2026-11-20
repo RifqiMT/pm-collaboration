@@ -9,16 +9,30 @@ import { RetroGlyph } from "./retro-glyphs";
 
 const titles: Record<RoomKind, string> = {
   retro: "Sprint retrospective",
+  planning: "Sprint planning",
+  refinement: "Backlog refinement",
   review: "Sprint review",
   roadmap: "Roadmap bets",
 };
 
 const stepHint: Record<Exclude<RoomKind, "retro">, Record<string, string>> = {
+  planning: {
+    Why: "Product Owner proposes the value. The Scrum Team writes the Sprint Goal.",
+    What: "Developers pull items they can finish to the Definition of Done.",
+    How: "Developers plan the first days. The plan is theirs.",
+    Forecast: "Sprint Goal, selected items, and the plan. That is the Sprint Backlog.",
+  },
+  refinement: {
+    Detail: "One Product Backlog item: user, outcome, and acceptance criteria.",
+    Split: "If it cannot be Done in one Sprint, break it into thinner slices.",
+    Size: "Developers size it by comparing it with work they already finished.",
+    Order: "Product Owner places it. Selectable, split, or return.",
+  },
   review: {
-    Checklist: "The shared bar for what is ready to show.",
-    Evidence: "A note or link sits on the check it supports.",
-    Feedback: "Praise, changes, and questions stay in the room.",
-    "Ship decision": "The room leaves with ship, iterate, or hold.",
+    "Sprint Goal": "Read the goal first. Say whether it was met.",
+    Increment: "Show only what meets the Definition of Done.",
+    Stakeholders: "A working session with people who can judge the outcome.",
+    Adapt: "Product Owner changes the Product Backlog before the room ends.",
   },
   roadmap: {
     Outcome: "The business result stays on the same card as the score.",
@@ -30,7 +44,9 @@ const stepHint: Record<Exclude<RoomKind, "retro">, Record<string, string>> = {
 
 const kindBlurb: Record<RoomKind, string> = {
   retro: "Notes, discussion, votes, and owners in one room.",
-  review: "Increment, evidence, feedback, and a ship call.",
+  planning: "Why this Sprint matters, what Developers forecast, and how they will do it.",
+  refinement: "Detail, split, size, and order on the Product Backlog. No Sprint starts here.",
+  review: "Inspect the Increment with stakeholders, then adapt the Product Backlog.",
   roadmap: "Score bets, then read them against complexity.",
 };
 
@@ -205,8 +221,7 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
               </button>
             </div>
             <p className="muted setup-note">
-              An example fills the session. A retrospective gets ten notes in every column. A sprint review gets a
-              finished checklist, evidence, feedback, and a ship decision. A roadmap gets ten scored bets.
+              An example fills the session. A retrospective gets ten notes in every column. Sprint planning, backlog refinement, and the sprint review each get a finished checklist, evidence, feedback, and that room's decision. A roadmap gets ten scored bets.
             </p>
           </form>
         </aside>

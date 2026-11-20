@@ -1,4 +1,4 @@
-export type RoomKind = "retro" | "review" | "roadmap";
+export type RoomKind = "retro" | "planning" | "refinement" | "review" | "roadmap";
 
 export type RetroTemplateId =
   | "start-stop-continue"
@@ -100,7 +100,7 @@ export type ImpactLevel = 0.25 | 0.5 | 1 | 2 | 3;
 
 export type Horizon = "now" | "next" | "later";
 
-export type ReviewDecision = "ship" | "iterate" | "hold";
+export type ReviewDecision = "ship" | "iterate" | "hold" | "commit" | "reshape" | "defer" | "ready" | "split" | "park";
 
 export type FeedbackKind = "praise" | "change" | "question";
 
@@ -163,6 +163,13 @@ export interface IcebreakerPair {
   right: string;
 }
 
+/** One raise-hand event during Discuss, tagged with the focus group at that moment. */
+export interface DiscussSpeakEntry {
+  personId: string;
+  groupKey: string;
+  at: string;
+}
+
 export interface RetroState {
   templateId: RetroTemplateId;
   phase: RetroPhase;
@@ -184,6 +191,11 @@ export interface RetroState {
   discussedGroupKey: string | null;
   /** Participant ids, in the order they raised a hand during Discuss. */
   raisedHands: string[];
+  /**
+   * Durable discuss speaking log. Each raise records the person and the focus group
+   * at that moment. Survives leaving Discuss so Summary can export the order.
+   */
+  discussSpeakLog: DiscussSpeakEntry[];
   icebreaker: IcebreakerId;
   icebreakerRound: number;
   /** Host-written This or That pairs. Null uses the built-in pairs. */
@@ -223,6 +235,12 @@ export interface ReviewState {
   feedback: FeedbackNote[];
   decision: ReviewDecision | null;
   decisionNotes: string;
+  /** Section the room is currently working. Drives the shared stopwatch. */
+  activeSectionId: string;
+  /** Accrued stopwatch time per section while that section was active. */
+  stopwatchMs: Record<string, number>;
+  /** When the current section's stopwatch started running. */
+  stopwatchRunningSince: string | null;
 }
 
 export interface Initiative {
@@ -351,6 +369,7 @@ export type Op =
   | { type: "review.deleteFeedback"; feedbackId: string }
   | { type: "review.setDecision"; decision: ReviewDecision | null }
   | { type: "review.setDecisionNotes"; notes: string }
+  | { type: "review.setSection"; sectionId: string }
   | { type: "roadmap.setFramework"; framework: FrameworkId }
   | { type: "roadmap.setObjective"; objective: string }
   | { type: "roadmap.addInitiative" }

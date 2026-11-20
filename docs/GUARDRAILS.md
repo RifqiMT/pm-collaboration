@@ -2,7 +2,7 @@
 
 **Purpose:** Technical and business limitations that constrain product development.  
 **Audience:** Engineers, PMs, designers, security reviewers  
-**Last updated:** 2026-11-20 (Lineup icebreaker)  
+**Last updated:** 2026-11-20 (five rituals + retro PPT)  
 
 Violating a hard guardrail without an approved architecture change is a product defect, not a stretch goal.
 
@@ -80,8 +80,10 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-FAC-1 Host authority** | Phase, icebreaker selection, This or That pairs, Lineup title (`setOrderTitle`), discuss mode (not vote budget or timers) | Product assumes a facilitator role; timer/budget controls are open to joined actors on web; renaming a Lineup clears shared orders |
 | **G-FAC-2 Section isolation** | Each retro section shows its work | Resist “show everything always” feature requests |
 | **G-FAC-3 Summary is terminal collection** | No timer/stopwatch on Summary | Keep Summary for export/review, not timed work |
-| **G-FAC-4 One ritual per room** | `kind` fixed at create | No multi-ritual mashup room without redesign |
+| **G-FAC-4 One ritual per room** | `kind` fixed at create (`retro` \| `planning` \| `refinement` \| `review` \| `roadmap`) | No multi-ritual mashup room without redesign |
 | **G-FAC-5 Definitions single source** | `GLOSSARY` in `@cadence/core` | Do not fork plain-English copy into web-only or mobile-only strings |
+| **G-FAC-6 Checklist decision scope** | `review.setDecision` must match `checklistDecisions(kind)` | Do not accept Release on planning or Forecast on review |
+| **G-FAC-7 PPT is web-first** | Deck render uses `pptxgenjs` in the browser | Do not claim mobile PPT parity until a shared render path exists |
 
 ---
 
@@ -143,6 +145,7 @@ Until one of these is approved and implemented, build **within** the guardrails 
 - [ ] Does this re-attribute Health Check scores to peers (UI, summary, or CSV)?  
 - [ ] Does Travel Wishlist accept countries outside `TRAVEL_COUNTRIES` or more than five pins?  
 - [ ] Does Lineup accept a partial order or keep stale answers after a host title change?  
+- [ ] Does a checklist decision cross ritual kinds (e.g. Release on planning)?  
 - [ ] Does this assume multiple server instances?  
 - [ ] Does this duplicate scoring math outside core?  
 - [ ] Does this raise limits without a rationale?  

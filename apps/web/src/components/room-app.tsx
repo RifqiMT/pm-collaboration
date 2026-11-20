@@ -1,6 +1,6 @@
 "use client";
 
-import { RITUALS, type Op, type RoomView } from "@cadence/core";
+import { RITUALS, isChecklistKind, type Op, type RoomView } from "@cadence/core";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createIdentityId, initials, readIdentity, writeIdentity, type Identity } from "./identity";
@@ -149,7 +149,7 @@ export function RoomApp({ code }: { code: string }) {
 
 function Board({ room, actorId, send }: { room: RoomView; actorId: string; send: (op: Op) => Promise<boolean> }) {
   if (room.kind === "retro") return <RetroBoard room={room} actorId={actorId} send={send} />;
-  if (room.kind === "review") return <ReviewBoard room={room} actorId={actorId} send={send} />;
+  if (isChecklistKind(room.kind)) return <ReviewBoard room={room} actorId={actorId} send={send} />;
   return <RoadmapBoard room={room} actorId={actorId} send={send} />;
 }
 

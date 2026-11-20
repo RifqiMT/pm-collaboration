@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-20 (Lineup icebreaker)  
+**Last updated:** 2026-11-20 (five rituals + retro PPT)  
 
 ---
 
@@ -97,7 +97,8 @@ npx expo start
 | Routing (mobile) | In-app screen state in `App.js` (not Expo Router yet) |
 | Identity | localStorage / AsyncStorage |
 | HTTP | `fetch` |
-| Validation / scoring | `@cadence/core` |
+| Validation / scoring / deck model | `@cadence/core` (incl. `retrospectiveDeck`) |
+| PPT export (web) | `pptxgenjs` ^3.12 (`apps/web/src/lib/retro-pptx.ts`) |
 | Styling (web) | Global CSS variables + component classes |
 | Styling (mobile) | `StyleSheet` + `colors` object |
 
@@ -120,7 +121,7 @@ npx expo start
 
 | Tool | Use |
 | --- | --- |
-| Vitest | Domain (room, scoring, export, glossary, health-check averages) + selected UI/store helper tests |
+| Vitest | Domain (room, scoring, export, deck, glossary, health-check) + web pptx/store/UI helper tests |
 | TypeScript | Core + web |
 | Manual / Expo | Mobile verification |
 

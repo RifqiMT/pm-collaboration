@@ -2,7 +2,7 @@
 
 **Document type:** Requirements ↔ Stories ↔ Implementation ↔ Verification  
 **Product:** TeamCompass (`@cadence/*`)  
-**Last updated:** 2026-11-20 (Lineup icebreaker)  
+**Last updated:** 2026-11-20 (five rituals + retro PPT)  
 
 ---
 
@@ -22,7 +22,7 @@
 
 | Req ID | Requirement (short) | Story | Implementation | Verification | Status |
 | --- | --- | --- | --- | --- | --- |
-| FR-R1 | Create ritual room | US-1.1 | `api/rooms/route.ts`, `new-room-form.tsx`, `createRoom` | `room.test.ts` create flows | Implemented |
+| FR-R1 | Create ritual room (5 kinds) | US-1.1 | `api/rooms/route.ts`, `new-room-form.tsx`, `createRoom`, `createChecklistState` | `room.test.ts` create flows | Implemented |
 | FR-R2 | 6-char code | US-1.1 | `store.ts` `makeCode` | Manual + create API | Implemented |
 | FR-R3 | Join with code + name | US-1.2 | `…/join/route.ts`, `room-app.tsx` | Core join + full room | Implemented |
 | FR-R4 | Persist identity | US-1.3 | `identity.ts`, mobile AsyncStorage | Manual | Implemented |
@@ -46,7 +46,7 @@
 | FR-RET7 | Dot voting budget | US-2.5 | `vote`, `setVotesPerPerson` | Vote tests | Implemented |
 | FR-RET8 | Actions + owners | US-2.6 | action ops, Actions UI | Action tests | Implemented |
 | FR-RET9 | Timers + stopwatch | US-2.7 | `timers`, `stopwatchMs`, `PhaseTimer`, custom 1–60 min | Timer/stopwatch tests | Implemented |
-| FR-RET10 | Summary + CSV | US-2.8 | `retro-export.ts`, summary UI | `retro-export.test.ts` | Implemented |
+| FR-RET10 | Summary + CSV + PPT | US-2.8 | `retro-export.ts`, `retro-deck.ts`, `lib/retro-pptx.ts`, summary UI | `retro-export.test.ts`, `retro-deck.test.ts`, `retro-pptx.test.ts` | Implemented |
 | FR-RET11 | Column glyphs | — | `retro-glyphs.tsx` | `retro-glyphs.test.ts` | Implemented |
 | FR-RET12 | Discuss raise hand | US-2.4b | `retro.raiseHand`, `raisedHands`, web+mobile Discuss UI | `room.test.ts` raise-hand cases | Implemented |
 
@@ -56,12 +56,21 @@
 
 | Req ID | Requirement (short) | Story | Implementation | Verification | Status |
 | --- | --- | --- | --- | --- | --- |
-| FR-REV1 | Seeded checklist | US-3.1 | `createReviewState`, `review-board.tsx` | Review checklist tests | Implemented |
+| FR-REV1 | Seeded checklist | US-3.1 | `createChecklistState("review")`, `review-board.tsx` | Review checklist tests | Implemented |
 | FR-REV2 | Multi-signer checks | US-3.2 | `review.setItemDone` | Desired-state tests | Implemented |
 | FR-REV3 | Notes + custom items | US-3.3 | `setItemNote`, `addItem` | Core tests | Implemented |
 | FR-REV4 | Sprint goal | US-3.4 | `setGoal` | Core tests | Implemented |
 | FR-REV5 | Feedback kinds | US-3.5 | feedback ops | Core tests | Implemented |
 | FR-REV6 | Release decision | US-3.6 | `setDecision`, notes | Core tests | Implemented |
+
+## 4b. Sprint planning and backlog refinement
+
+| Req ID | Requirement (short) | Story | Implementation | Verification | Status |
+| --- | --- | --- | --- | --- | --- |
+| FR-PLN1 | Planning checklist | US-6.1 | `createChecklistState("planning")`, `ReviewBoard` | `room.test.ts` planning cases | Implemented |
+| FR-PLN4 | Planning decision | US-6.1 | `checklistDecisions`, `review.setDecision` | Rejects `ship`; accepts `commit` | Implemented |
+| FR-REF1 | Refinement checklist | US-6.2 | `createChecklistState("refinement")` | `room.test.ts` refinement cases | Implemented |
+| FR-REF4 | Refinement decision | US-6.2 | `checklistDecisions` | Rejects `commit`; accepts `ready` | Implemented |
 
 ---
 

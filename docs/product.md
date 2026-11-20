@@ -1,6 +1,6 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-20 (Lineup icebreaker)  
+**Status:** Current as of repository state 2026-11-20 (five rituals + retro PPT export)  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
 **Canonical path:** `docs/product.md` (use this casing in links for case-sensitive hosts).
@@ -9,11 +9,13 @@
 
 ## 1. Product overview
 
-TeamCompass is a **shared collaboration room** for three sprint rituals:
+TeamCompass is a **shared collaboration room** for five sprint rituals:
 
 1. **Retrospective** — warm up, write privately, discuss, vote, own actions, export a summary  
-2. **Sprint review** — walk a shared readiness checklist, collect feedback, record one release decision  
-3. **Roadmap** — score initiatives with RICE, ICE, or value÷complexity, with complexity as a first-class lens  
+2. **Sprint planning** — set a Sprint Goal, let Developers forecast what can be Done, and plan how  
+3. **Backlog refinement** — add detail, size, and order so an item can be selected later  
+4. **Sprint review** — inspect the Increment with stakeholders and adapt the Product Backlog  
+5. **Roadmap** — score initiatives with RICE, ICE, or value÷complexity, with complexity as a first-class lens  
 
 People join with a **six-character room code**. There are **no accounts**. Everyone who has the code edits the same board. The **web app** is the full room experience and hosts the API. The **phone app** (Expo) joins the same rooms over the same HTTP API and shared domain package.
 
@@ -28,10 +30,10 @@ People join with a **six-character room code**. There are **no accounts**. Every
 | Fast room start | Create a ritual room in seconds; share a short code |
 | Psychological safety in retros | Notes stay private on the server during brainstorm |
 | Facilitation control | Host gates phase, icebreaker, and discussion walk; timers and vote budget are open on web |
-| Decision clarity | Review ends in ship / iterate / hold with notes |
+| Decision clarity | Planning ends in commit / reshape / defer. Refinement ends in ready / split / park. Review ends in ship / iterate / hold. Each call keeps notes. |
 | Honest roadmap math | Score and complexity sit on the same card; quadrants explain trade-offs |
 | Cross-device parity | Web and mobile share `@cadence/core` rules and the same room document |
-| Exportable outcomes | Retro summary downloads as CSV including timing and icebreaker data |
+| Exportable outcomes | Retro summary downloads as **CSV** and as a consultant-style **PPT** (deck model in `@cadence/core`, rendered with `pptxgenjs` on web) |
 
 ---
 
@@ -45,8 +47,9 @@ Primary users are agile product and engineering teams running time-boxed rituals
 
 ### 3.1 Rooms and presence
 
-- Create a room by ritual kind (`retro` | `review` | `roadmap`), optional title, host name, and (for retros) template  
-- Optional **demo** seed, for showing the product: 10 notes on every column of every retrospective template, a sprint review with evidence on every checklist item, and 10 scored roadmap bets  
+- Create a room by ritual kind (`retro` | `planning` | `refinement` | `review` | `roadmap`), optional title, host name, and (for retros) template  
+- Optional **demo** seed: 10 notes per retro column, checklist demos for planning / refinement / review, and 10 scored roadmap bets  
+- Planning and refinement store their board in `room.review` via `createChecklistState(kind)` (same checklist ops as sprint review; decisions are kind-scoped)  
  
 - Join by six-character code and display name  
 - Local identity persisted in browser `localStorage` / mobile AsyncStorage (`person_…` id + name)  
@@ -73,19 +76,39 @@ Primary users are agile product and engineering teams running time-boxed rituals
 | Timers | Per-section countdown; **web** presets **3 / 5 / 8** minutes plus Custom **1–60** whole minutes; server clamps 30–3600 seconds (mobile has no timer chrome) |
 | Stopwatch | Accrues while a section is open; Summary has no timer/stopwatch UI |
 | Column glyphs | Header graphics grow as notes collect in that column |
-| Summary + CSV | Collects notes, votes, actions, icebreaker answers, and section timing; downloadable CSV |
+| Summary + CSV + PPT | Collects notes, votes, actions, icebreaker answers, and section timing; downloadable **CSV** and **PPT** (web Summary: `.summary-downloads*`) |
 
-### 3.3 Sprint review
+### 3.3 Sprint planning
 
-- Shared checklist seeded into four sections (increment, story, evidence, closing the loop)  
-- Required items; multi-signer `doneBy` (idempotent desired-state checks)  
-- Per-item evidence notes; custom items per section (cap **30** / section)  
-- Sprint goal  
-- Live feedback: praise / change / question  
-- One release decision: **ship**, **iterate**, or **hold**, plus decision notes  
-- Progress derived from required items checked  
+Scrum Planning topics, each with a short “how to do it” for the room:
 
-### 3.4 Roadmap
+- **Why** — Product Owner proposes value. The Scrum Team writes a Sprint Goal. The goal is the commitment.  
+- **What** — Developers pull items they believe they can bring to the Definition of Done. The selection is a forecast.  
+- **How** — Developers plan the work, often in pieces of about a day. The plan is theirs.  
+- **Sprint Backlog** — Sprint Goal + selected items + plan.  
+- Calls: **Forecast**, **Narrow**, or **No goal**. A review decision such as Release is rejected.  
+
+### 3.4 Product Backlog refinement
+
+Ongoing backlog work, not a second planning event. Each part includes how to do it:
+
+- **Detail** — user, outcome, acceptance criteria, open questions.  
+- **Split** — if it cannot be Done in one Sprint, break it into a thin slice of value.  
+- **Size** — Developers size it by comparison. The Product Owner does not set the size.  
+- **Order** — Product Owner places it against its neighbors.  
+- Calls: **Selectable**, **Split**, or **Return**. Selectable means Developers could pull it in Sprint Planning.  
+
+### 3.5 Sprint review
+
+Inspect and adapt, with how-to steps on each part:
+
+- **Sprint Goal** — read the goal first and say whether it was met.  
+- **Increment** — show only what meets the Definition of Done, along a user path.  
+- **Stakeholders** — a working session. Ask what changed and what they would do next.  
+- **Adapt the backlog** — Product Owner updates the Product Backlog before the room ends.  
+- Calls: **Release**, **Adapt**, or **Hold** (stored as ship / iterate / hold).  
+
+### 3.6 Roadmap
 
 - Framework switch: **RICE**, **ICE**, **value / complexity**  
 - Initiatives with outcome, assumption, scores, complexity (technical / dependency / uncertainty), horizon (now / next / later), owner  
@@ -96,9 +119,9 @@ Primary users are agile product and engineering teams running time-boxed rituals
 - Ranked list with relative bar  
 - Inline link to roadmap Definitions (`/guide#guide-roadmap`)  
 
-### 3.5 Definitions (cross-cutting)
+### 3.7 Definitions (cross-cutting)
 
-Plain-English **variables**, **metrics**, and **formulas** for all three rituals, shared from `@cadence/core` `GLOSSARY` (27 entries across retro / review / roadmap groups).
+Plain-English **variables**, **metrics**, and **formulas** for the rituals, shared from `@cadence/core` `GLOSSARY` (**31** entries across **5** groups: retro, planning, refinement, review, roadmap).
 
 | Surface | Entry point |
 | --- | --- |
@@ -107,13 +130,13 @@ Plain-English **variables**, **metrics**, and **formulas** for all three rituals
 
 Kinds: Variable (something the team enters) · Metric (a number the board calculates) · Formula (the math behind a metric). Engineering catalog remains [VARIABLES.md](./VARIABLES.md).
 
-### 3.6 Platforms
+### 3.8 Platforms
 
 | Surface | Role |
 | --- | --- |
 | Web (`apps/web`) | Full UI, App Router pages (`/`, `/new`, `/r/[code]`, `/guide`), room API, persistence (`file` / `supabase` / `redis`) |
 | Mobile (`apps/mobile`) | Expo client: home / guide / create / room (2s poll; raise hand; no timer or vote-budget chrome) |
-| Core (`packages/core`) | Types, ops, privacy, scoring, content (21 icebreakers), **countries** (travel catalog), demo seed, export, **glossary** |
+| Core (`packages/core`) | Types, ops, privacy, scoring, content (21 icebreakers + checklist rituals), **countries**, demo seed, CSV export, **retro deck** (`retrospectiveDeck`), **glossary** |
 | Credit | Site-wide developer credit footer on web; home/create on mobile (`credit-footer`) |
 
 ---

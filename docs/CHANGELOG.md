@@ -13,12 +13,14 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **Developer credit footer** on web (all pages) and mobile (home + create): “Developed, managed, and maintained by Rifqi Tjahyono” with LinkedIn, personal-website, [GitHub](https://github.com/RifqiMT/pm-collaboration), and [article](https://rifqi-tjahyono.com/%f0%9f%93%9d-sticky-note-chaos-to-team-clarity-reflect-together-review-progress-and-decide-what-comes-next-%f0%9f%a4%9d%f0%9f%a7%ad/) icon links.  
 - **Start from an example** loads a demo session: 10 notes in every column of every retrospective shape, a sprint review with evidence on every checklist item, and a 10-bet roadmap across all four quadrants.  
 - **Raise hand** in Discuss: ordered speaking queue; named notes highlight; anonymous authorship stays protected; queue clears on phase change (web + mobile).
-- **Definitions**: plain-English variables, metrics, and formulas for the retrospective, sprint review, and roadmap (`GLOSSARY` in `@cadence/core`). Web `/guide`; mobile Guide screen; linked from home, room chrome, and roadmap scoring help.
+- **Definitions**: plain-English variables, metrics, and formulas for retrospective, planning, refinement, sprint review, and roadmap (`GLOSSARY` — 31 entries / 5 groups). Web `/guide`; mobile Guide screen; linked from home, room chrome, and roadmap scoring help.
 - **62 retrospective shapes** across eight shelves (Classic 13 · Film 10 · Series 9 · Anime 5 · Games 9 · Sport 14 · Music 1 · Food 1). Newer themes include TACO, 4Ps, Marie Kondo, KALM, ALC, Digimon, Star Trek, F1, MotoGP, World Cup, Super Mario, Mario Kart, Pac-Man, Pizza, Cricket, Basketball, Field Hockey, Tennis, Volleyball, Table Tennis, Baseball, Rugby, Golf, Olympics, eSports, DOTA, Resident Evil, and Assassin's Creed. Demo seed writes ten theme-specific notes per column.
 - **Shape picker** on create: searchable shelves, column-count filters (3 / 4 / 5), A–Z lists, and live column titles/hints before create (web + mobile).
 - **Health Check** icebreaker: six statements rated from strongly disagree to strongly agree (1–7). The room sees the spread of answers and averages, not who chose each point. Web and mobile.
 - **Travel Wishlist** icebreaker: pick up to five countries on the map from a 175-country catalog. Each selected country shows a rounded flag. Names stay with the wishlist. The summary and CSV use country names. Web interactive map; mobile uses the same country list.
 - **Lineup** icebreaker: the host names what the order means. Everyone arranges the people in the room. Saving a new title clears orders already shared. Web and mobile.
+- **Sprint planning, backlog refinement, and sprint review** follow the Scrum Guide; each part includes how to run it. Planning: Why / What / How / Sprint Backlog (Forecast, Narrow, or No goal). Refinement: Detail / Split / Size / Order (Selectable, Split, or Return). Review: Sprint Goal / Increment / Stakeholders / Adapt (Release, Adapt, or Hold).
+- **Retro PPT export** on Summary: consultant-style deck (icebreaker, durations, discuss order, overview, categories, top votes, actions) alongside CSV. Web-first.
 
 ### Added — Engineering
 
@@ -30,9 +32,11 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - `packages/core/src/glossary.ts` + `glossary.test.ts` (unique ids; RICE example matches scorer).  
 - `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`, `retroColumnCounts`, and template coverage tests for all 62 shapes.  
 - Shape-finder UI styles (`.shape-finder*`) and glyph coverage for new templates.  
-- `IcebreakerMode` extended with `scale`, `map`, and `order`; `HEALTH_CHECK` helpers + `health-check.test.ts`; `countries.ts` (175 countries, wishlist parse/format/export); `parsePeopleOrder` / `formatPeopleOrder`; health peer anonymization in `presentRoom`; CSV transforms for health / travel / lineup / show-and-tell.  
+- `IcebreakerMode` extended with `scale`, `map`, and `order`; `HEALTH_CHECK` helpers + `health-check.test.ts`; `countries.ts` (175 countries); `parsePeopleOrder` / `formatPeopleOrder`; health peer anonymization; CSV transforms for health / travel / lineup / show-and-tell.  
+- Web icebreaker surfaces: `travel-map.tsx`, `people-order.tsx`, `.health-*` / `.wish-map*` / `.order-*` CSS; mobile Health / Travel / Lineup screens.  
 - `retro.setOrderTitle` (host); removed `retro.nextIcebreakerRound` and `retro.focusCard` / `discussedCardId`.  
-- Web: `travel-map.tsx`, `world-map-paths.ts`, `people-order.tsx`, `public/flags/*.svg` (~175), `.health-*` / `.wish-map*` / `.order-*` CSS. Mobile: `HealthCheckMobile` / `TravelWishlistMobile` / `PeopleOrderMobile`.
+- `RoomKind` includes `planning` and `refinement`. Both store a `ReviewState` from `createChecklistState`. `review.setDecision` is kind-scoped (nine stored ids; cross-kind rejected). Checklist stopwatch via `checklistStopwatchMs`. Demo seeds: `demoPlanningContent` / `demoRefinementContent`.  
+- `retrospectiveDeck` (`retro-deck.ts`) + web `buildRetroPptx` (`pptxgenjs` ^3.12) + `.summary-downloads*` UI; deck/pptx vitest coverage.
 
 ### Documentation
 
@@ -41,8 +45,9 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **2026-11-16 refresh:** API `store`→503 + full error catalog; web timer Custom 1–60 min and `DOT_PRESETS`; `persistence.ts` lock constants; credit footer inventory; `product.md` link casing; mobile vote-budget chrome gap; `vercel.json` and `sb_*` auth notes.  
 - **2026-11-18 refresh:** Definitions/glossary end-to-end (product, PRD FR-P6, stories, VARIABLES §12–13, architecture, design, traceability); clarified vote budget/timers are not host-gated; CSV export columns catalogued.  
 - **2026-11-19 refresh:** 62-template shelves + shape picker documented; CSV §13 examples match export writers; glossary timer/dot copy no longer claims host-only; DESIGN shape-finder section; suite stamps updated.  
-- **2026-11-19 evening refresh:** documented Health Check + Travel Wishlist end-to-end (product, VARIABLES body contracts + charts, DESIGN health/map, ARCHITECTURE/INDEX source map, stories AC, guardrail privacy, metrics, TRACEABILITY); restored Shape picker CHANGELOG product bullet; aligned remaining “18 icebreakers” → **20**.  
-- **2026-11-20 refresh:** documented Lineup (`order` / `setOrderTitle` / `people-order.tsx`); icebreaker count **21**; removed stale next-round / focus-card host claims; DESIGN `.order-*`; INDEX/ARCHITECTURE/personas/stories/METRICS/GUARDRAILS suite stamps.
+- **2026-11-19 evening refresh:** documented Health Check + Travel Wishlist end-to-end; aligned remaining “18 icebreakers” → **20**.  
+- **2026-11-20 refresh:** documented Lineup; icebreaker count **21**; removed stale next-round / focus-card host claims.  
+- **2026-11-20 evening refresh:** five rituals (planning + refinement checklists); glossary 31/5; retro PPT deck end-to-end; FR-R1 / epic-01 / VARIABLES `kind` / ARCHITECTURE room model aligned; epic-06 linked.
 
 ---
 

@@ -15,7 +15,7 @@ export const RETRO_PHASES: { id: RetroPhase; label: string; short: string; hint:
     id: "summary",
     label: "Summary",
     short: "Close",
-    hint: "Read the retrospective, then download every note, vote, action, and icebreaker answer.",
+    hint: "Read the retrospective, then download CSV or a consultant PPT with timings, categories, top votes, and actions.",
   },
 ];
 

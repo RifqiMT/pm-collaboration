@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { columnMark, previewMediaCandidates, RETRO_TEMPLATE_GROUPS, RETRO_TEMPLATES, RITUALS, retroColumnCounts, searchRetroTemplates, truthDisplayOrder } from "./content";
+import { columnMark, previewMediaCandidates, RETRO_TEMPLATE_GROUPS, RETRO_TEMPLATES, RITUALS, checklistHow, retroColumnCounts, searchRetroTemplates, truthDisplayOrder } from "./content";
 import { formatScore, formulaLine, scoreInitiative, scoreRoadmap } from "./scoring";
 import { retrospectiveExport } from "./retro-export";
 import {
@@ -11,6 +11,7 @@ import {
   discussionGroups,
   presentRoom,
   sectionStopwatchMs,
+  checklistStopwatchMs,
   votesLeft,
   votesUsed,
 } from "./room";
@@ -239,8 +240,8 @@ describe("media previews", () => {
 });
 
 describe("rituals", () => {
-  it("offers the three collaboration rooms", () => {
-    expect(RITUALS.map((ritual) => ritual.kind)).toEqual(["retro", "review", "roadmap"]);
+  it("offers the collaboration rooms", () => {
+    expect(RITUALS.map((ritual) => ritual.kind)).toEqual(["retro", "planning", "refinement", "review", "roadmap"]);
   });
 });
 
@@ -809,8 +810,13 @@ describe("retrospective", () => {
 
     room = applyOp(room, { type: "retro.raiseHand", raised: false }, "person_alexdemo01", NOW);
     expect(room.retro?.raisedHands).toEqual([HOST]);
+    expect(room.retro?.discussSpeakLog.map((entry) => entry.personId)).toEqual(["person_alexdemo01", HOST]);
     room = applyOp(room, { type: "retro.setPhase", phase: "vote" }, HOST, NOW);
     expect(room.retro?.raisedHands).toEqual([]);
+    expect(room.retro?.discussSpeakLog.map((entry) => [entry.personId, entry.groupKey])).toEqual([
+      ["person_alexdemo01", "start"],
+      [HOST, "start"],
+    ]);
   });
 
   it("turns each note into an action only once", () => {
@@ -852,17 +858,99 @@ describe("sprint review", () => {
     expect(before.requiredTotal).toBeGreaterThan(5);
     room = applyOp(room, { type: "review.setItemDone", itemId: "dod", done: true }, HOST, NOW);
     room = applyOp(room, { type: "review.setItemDone", itemId: "dod", done: true }, "person_samdemo001", NOW);
-    expect(room.review?.sections[0]?.items.find((item) => item.id === "dod")?.doneBy).toEqual([
+    expect(room.review?.sections.flatMap((section) => section.items).find((item) => item.id === "dod")?.doneBy).toEqual([
       HOST,
       "person_samdemo001",
     ]);
     room = applyOp(room, { type: "review.setItemDone", itemId: "dod", done: false }, HOST, NOW);
-    expect(room.review?.sections[0]?.items.find((item) => item.id === "dod")?.doneBy).toEqual([
+    expect(room.review?.sections.flatMap((section) => section.items).find((item) => item.id === "dod")?.doneBy).toEqual([
       "person_samdemo001",
     ]);
     room = applyOp(room, { type: "review.setDecision", decision: "iterate" }, HOST, NOW);
     expect(room.review?.decision).toBe("iterate");
     expect(checklistProgress(room.review!).requiredDone).toBe(1);
+  });
+});
+
+describe("sprint planning and backlog refinement", () => {
+  it("seeds a planning checklist and rejects a review decision", () => {
+    let room = createRoom(
+      { code: "PLAN01", kind: "planning", title: "Planning", hostId: HOST, hostName: "Rifqi" },
+      NOW,
+    );
+    expect(room.review?.sections.map((section) => section.id)).toEqual(["why", "what", "how", "forecast"]);
+    expect(room.review?.sections.flatMap((section) => section.items).some((item) => item.id === "why-goal")).toBe(true);
+    expect(room.roadmap).toBeNull();
+    expect(() => applyOp(room, { type: "review.setDecision", decision: "ship" }, HOST, NOW)).toThrow(/not part of this checklist/);
+    room = applyOp(room, { type: "review.setDecision", decision: "commit" }, HOST, NOW);
+    expect(room.review?.decision).toBe("commit");
+    room = applyOp(room, { type: "review.setItemDone", itemId: "why-goal", done: true }, HOST, NOW);
+    expect(checklistProgress(room.review!).requiredDone).toBe(1);
+    expect(checklistHow("planning", "why").length).toBeGreaterThanOrEqual(3);
+    expect(checklistHow("planning", "how")[0]).toMatch(/Developers/);
+  });
+
+  it("seeds a refinement checklist and rejects a planning decision", () => {
+    let room = createRoom(
+      { code: "REFIN1", kind: "refinement", title: "Refinement", hostId: HOST, hostName: "Rifqi" },
+      NOW,
+    );
+    expect(room.review?.sections.map((section) => section.id)).toEqual(["detail", "decompose", "size", "order"]);
+    expect(() => applyOp(room, { type: "review.setDecision", decision: "commit" }, HOST, NOW)).toThrow(/not part of this checklist/);
+    room = applyOp(room, { type: "review.setDecision", decision: "ready" }, HOST, NOW);
+    expect(room.review?.decision).toBe("ready");
+    expect(checklistHow("refinement", "size").join(" ")).toMatch(/Developers/);
+    expect(checklistHow("review", "increment").length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("runs a separate stopwatch for each checklist section when the section is opened", () => {
+    let room = createRoom(
+      { code: "REFIN2", kind: "refinement", title: "Refinement", hostId: HOST, hostName: "Rifqi" },
+      NOW,
+    );
+    expect(room.review?.activeSectionId).toBe("detail");
+    expect(room.review?.stopwatchRunningSince).toBe(NOW);
+    expect(checklistStopwatchMs(room.review!, "detail", "2026-11-06T12:01:00.000Z")).toBe(60_000);
+
+    room = applyOp(room, { type: "review.setSection", sectionId: "decompose" }, HOST, "2026-11-06T12:01:00.000Z");
+    expect(room.review?.stopwatchMs.detail).toBe(60_000);
+    expect(room.review?.activeSectionId).toBe("decompose");
+    expect(room.review?.stopwatchRunningSince).toBe("2026-11-06T12:01:00.000Z");
+    expect(checklistStopwatchMs(room.review!, "detail", "2026-11-06T12:05:00.000Z")).toBe(60_000);
+    expect(checklistStopwatchMs(room.review!, "decompose", "2026-11-06T12:01:30.000Z")).toBe(30_000);
+
+    room = applyOp(room, { type: "review.setSection", sectionId: "size" }, HOST, "2026-11-06T12:01:30.000Z");
+    expect(room.review?.stopwatchMs.decompose).toBe(30_000);
+    expect(room.review?.stopwatchMs.detail).toBe(60_000);
+    room = applyOp(room, { type: "review.setSection", sectionId: "detail" }, HOST, "2026-11-06T12:02:00.000Z");
+    expect(checklistStopwatchMs(room.review!, "detail", "2026-11-06T12:02:15.000Z")).toBe(75_000);
+    expect(checklistStopwatchMs(room.review!, "size", "2026-11-06T12:02:15.000Z")).toBe(30_000);
+
+    const version = room.version;
+    const same = applyOp(room, { type: "review.setSection", sectionId: "detail" }, HOST, "2026-11-06T12:03:00.000Z");
+    expect(same.version).toBe(version);
+    expect(() => applyOp(room, { type: "review.setSection", sectionId: "missing" }, HOST, NOW)).toThrow(/not on this checklist/);
+  });
+
+  it("seeds demo planning and refinement with their own decisions", () => {
+    const planning = createRoom(
+      { code: "PLAN02", kind: "planning", title: "Planning", hostId: HOST, hostName: "Rifqi", demo: true },
+      NOW,
+    );
+    expect(planning.review?.decision).toBe("commit");
+    expect(planning.review?.goal.length).toBeGreaterThan(40);
+    const planningItems = planning.review?.sections.flatMap((section) => section.items) ?? [];
+    expect(planningItems.every((item) => item.note.length > 40)).toBe(true);
+    expect(planningItems.every((item) => item.doneBy.length >= 2)).toBe(true);
+
+    const refinement = createRoom(
+      { code: "REFIN2", kind: "refinement", title: "Refinement", hostId: HOST, hostName: "Rifqi", demo: true },
+      NOW,
+    );
+    expect(refinement.review?.decision).toBe("ready");
+    const refinementItems = refinement.review?.sections.flatMap((section) => section.items) ?? [];
+    expect(refinementItems.every((item) => item.note.length > 40)).toBe(true);
+    expect(refinementItems.some((item) => item.id === "detail-user")).toBe(true);
   });
 });
 

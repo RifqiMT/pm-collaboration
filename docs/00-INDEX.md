@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-20 (Lineup icebreaker)  
+**Last documentation refresh:** 2026-11-20 (five rituals + retro PPT)  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -51,13 +51,15 @@ This index is the reading map for product, engineering, design, and leadership s
 | Domain types & limits | `packages/core/src/types.ts` |
 | Room mutations & privacy | `packages/core/src/room.ts` |
 | Scoring & quadrants | `packages/core/src/scoring.ts` |
-| Templates, shelves, search, icebreakers, review seed | `packages/core/src/content.ts` (`RETRO_TEMPLATES`, `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`, `ICEBREAKERS` 21, `HEALTH_CHECK`, `parsePeopleOrder`) |
-| Travel wishlist catalog | `packages/core/src/countries.ts` (`TRAVEL_COUNTRIES` 175, parse/format/export) |
-| Shape picker UI | `apps/web/.../new-room-form.tsx`, mobile create in `App.js`, `.shape-finder*` in `globals.css` |
-| Health Check / Travel Wishlist / Lineup UI | `icebreaker-panel.tsx` (`.health-check*`), `travel-map.tsx`, `world-map-paths.ts`, `people-order.tsx` (`.order-*`), `apps/web/public/flags/*.svg`; mobile `HealthCheckMobile` / `TravelWishlistMobile` / `PeopleOrderMobile` in `App.js` |
-| Demo seed data | `packages/core/src/demo.ts` |
-| In-app Definitions glossary | `packages/core/src/glossary.ts` |
-| Retro CSV export | `packages/core/src/retro-export.ts` (health anonymous; travel names; lineup ranked names; show-and-tell caption) |
+| Templates, shelves, search, icebreakers, checklist rituals | `packages/core/src/content.ts` (`RETRO_TEMPLATES`, `ICEBREAKERS` 21, `createChecklistState`, `checklistRitual`, `HEALTH_CHECK`, `parsePeopleOrder`) |
+| Travel wishlist catalog | `packages/core/src/countries.ts` (`TRAVEL_COUNTRIES` 175) |
+| Shape picker UI | `apps/web/.../new-room-form.tsx`, mobile create in `App.js`, `.shape-finder*` |
+| Health / Travel / Lineup UI | `icebreaker-panel.tsx`, `travel-map.tsx`, `people-order.tsx`, `public/flags/*.svg`; mobile counterparts in `App.js` |
+| Planning / refinement / review board | `review-board.tsx` + mobile checklist screens; kind-scoped decisions |
+| Demo seed data | `packages/core/src/demo.ts` (incl. planning + refinement demos) |
+| In-app Definitions glossary | `packages/core/src/glossary.ts` (31 entries / 5 groups) |
+| Retro CSV export | `packages/core/src/retro-export.ts` |
+| Retro PPT deck | `packages/core/src/retro-deck.ts` → `apps/web/src/lib/retro-pptx.ts` (`pptxgenjs`) |
 | Web UI & polling | `apps/web/src/components/` |
 | Definitions page | `apps/web/src/app/guide/page.tsx` (`/guide`) |
 | Mobile Definitions | `Guide` screen in `apps/mobile/App.js` |

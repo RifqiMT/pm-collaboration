@@ -2359,3 +2359,115 @@ function initiative(
 ): Initiative {
   return { id, ...patch };
 }
+
+export function demoPlanningContent(authors: DemoAuthor[], now: string): {
+  goal: string;
+  decision: ReviewDecision;
+  decisionNotes: string;
+  feedback: FeedbackNote[];
+  itemNotes: Record<string, string>;
+} {
+  const [host, alex, sam] = padAuthors(authors);
+  return {
+    goal: "By Friday, a merchant can retry a failed payout from the email, and Finance can see that recovery on the same dashboard.",
+    decision: "commit",
+    decisionNotes:
+      "Commit to the retry path and the recovery tile. Leave the bulk export for the next sprint. Revisit only if Payments cannot confirm the token contract by Tuesday.",
+    feedback: [
+      {
+        id: "note_planpraise01",
+        authorId: alex.id,
+        kind: "praise",
+        body: "The goal is one sentence and it matches the capacity we named.",
+        createdAt: now,
+      },
+      {
+        id: "note_planchange01",
+        authorId: sam.id,
+        kind: "change",
+        body: "Put the support-duty hours on the forecast before we pull the third story.",
+        createdAt: now,
+      },
+      {
+        id: "note_planquestion1",
+        authorId: host.id,
+        kind: "question",
+        body: "Does Finance need the recovery tile in production, or is a staging walkthrough enough for this sprint?",
+        createdAt: now,
+      },
+    ],
+    itemNotes: {
+      "why-value": "Product Owner opened with the Product Goal: fewer merchants wait on support after a failed payout.",
+      "why-goal": "Sprint Goal: a merchant retries a failed payout from the email, and Finance sees that recovery the same day.",
+      "why-product": "The goal serves the payouts Product Goal. Bulk export does not, so it stays off this Sprint.",
+      "why-inspect": "Sprint Review will fail a payout in staging, retry from the email, and show the recovery count.",
+      "what-pull": "Developers pulled retry-from-email, confirmation, and the Finance tile. The Product Owner did not assign them.",
+      "what-dod": "Each selected item can meet the Definition of Done this Sprint. The export cannot, so it was not selected.",
+      "what-capacity": "Four people. Sam is on support Tuesday and Thursday. The forecast is 16 points against 18 of capacity.",
+      "what-cut": "The bulk export stays on the Product Backlog because it needs a data review the Sprint cannot hold.",
+      "how-plan": "Developers split the email retry into token check, retry action, and confirmation. Each is about a day.",
+      "how-days": "Monday is the token contract and the email retry. Tuesday is the confirmation state.",
+      "how-deps": "Payments owns the retry token, needed Monday. Design owns the email layout, confirmed for Monday.",
+      "how-risk": "Risk: the token contract slips. Signal: no written confirmation from Payments by Tuesday noon.",
+      "forecast-backlog": "Sprint Backlog shows the Sprint Goal, the three items, and the Monday-Tuesday plan.",
+      "forecast-owners": "Alex, Sam, and Jordan agreed the forecast. They did not promise the export.",
+      "forecast-call": "The room recorded Forecast. Narrow only if the token contract is late.",
+    },
+  };
+}
+
+export function demoRefinementContent(authors: DemoAuthor[], now: string): {
+  goal: string;
+  decision: ReviewDecision;
+  decisionNotes: string;
+  feedback: FeedbackNote[];
+  itemNotes: Record<string, string>;
+} {
+  const [host, alex, sam] = padAuthors(authors);
+  return {
+    goal: "Make the payout-retry story small enough to enter the next sprint, with acceptance criteria a tester can run.",
+    decision: "ready",
+    decisionNotes:
+      "The email retry and the confirmation state are ready. The Finance dashboard tile is split into its own story and parked until the data contract is written.",
+    feedback: [
+      {
+        id: "note_refpraise001",
+        authorId: alex.id,
+        kind: "praise",
+        body: "Splitting the dashboard tile kept this story inside one sprint.",
+        createdAt: now,
+      },
+      {
+        id: "note_refchange001",
+        authorId: sam.id,
+        kind: "change",
+        body: "Add the empty-token case to the acceptance criteria before planning.",
+        createdAt: now,
+      },
+      {
+        id: "note_refquestion01",
+        authorId: host.id,
+        kind: "question",
+        body: "Who confirms the email layout before this is pulled into a sprint?",
+        createdAt: now,
+      },
+    ],
+    itemNotes: {
+      "detail-user": "A merchant whose payout failed can retry it from the email and see a confirmation, without calling support.",
+      "detail-criteria": "Given a failed payout email, the merchant retries once and sees either a confirmation or a named reason.",
+      "detail-questions": "Open question: which failure reasons can be retried. Owner: Sam. Answer due before Planning.",
+      "detail-goal": "Serves the payouts Product Goal: fewer merchants wait on support to recover a failed payout.",
+      "split-size": "The email retry can be Done in one Sprint. The Finance dashboard tile cannot, so it is split off.",
+      "split-value": "The retry slice still ends in a confirmation the merchant can see. The dashboard is a separate item.",
+      "split-out": "Out of this item: bulk export, the Finance dashboard, and any change to the payout schedule.",
+      "split-children": "The Finance tile is now its own Product Backlog item. The parent is no longer one lump.",
+      "size-devs": "Developers set a small size. The Product Owner did not estimate it.",
+      "size-compare": "Compared with the failed-payout email story the team finished last Sprint. This is about the same size.",
+      "size-tradeoff": "Product Owner dropped the dashboard from this item so the size stays inside one Sprint.",
+      "order-place": "Ordered after the failed-payout email and before the Finance recovery tile.",
+      "order-deps": "Depends on the Payments retry token. Owner: Payments. Needed before a Developer starts.",
+      "order-call": "The room called the retry item Selectable. The Finance tile is Return until the data contract exists.",
+      "order-next": "Next item to refine: the Finance recovery tile, once the data contract exists.",
+    },
+  };
+}

@@ -1,4 +1,4 @@
-import { LIMITS, type ColumnTone, type IcebreakerPair, type IcebreakerId, type RetroColumn, type RetroTemplateId, type ReviewState, type RoomKind } from "./types";
+import { LIMITS, type ColumnTone, type IcebreakerPair, type IcebreakerId, type RetroColumn, type RetroTemplateId, type ReviewDecision, type ReviewState, type RoomKind } from "./types";
 
 export interface RitualCopy {
   kind: RoomKind;
@@ -15,10 +15,22 @@ export const RITUALS: RitualCopy[] = [
     steps: ["Icebreaker", "Private notes", "Discuss", "Dot vote", "Actions", "Summary"],
   },
   {
+    kind: "planning",
+    name: "Sprint planning",
+    promise: "Set a Sprint Goal, forecast what can be Done, and plan how.",
+    steps: ["Why", "What", "How", "Forecast"],
+  },
+  {
+    kind: "refinement",
+    name: "Backlog refinement",
+    promise: "Add detail, size, and order so an item can be selected later.",
+    steps: ["Detail", "Split", "Size", "Order"],
+  },
+  {
     kind: "review",
     name: "Sprint review",
-    promise: "Walk the increment against a shared bar, and record the decision.",
-    steps: ["Checklist", "Evidence", "Feedback", "Ship decision"],
+    promise: "Inspect the Increment with stakeholders, then adapt the Product Backlog.",
+    steps: ["Sprint Goal", "Increment", "Stakeholders", "Adapt"],
   },
   {
     kind: "roadmap",
@@ -489,7 +501,7 @@ export function previewMediaCandidates(input: string): string[] {
 }
 
 /** Largest picture or GIF stored with a Desk Show-and-Tell answer. */
-export const SHOW_MEDIA_MAX = 70_000;
+const SHOW_MEDIA_MAX = 70_000;
 
 const SHOW_MEDIA_MARK = /^(.*?)\s*\[\[media:([^\]]+)\]\]\s*$/;
 const SHOW_DATA_MEDIA = /^data:image\/(gif|png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
@@ -1483,7 +1495,7 @@ export function columnsFor(templateId: RetroTemplateId): RetroColumn[] {
 }
 
 /** Shape picker order: A to Z by the name the room sees. */
-export function retroTemplateIds(): RetroTemplateId[] {
+function retroTemplateIds(): RetroTemplateId[] {
   return (Object.keys(RETRO_TEMPLATES) as RetroTemplateId[]).sort((left, right) =>
     RETRO_TEMPLATES[left].name.localeCompare(RETRO_TEMPLATES[right].name, "en", {
       sensitivity: "base",
@@ -1561,148 +1573,581 @@ interface ReviewSeedSection {
   id: string;
   title: string;
   intent: string;
+  /** Facilitation steps. Shown in the room. Not a second checklist. */
+  how: string[];
   items: ReviewSeedItem[];
 }
 
 const REVIEW_SECTIONS: ReviewSeedSection[] = [
   {
-    id: "increment",
-    title: "Increment",
-    intent: "Show what is actually done.",
+    id: "sprint-goal",
+    title: "Sprint Goal",
+    intent: "Inspect the Sprint against the goal the team committed to, and against the Product Goal.",
+    how: [
+      "Read the Sprint Goal out loud before anyone opens a screen.",
+      "Say whether it was met, partly met, or missed, and what that means for the Product Goal.",
+      "Name work that is not Done. It is not part of the Increment.",
+    ],
     items: [
       {
         id: "goal-visible",
-        label: "Sprint goal is visible to everyone in the room",
-        detail: "Say the goal before the demo, in one sentence.",
+        label: "The Sprint Goal is read before the Increment is shown",
+        detail: "The room inspects the goal first. The demo comes after.",
         required: true,
       },
       {
-        id: "dod",
-        label: "The increment meets the Definition of Done",
-        detail: "If something is not done, say so before the demo, not after a question.",
+        id: "outcome-stated",
+        label: "Progress toward the Product Goal is discussed",
+        detail: "Say what is more true for users or the business because of this Sprint.",
         required: true,
       },
       {
         id: "undone",
-        label: "Unfinished work is called out explicitly",
-        detail: "Name the stories that slipped and where they go next.",
+        label: "Work that is not Done is named, and it is not presented as the Increment",
+        detail: "Unfinished items return to the Product Backlog. They are not a silent carry-over.",
         required: true,
-      },
-      {
-        id: "environment",
-        label: "The demo environment is ready",
-        detail: "Open the path a stakeholder will see. Skip local-only surprises.",
       },
     ],
   },
   {
-    id: "story",
-    title: "Story of the sprint",
-    intent: "Demo the user journey, not the ticket list.",
+    id: "increment",
+    title: "Increment",
+    intent: "Show the working product. Only what meets the Definition of Done.",
+    how: [
+      "Walk the real user path in an environment a stakeholder can trust.",
+      "Show the check that made each item Done. Skip a ticket-by-ticket status.",
+      "If it does not meet the Definition of Done, leave it out of the Increment.",
+      "Disclose bugs a user can hit, including severity.",
+    ],
     items: [
       {
-        id: "stakeholders",
-        label: "The people who can judge the outcome are here",
-        detail: "Support, sales, design, or a customer proxy — whoever feels the change.",
+        id: "dod",
+        label: "Everything shown meets the Definition of Done",
+        detail: "Done means the team's Definition of Done, not 'demoable on a laptop'.",
         required: true,
       },
       {
         id: "journey",
-        label: "The demo follows a user journey",
-        detail: "Start from the trigger. End at the outcome the sprint promised.",
+        label: "The walkthrough follows a user path from trigger to outcome",
+        detail: "Start where the user starts. End at the result the Sprint Goal named.",
         required: true,
+      },
+      {
+        id: "environment",
+        label: "Stakeholders can see the same environment the team is inspecting",
+        detail: "Use a shared environment. A local-only build hides the real Increment.",
       },
       {
         id: "acceptance",
-        label: "Acceptance criteria are visible with each story",
-        detail: "Show the check that made it acceptable, not only the UI.",
-      },
-      {
-        id: "outcome-stated",
-        label: "The business outcome of the sprint is stated",
-        detail: "What should be different for users or the business because this shipped?",
-        required: true,
-      },
-    ],
-  },
-  {
-    id: "evidence",
-    title: "Evidence",
-    intent: "Put numbers next to the narrative.",
-    items: [
-      {
-        id: "metrics",
-        label: "The metrics that matter for this goal are on screen",
-        detail: "Adoption, defects, cycle time, revenue — only the ones this sprint could move.",
+        label: "The acceptance check is visible with what is shown",
+        detail: "The room sees why it is Done, not only the screen.",
       },
       {
         id: "bugs",
         label: "Known bugs and incidents are disclosed",
-        detail: "Severity and whether a user can hit them.",
+        detail: "Say the severity and whether a user can hit them.",
         required: true,
       },
       {
         id: "quality-bar",
-        label: "Quality checks that apply were run",
-        detail: "Accessibility, analytics, privacy, or performance — whichever this increment touches.",
-      },
-      {
-        id: "notes",
-        label: "Release notes or a changelog draft exists",
-        detail: "Even an internal note. Future-you will need the reason.",
+        label: "Quality checks that this Increment needs were run",
+        detail: "Accessibility, analytics, privacy, or performance, for the change that shipped.",
       },
     ],
   },
   {
-    id: "close",
-    title: "Close the loop",
-    intent: "Leave with feedback, a decision, and a backlog that matches both.",
+    id: "stakeholders",
+    title: "Stakeholders",
+    intent: "A working session with the people who can judge the outcome. Not a slide reading.",
+    how: [
+      "Invite people who feel the change: users, support, sales, or a clear proxy.",
+      "Ask what changed in their environment: market, policy, season, or a new constraint.",
+      "Ask what they would do next. Write the answer in the room.",
+      "Show a metric only when this Sprint could have moved it.",
+    ],
     items: [
       {
-        id: "feedback-live",
-        label: "Feedback is captured in the room",
-        detail: "Use the feedback column. Do not trust memory after the call.",
+        id: "stakeholders",
+        label: "Key stakeholders are in the room and can judge the outcome",
+        detail: "The people affected collaborate. A status meeting to the team alone is not a Sprint Review.",
         required: true,
       },
+      {
+        id: "metrics",
+        label: "Useful evidence of the Sprint Goal is on screen",
+        detail: "Only numbers this Sprint could move. Skip a dashboard that does not serve the conversation.",
+      },
+      {
+        id: "feedback-live",
+        label: "Stakeholder comments are captured before people leave",
+        detail: "Praise, a change, or a question stays on the board.",
+        required: true,
+      },
+      {
+        id: "notes",
+        label: "What changed in the environment is written down",
+        detail: "A market, policy, or user shift belongs in the notes for the Product Owner.",
+      },
+    ],
+  },
+  {
+    id: "adapt",
+    title: "Adapt the backlog",
+    intent: "The Product Owner adjusts the Product Backlog from what the room just learned.",
+    how: [
+      "Product Owner reorders or adds items while everyone is still here.",
+      "A new request becomes a Product Backlog item. It is not a promise for the next Sprint.",
+      "Decide whether the Increment can be released, the backlog should change, or release should wait.",
+      "Leave a Product Backlog the next Sprint Planning can select from.",
+    ],
+    items: [
       {
         id: "scope",
-        label: "Scope changes discovered in the review are recorded",
-        detail: "New requests are notes, not silent commitments.",
-      },
-      {
-        id: "decision-made",
-        label: "The release decision is explicit",
-        detail: "Ship, iterate, or hold. Pick one before people leave.",
-        required: true,
+        label: "New requests are Product Backlog items, not silent Sprint promises",
+        detail: "Write them down. Ordering happens on the Product Backlog.",
       },
       {
         id: "backlog",
-        label: "The product backlog is adjusted before the room closes",
-        detail: "The next sprint should not start from a stale list.",
+        label: "The Product Backlog is adjusted before the room closes",
+        detail: "Order, add, or drop items to meet what the Review just learned.",
+        required: true,
+      },
+      {
+        id: "decision-made",
+        label: "The room records release, adapt, or hold",
+        detail: "Release means the Increment can go out. Adapt means the Product Goal holds and the backlog changes. Hold means do not release yet.",
         required: true,
       },
     ],
   },
 ];
 
-export function createReviewState(): ReviewState {
+const PLANNING_SECTIONS: ReviewSeedSection[] = [
+  {
+    id: "why",
+    title: "Why this Sprint is valuable",
+    intent: "The Product Owner proposes value. The Scrum Team writes a Sprint Goal before Planning ends.",
+    how: [
+      "Product Owner speaks first: whose problem gets better, and how that serves the Product Goal.",
+      "The whole Scrum Team writes one Sprint Goal. It is an outcome stakeholders can repeat.",
+      "Check that the Sprint Review will be able to inspect this goal.",
+      "Finish the Sprint Goal before Planning ends. The goal is the commitment.",
+    ],
+    items: [
+      {
+        id: "why-value",
+        label: "The Product Owner has said how this Sprint increases value",
+        detail: "Value comes before the item list.",
+        required: true,
+      },
+      {
+        id: "why-goal",
+        label: "The Sprint Goal is one sentence and is final",
+        detail: "The Scrum Team owns the wording. A list of tickets is not a Sprint Goal.",
+        required: true,
+      },
+      {
+        id: "why-product",
+        label: "The Sprint Goal serves the Product Goal",
+        detail: "If it does not, choose a different goal.",
+      },
+      {
+        id: "why-inspect",
+        label: "The team can say how the Sprint Review will inspect this goal",
+        detail: "Name the demo or the evidence that will show the goal was met.",
+      },
+    ],
+  },
+  {
+    id: "what",
+    title: "What can be Done this Sprint",
+    intent: "Developers select Product Backlog items. The selection is a forecast.",
+    how: [
+      "Start at the top of the ordered Product Backlog. Developers pull the next item.",
+      "The Product Owner clarifies. The Product Owner does not assign the work.",
+      "Count who is actually here: leave, support duty, and events already on the calendar.",
+      "Select only items the Developers believe they can bring to the Definition of Done.",
+      "Stop when the forecast is full. The next item stays on the Product Backlog.",
+    ],
+    items: [
+      {
+        id: "what-pull",
+        label: "Developers selected the items",
+        detail: "Selection is a pull from the ordered backlog, not an assignment.",
+        required: true,
+      },
+      {
+        id: "what-dod",
+        label: "Each selected item can meet the Definition of Done in this Sprint",
+        detail: "If it cannot, it is not selected. Refine it or leave it.",
+        required: true,
+      },
+      {
+        id: "what-capacity",
+        label: "The forecast fits past performance and who is here",
+        detail: "Include support, meetings, and known leave.",
+        required: true,
+      },
+      {
+        id: "what-cut",
+        label: "The team can say why the next item was not selected",
+        detail: "The cut is part of the forecast.",
+      },
+    ],
+  },
+  {
+    id: "how",
+    title: "How the work will get done",
+    intent: "Developers plan the selected work. The plan is theirs.",
+    how: [
+      "For each selected item, Developers break the work into pieces of about a day or less.",
+      "Plan the first days in the room. Later days can stay coarser.",
+      "Name a dependency and the person outside the team who must act.",
+      "The Product Owner may clarify a trade-off. Developers decide the plan.",
+    ],
+    items: [
+      {
+        id: "how-plan",
+        label: "Developers have a plan for the first selected items",
+        detail: "The plan is how the Increment will meet the Definition of Done.",
+        required: true,
+      },
+      {
+        id: "how-days",
+        label: "The opening days are clear enough to start",
+        detail: "Tomorrow's work is visible. The rest of the Sprint can emerge.",
+        required: true,
+      },
+      {
+        id: "how-deps",
+        label: "Dependencies have an owner and a needed-by time",
+        detail: "A blocker with no owner still blocks the Sprint Goal.",
+      },
+      {
+        id: "how-risk",
+        label: "A risk to the Sprint Goal is named, with a signal",
+        detail: "Say what the team will watch, and when they will adapt the plan.",
+      },
+    ],
+  },
+  {
+    id: "forecast",
+    title: "Sprint Backlog",
+    intent: "The Sprint Goal, the selected items, and the plan together are the Sprint Backlog.",
+    how: [
+      "Read the Sprint Goal once more. Every selected item should serve it.",
+      "Put the goal, the items, and the plan where the team will see them at the Daily Scrum.",
+      "Record Forecast, Narrow, or No goal. The forecast can change. The Sprint Goal should not.",
+      "If the Sprint Goal is not final, do not start the Sprint.",
+    ],
+    items: [
+      {
+        id: "forecast-backlog",
+        label: "The Sprint Backlog shows the goal, the selected items, and the plan",
+        detail: "Those three parts are the Sprint Backlog. A goal alone is not enough.",
+        required: true,
+      },
+      {
+        id: "forecast-owners",
+        label: "The Developers who will do the work agree the forecast",
+        detail: "Agreement is on the Sprint Goal and a realistic forecast, not a promise that every item finishes.",
+        required: true,
+      },
+      {
+        id: "forecast-call",
+        label: "The room records Forecast, Narrow, or No goal",
+        detail: "Forecast: the goal is set and the selection is a forecast. Narrow: the goal stays and fewer items are selected. No goal: Planning is not finished.",
+        required: true,
+      },
+    ],
+  },
+];
+
+const REFINEMENT_SECTIONS: ReviewSeedSection[] = [
+  {
+    id: "detail",
+    title: "Detail",
+    intent: "Add a description the Developers can understand. Refinement is ongoing. It is not Sprint Planning.",
+    how: [
+      "Pick one Product Backlog item. Name the user and the outcome that becomes true.",
+      "Product Owner explains why it matters for the Product Goal.",
+      "Write acceptance criteria a tester can fail.",
+      "List each open question with an owner. Leave the question on the item until it is answered.",
+    ],
+    items: [
+      {
+        id: "detail-user",
+        label: "The user and the outcome are written on the item",
+        detail: "A Developer who missed the conversation can still see who benefits.",
+        required: true,
+      },
+      {
+        id: "detail-criteria",
+        label: "Acceptance criteria are written",
+        detail: "Done is visible from the item. It does not depend on memory.",
+        required: true,
+      },
+      {
+        id: "detail-questions",
+        label: "Open questions have an owner",
+        detail: "An unanswered question means the item is not transparent yet.",
+        required: true,
+      },
+      {
+        id: "detail-goal",
+        label: "The item serves the Product Goal",
+        detail: "If nobody can say which goal it serves, it waits.",
+      },
+    ],
+  },
+  {
+    id: "decompose",
+    title: "Split",
+    intent: "Break down items that cannot be Done in one Sprint.",
+    how: [
+      "Ask: can the Scrum Team make this Done in one Sprint? If not, split it.",
+      "Split along a user step or a thin slice of value.",
+      "Do not split into layers such as frontend and backend. Each piece should still be valuable.",
+      "Write what this piece will not include. Give each new piece its own description.",
+    ],
+    items: [
+      {
+        id: "split-size",
+        label: "The item can be Done in one Sprint, or it is split",
+        detail: "An item that cannot finish in a Sprint is not ready for selection.",
+        required: true,
+      },
+      {
+        id: "split-value",
+        label: "Each smaller item still delivers something a user can recognize",
+        detail: "A layer with no user outcome is not a useful split.",
+        required: true,
+      },
+      {
+        id: "split-out",
+        label: "Out of scope is written on the item",
+        detail: "Say what this piece will not do.",
+      },
+      {
+        id: "split-children",
+        label: "Oversized items have smaller Product Backlog items",
+        detail: "Renaming a large item does not split it.",
+      },
+    ],
+  },
+  {
+    id: "size",
+    title: "Size",
+    intent: "Developers who will do the work are responsible for the size.",
+    how: [
+      "Developers compare the item with one the team has already finished.",
+      "Agree a size or a range, and say what would change it.",
+      "The Product Owner may explain a trade-off. The Product Owner does not set the size.",
+      "Treat the size as a forecast of effort. It is not a delivery date.",
+    ],
+    items: [
+      {
+        id: "size-devs",
+        label: "Developers set the size",
+        detail: "The people who will do the work own the estimate.",
+        required: true,
+      },
+      {
+        id: "size-compare",
+        label: "The size is compared with a known item",
+        detail: "A number with no comparison is hard to forecast from.",
+        required: true,
+      },
+      {
+        id: "size-tradeoff",
+        label: "Any trade-off from the Product Owner is written down",
+        detail: "A smaller outcome can earn a smaller size. Record the exchange.",
+      },
+    ],
+  },
+  {
+    id: "order",
+    title: "Order",
+    intent: "The Product Owner orders the Product Backlog. Selectable means Developers could pull it in Planning.",
+    how: [
+      "Product Owner places the item against the items just above and below it.",
+      "Order by value, risk, and learning. Dependencies are a reason, not the whole order.",
+      "Name each dependency and who owns it.",
+      "Call it Selectable only when it can be Done in one Sprint. Otherwise Split or Return.",
+    ],
+    items: [
+      {
+        id: "order-place",
+        label: "The item is ordered against its neighbors",
+        detail: "The Product Owner can say what comes just before and just after.",
+        required: true,
+      },
+      {
+        id: "order-deps",
+        label: "Dependencies are named with an owner",
+        detail: "A hidden dependency shows up as a surprise in Planning.",
+      },
+      {
+        id: "order-call",
+        label: "The item is Selectable, Split, or Return",
+        detail: "Selectable: Developers could select it in Sprint Planning. Split: it is still too big. Return: a Product Owner decision is still open.",
+        required: true,
+      },
+      {
+        id: "order-next",
+        label: "The next item to refine is named",
+        detail: "Refinement continues. This session does not have to finish the whole backlog.",
+      },
+    ],
+  },
+];
+
+export interface ChecklistDecisionCopy {
+  id: ReviewDecision;
+  label: string;
+  detail: string;
+}
+
+export interface ChecklistRitualCopy {
+  eyebrow: string;
+  headline: string;
+  lede: string;
+  goalLabel: string;
+  goalPlaceholder: string;
+  goalHint: string;
+  progressLabel: string;
+  decisionHeading: string;
+  decisionIdle: string;
+  decisionNotesLabel: string;
+  decisionNotesPlaceholder: string;
+  noteLabel: string;
+  notePlaceholder: string;
+  feedbackLede: string;
+  feedbackEmpty: string;
+  decisions: ChecklistDecisionCopy[];
+}
+
+const CHECKLIST_RITUALS: Record<"review" | "planning" | "refinement", ChecklistRitualCopy> = {
+  review: {
+    eyebrow: "Sprint review",
+    headline: "Inspect the Increment. Adapt the Product Backlog.",
+    lede: "Look at what is Done with stakeholders, then change the Product Backlog before people leave.",
+    goalLabel: "Sprint Goal being inspected",
+    goalPlaceholder: "Paste the Sprint Goal the team committed to.",
+    goalHint: "Read this before the Increment is shown",
+    progressLabel: "Inspection",
+    decisionHeading: "What happens next",
+    decisionIdle: "Release, adapt the backlog, or hold.",
+    decisionNotesLabel: "What the backlog will change",
+    decisionNotesPlaceholder: "What did stakeholders ask for, and how will the Product Backlog change?",
+    noteLabel: "What we saw",
+    notePlaceholder: "A path you showed, a bug, or a stakeholder comment",
+    feedbackLede: "What stakeholders want the Product Owner to hear.",
+    feedbackEmpty: "A comment from someone who can judge the outcome.",
+    decisions: [
+      { id: "ship", label: "Release", detail: "The Increment is Done and can be released." },
+      { id: "iterate", label: "Adapt", detail: "The Product Goal holds. The Product Backlog changes." },
+      { id: "hold", label: "Hold", detail: "Do not release. Adapt the backlog before more building." },
+    ],
+  },
+  planning: {
+    eyebrow: "Sprint planning",
+    headline: "Why, what, and how. Then a forecast.",
+    lede: "The Sprint Goal is the commitment. The items the Developers select are a forecast.",
+    goalLabel: "Sprint Goal",
+    goalPlaceholder: "Why is this Sprint valuable to stakeholders?",
+    goalHint: "The Scrum Team finalizes this before Planning ends",
+    progressLabel: "Planning topics",
+    decisionHeading: "Forecast",
+    decisionIdle: "Forecast, narrow the selection, or stop because there is no Sprint Goal.",
+    decisionNotesLabel: "Forecast notes",
+    decisionNotesPlaceholder: "Which items are in, which item was left out, and what could change the plan?",
+    noteLabel: "Planning note",
+    notePlaceholder: "The value, the selected item, or the plan for the first days",
+    feedbackLede: "A trade-off, a risk, or a question about the forecast.",
+    feedbackEmpty: "Something the Developers or the Product Owner need on the Sprint Backlog.",
+    decisions: [
+      { id: "commit", label: "Forecast", detail: "The Sprint Goal is set. The selected items are a forecast." },
+      { id: "reshape", label: "Narrow", detail: "The Sprint Goal stays. Developers select fewer items." },
+      { id: "defer", label: "No goal", detail: "The Sprint Goal is not final. Do not start the Sprint." },
+    ],
+  },
+  refinement: {
+    eyebrow: "Product Backlog refinement",
+    headline: "Add detail, size, and order.",
+    lede: "This is ongoing work on the Product Backlog. It does not start a Sprint and it does not inspect an Increment.",
+    goalLabel: "Item being refined",
+    goalPlaceholder: "Which Product Backlog item is in front of the team?",
+    goalHint: "One item at a time. The rest of the backlog waits",
+    progressLabel: "Transparency",
+    decisionHeading: "Ready for selection?",
+    decisionIdle: "Selectable, split, or return to the Product Owner.",
+    decisionNotesLabel: "What is still unclear",
+    decisionNotesPlaceholder: "What would a Developer still need before they could select this?",
+    noteLabel: "Item note",
+    notePlaceholder: "Acceptance criteria, a split, a size, or an open question",
+    feedbackLede: "A question for the Product Owner, or a trade-off for the Developers.",
+    feedbackEmpty: "Clarity the item still needs. This is not Sprint feedback.",
+    decisions: [
+      { id: "ready", label: "Selectable", detail: "Developers could select this in Sprint Planning." },
+      { id: "split", label: "Split", detail: "It cannot be Done in one Sprint. Break it down." },
+      { id: "park", label: "Return", detail: "A Product Owner decision is still open." },
+    ],
+  },
+};
+
+const CHECKLIST_SECTIONS: Record<"review" | "planning" | "refinement", ReviewSeedSection[]> = {
+  review: REVIEW_SECTIONS,
+  planning: PLANNING_SECTIONS,
+  refinement: REFINEMENT_SECTIONS,
+};
+
+export type ChecklistKind = "review" | "planning" | "refinement";
+
+export function isChecklistKind(kind: RoomKind): kind is ChecklistKind {
+  return kind === "review" || kind === "planning" || kind === "refinement";
+}
+
+export function checklistRitual(kind: RoomKind): ChecklistRitualCopy {
+  if (isChecklistKind(kind)) return CHECKLIST_RITUALS[kind];
+  return CHECKLIST_RITUALS.review;
+}
+
+export function checklistDecisions(kind: RoomKind): ChecklistDecisionCopy[] {
+  return checklistRitual(kind).decisions;
+}
+
+export function checklistHow(kind: RoomKind, sectionId: string): string[] {
+  if (!isChecklistKind(kind)) return [];
+  return CHECKLIST_SECTIONS[kind].find((section) => section.id === sectionId)?.how ?? [];
+}
+
+function seedChecklist(sections: ReviewSeedSection[]): ReviewState {
+  const mapped = sections.map((section) => ({
+    id: section.id,
+    title: section.title,
+    intent: section.intent,
+    items: section.items.map((item) => ({
+      id: item.id,
+      label: item.label,
+      detail: item.detail,
+      required: Boolean(item.required),
+      doneBy: [],
+      note: "",
+    })),
+  }));
   return {
     goal: "",
     decision: null,
     decisionNotes: "",
     feedback: [],
-    sections: REVIEW_SECTIONS.map((section) => ({
-      id: section.id,
-      title: section.title,
-      intent: section.intent,
-      items: section.items.map((item) => ({
-        id: item.id,
-        label: item.label,
-        detail: item.detail,
-        required: Boolean(item.required),
-        doneBy: [],
-        note: "",
-      })),
-    })),
+    sections: mapped,
+    activeSectionId: mapped[0]?.id ?? "",
+    stopwatchMs: {},
+    stopwatchRunningSince: null,
   };
+}
+
+export function createChecklistState(kind: ChecklistKind): ReviewState {
+  return seedChecklist(CHECKLIST_SECTIONS[kind]);
 }

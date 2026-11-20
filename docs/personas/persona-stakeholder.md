@@ -12,7 +12,8 @@
 
 ## Goals
 
-- Run a sprint review that ends in ship, iterate, or hold  
+- Run a sprint review that ends in Release, Adapt, or Hold  
+- Join refinement when an item needs a Selectable / Split / Return call  
 - Capture multi-person sign-off on readiness  
 - Compare initiatives with a familiar framework (RICE / ICE / value÷complexity)  
 - Separate “high score” from “easy to build”  
@@ -38,7 +39,7 @@
 
 | Need | Product response |
 | --- | --- |
-| Decision artifact | Ship / iterate / hold + notes |
+| Decision artifact | Release / Adapt / Hold (+ planning Forecast / refinement Selectable) with notes |
 | Shared bar | Seeded checklist + multi-signer doneBy |
 | Honest math | Core scoring + HIGH_COMPLEXITY 3.5 + median |
 | Outcome first | Outcome/assumption fields on each initiative |

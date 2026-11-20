@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-20 (Lineup icebreaker)  
+**Last updated:** 2026-11-20 (five rituals + retro PPT)  
 
 ---
 
@@ -140,7 +140,7 @@ Hover (pointer devices): stronger border + `--shadow-lift`; ritual cards lift `-
 
 - Bordered card, not a dashboard grid of metrics  
 - Index `01…`, title, promise, detail, step list  
-- Kind-specific class `kind-retro|review|roadmap`  
+- Kind-specific class `kind-retro|planning|refinement|review|roadmap`  
 
 ### 5.4 Forms & fields
 
@@ -151,8 +151,8 @@ Hover (pointer devices): stronger border + `--shadow-lift`; ritual cards lift `-
 
 | Board | Design notes |
 | --- | --- |
-| Retro | Columns with glyphs that scale with note volume; phase tools; timers |
-| Review | Checklist + side panel for goal, feedback, decision |
+| Retro | Columns with glyphs that scale with note volume; phase tools; timers; Summary CSV/PPT downloads |
+| Planning / Refinement / Review | Shared checklist board (`ReviewBoard`) with ritual eyebrow, how-to steps, goal/focus, feedback, kind-scoped decision trio |
 | Roadmap | Initiative cards + score/complexity chart + insights |
 
 ### 5.6 Icebreaker This or That
@@ -205,9 +205,15 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 ### 5.6e Definitions (`/guide`)
 
 - Quiet `.guide-link` in wordmark rows (home, room) and roadmap scoring help  
-- Guide page: legend for Variable / Metric / Formula kinds, jump nav by ritual, entry cards with plain / formula / example / where  
+- Guide page: legend for Variable / Metric / Formula kinds, jump nav by ritual (five groups), entry cards with plain / formula / example / where  
 - Kind chips use semantic tones without competing with ritual boards  
 - Mobile Guide mirrors the same content hierarchy without the web jump chrome  
+
+### 5.6f Summary exports (retro)
+
+- Group `.summary-downloads` with copy + CSV/PPT actions (`.summary-download-btn`)  
+- PPT is primary for facilitator share-out; CSV remains available as ghost/secondary  
+- Keep export chrome in Summary only—do not promote downloads into earlier phases  
 
 ### 5.7 Roadmap chart
 
@@ -252,7 +258,8 @@ Avoid decorative perpetual animations, glow stacks, and emoji as structure.
 ## 9. Content tone
 
 - Direct, calm, facilitator-friendly  
-- Prefer “ship / iterate / hold” over jargon  
+- Prefer facilitation labels (Release / Forecast / Selectable) in UI; document stored ids (`ship` / `commit` / `ready`) in engineering docs  
+
 - Error copy is human (`CadenceError` messages) — keep that voice in UI  
 
 ---
@@ -275,9 +282,10 @@ Site-wide attribution sits at the bottom of the shell (web) and at the end of ho
 
 ## 12. File references
 
-- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.guide-link` / `.shape-finder*` / `.health-*` / `.wish-map*` / `.order-*`)  
+- Web tokens & components: `apps/web/src/app/globals.css` (incl. `.guide*` / `.shape-finder*` / `.health-*` / `.wish-map*` / `.order-*` / `.summary-downloads*`)  
 - Shape picker: `apps/web/src/components/new-room-form.tsx`, mobile create in `App.js`  
 - Icebreakers: `icebreaker-panel.tsx`, `travel-map.tsx`, `world-map-paths.ts`, `people-order.tsx`, `apps/web/public/flags/`  
+- PPT export: `apps/web/src/lib/retro-pptx.ts` (brand hex mirrored from CSS tokens)  
 - Definitions page: `apps/web/src/app/guide/page.tsx`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
 - Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  

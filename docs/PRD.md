@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-20 (Lineup icebreaker) |
+| Last updated | 2026-11-20 (five rituals + retro PPT) |
 
 ---
 
@@ -30,7 +30,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | --- | --- | --- |
 | G1 | Start a ritual in under one minute | Create → share code → second person joins |
 | G2 | Safe private brainstorm then fair discuss | Others’ note bodies never leave server in brainstorm |
-| G3 | Leave retros with owned actions and exportable record | Actions assigned; CSV download works |
+| G3 | Leave retros with owned actions and exportable record | Actions assigned; CSV and PPT downloads work |
 | G4 | Close reviews with one decision | Ship / iterate / hold + notes recorded |
 | G5 | Compare roadmap bets consistently | Same formulas on web and mobile; quadrants readable |
 | G6 | Work on laptop and phone against one room | Mobile configured to web API; ops apply |
@@ -62,7 +62,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-R1 | User can create a room for retro, review, or roadmap | Must |
+| FR-R1 | User can create a room for retro, planning, refinement, review, or roadmap | Must |
 | FR-R2 | System issues a unique 6-character room code (ambiguous chars excluded) | Must |
 | FR-R3 | User can join with code + display name | Must |
 | FR-R4 | Identity persists locally across sessions on the same device | Should |
@@ -84,7 +84,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-RET7 | Dot vote with configurable budget 1–10 (default 3) | Must |
 | FR-RET8 | Actions with owner and done; creatable from notes | Must |
 | FR-RET9 | Per-section countdown + stopwatch (not on summary) | Should |
-| FR-RET10 | Summary view + CSV export of full retro data | Must |
+| FR-RET10 | Summary view + CSV export + PPT deck export of full retro data | Must |
 | FR-RET11 | Column glyphs grow with note volume | Could |
 | FR-RET12 | Discuss raise-hand queue; named notes highlight; anonymous stay unattributed; cleared on phase change | Should |
 
@@ -92,14 +92,32 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-REV1 | Seeded multi-section checklist with required items | Must |
+| FR-REV1 | Inspect Sprint Goal, Increment, stakeholders, then adapt the Product Backlog, with how-to steps | Must |
 | FR-REV2 | Multi-signer checks (desired state) | Must |
 | FR-REV3 | Item notes and custom items | Should |
 | FR-REV4 | Sprint goal field | Must |
 | FR-REV5 | Feedback kinds: praise, change, question | Must |
-| FR-REV6 | Decision ship / iterate / hold + notes | Must |
+| FR-REV6 | Decision release / adapt / hold (stored ship / iterate / hold) + notes | Must |
 
-### 4.4 Roadmap
+### 4.4 Sprint planning
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-PLN1 | Topics Why, What, How, and Sprint Backlog, each with how-to steps | Must |
+| FR-PLN2 | Reuses review checks, evidence, feedback, and progress | Must |
+| FR-PLN3 | Sprint goal field | Must |
+| FR-PLN4 | Forecast / Narrow / No goal (stored commit / reshape / defer); other decisions rejected | Must |
+
+### 4.5 Backlog refinement
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-REF1 | Topics Detail, Split, Size, and Order, each with how-to steps | Must |
+| FR-REF2 | Reuses review checks, evidence, feedback, and progress | Must |
+| FR-REF3 | Refinement focus field | Must |
+| FR-REF4 | Selectable / Split / Return (stored ready / split / park); other decisions rejected | Must |
+
+### 4.6 Roadmap
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -110,7 +128,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-RM5 | Horizon now/next/later and owner | Should |
 | FR-RM6 | Objective field for the board | Should |
 
-### 4.5 Platforms & API
+### 4.7 Platforms & API
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -146,6 +164,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 5. RICE example `(400 × 2 × 0.8) / 2 = 320` matches `scoreInitiative`.  
 6. Complexity ≥ 3.5 with score ≥ median maps to `big-bet`.  
 7. Retro CSV export includes notes, votes, actions, icebreaker answers, and section timings.  
+7b. Retro PPT export builds a deck (`retrospectiveDeck`) with icebreaker, durations, discuss order, overview, categories, top votes, and actions.  
 8. Mobile can complete create → join → mutate against a LAN-hosted web API.  
 9. Definitions on web `/guide` and mobile Guide render the same `GLOSSARY` entries from `@cadence/core`.  
 
@@ -171,7 +190,7 @@ Traceability to stories and code: [TRACEABILITY_MATRIX.md](./TRACEABILITY_MATRIX
 | --- | --- |
 | M0 Domain core | Types, room ops, scoring, templates, tests |
 | M1 Web rooms | Next.js UI + JSON API + polling |
-| M2 Ritual depth | Icebreaker suite, discuss walks, timers, summary/CSV |
+| M2 Ritual depth | Icebreaker suite, discuss walks, timers, summary CSV/PPT; planning + refinement checklists |
 | M3 Roadmap & review polish | Quadrants, insights, multi-signer checklist |
 | M4 Mobile peer client | Expo app sharing core + API |
 | M5 Documentation standard | This PRD set and enterprise docs (2026-11) |

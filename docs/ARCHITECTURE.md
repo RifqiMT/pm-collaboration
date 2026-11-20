@@ -1,6 +1,6 @@
 # TeamCompass — Architecture
 
-**Last updated:** 2026-11-20 (Lineup icebreaker)  
+**Last updated:** 2026-11-20 (five rituals + retro PPT)  
 
 ---
 
@@ -34,8 +34,8 @@ TeamCompass is a **monorepo** with a shared domain library and two clients that 
 
 | Path | Package | Responsibility |
 | --- | --- | --- |
-| `packages/core` | `@cadence/core` | Types, `createRoom`, `applyOp`, `presentRoom`, scoring, content (62 templates + `searchRetroTemplates` + 21 icebreakers / Health Check / Lineup), `countries.ts` (travel catalog), glossary, retro export, validation |
-| `apps/web` | `@cadence/web` | Next.js App Router UI, API routes, JSON persistence, HTTP helpers |
+| `packages/core` | `@cadence/core` | Types, ops, privacy, scoring, content (62 templates + 21 icebreakers + checklist rituals), `countries.ts`, glossary (31/5), CSV export, **retro deck**, validation |
+| `apps/web` | `@cadence/web` | Next.js App Router UI, API routes, JSON persistence, HTTP helpers, **PPT render** (`lib/retro-pptx.ts` + `pptxgenjs`) |
 | `apps/mobile` | `@cadence/mobile` | Expo RN client (not in root workspaces; depends via `file:../../packages/core`) |
 
 Root `package.json` workspaces: `packages/core`, `apps/web` only.
@@ -44,7 +44,7 @@ Root `package.json` workspaces: `packages/core`, `apps/web` only.
 
 ## 3. Domain model (summary)
 
-A **Room** has `code`, `kind`, `title`, timestamps, monotonic `version`, `hostId`, `participants`, and exactly one of `retro` | `review` | `roadmap` populated by kind.
+A **Room** has `code`, `kind` (`retro` | `planning` | `refinement` | `review` | `roadmap`), `title`, timestamps, monotonic `version`, `hostId`, `participants`, and the matching board populated by kind: `retro` for retrospectives, `review` for **planning / refinement / review** checklist rituals (`createChecklistState`), or `roadmap` for roadmap rooms.
 
 Mutations are **Ops** (discriminated union). The server:
 
@@ -124,10 +124,10 @@ Details: [API.md](./API.md).
 | --- | --- |
 | `/` | `HomeScreen` |
 | `/new` | `NewRoomForm` (shape finder for retros) |
-| `/r/[code]` | `RoomApp` → `RetroBoard` / `ReviewBoard` / `RoadmapBoard` |
+| `/r/[code]` | `RoomApp` → `RetroBoard` / `ReviewBoard` (planning · refinement · review) / `RoadmapBoard` |
 | `/guide` | Definitions from `GLOSSARY` (`guide/page.tsx`) |
 
-Supporting modules: `use-room.ts` (poll + serialized ops), `identity.ts`, `shared-field.tsx`, `icebreaker-panel.tsx` (incl. Health Check `scale` UI), `travel-map.tsx` + `world-map-paths.ts` (Travel Wishlist map), `people-order.tsx` (Lineup `order` UI), `retro-ui.ts`, glyphs, `credit-footer.tsx` (layout shell), `.guide-link` entry points. Static flag SVGs live under `apps/web/public/flags/`. Core helpers: `content.ts` (`HEALTH_CHECK`, averages, `parsePeopleOrder`), `countries.ts` (175-country catalog).
+Supporting modules: `use-room.ts` (poll + serialized ops), `identity.ts`, `shared-field.tsx`, `icebreaker-panel.tsx` (Health Check), `travel-map.tsx` + `world-map-paths.ts`, `people-order.tsx` (Lineup), `lib/retro-pptx.ts` (PPT), `retro-ui.ts`, glyphs, `credit-footer.tsx`, `.guide-link` entry points. Static flag SVGs under `apps/web/public/flags/`. Core helpers: `content.ts` (checklists + icebreakers), `countries.ts`, `retro-deck.ts`.
 
 ---
 

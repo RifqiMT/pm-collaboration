@@ -2,7 +2,7 @@
 
 **Helps teams align on direction, review progress, and decide what comes next.**
 
-TeamCompass is a shared collaboration room for three sprint rituals—**retrospective**, **sprint review**, and **roadmap scoring**. A team joins with a six-character code and edits one board together. The web app is the full room and hosts the API. The phone app joins the same rooms. There are no accounts.
+TeamCompass is a shared collaboration room for five sprint rituals—**retrospective**, **sprint planning**, **backlog refinement**, **sprint review**, and **roadmap scoring**. A team joins with a six-character code and edits one board together. The web app is the full room and hosts the API. The phone app joins the same rooms. There are no accounts.
 
 | | |
 | --- | --- |
@@ -17,18 +17,20 @@ TeamCompass is a shared collaboration room for three sprint rituals—**retrospe
 
 TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one code-joined board per ritual:
 
-1. **Retrospective** — Icebreaker → private notes → discuss → dot vote → owned actions → summary/CSV  
-2. **Sprint review** — Shared readiness checklist, live feedback, one decision: ship / iterate / hold  
-3. **Roadmap** — Score bets with RICE, ICE, or value÷complexity; complexity sits beside the business outcome  
+1. **Retrospective** — Icebreaker → private notes → discuss → dot vote → owned actions → summary (CSV + PPT)  
+2. **Sprint planning** — Why this Sprint is valuable, what Developers can finish, and how they will do it. The Sprint Goal is the commitment. The items are a forecast.  
+3. **Backlog refinement** — Ongoing Product Backlog work: detail, split, Developer sizing, and Product Owner order. Selectable, split, or return.  
+4. **Sprint review** — Inspect the Sprint Goal and the Increment with stakeholders, then adapt the Product Backlog: release / adapt / hold  
+5. **Roadmap** — Score bets with RICE, ICE, or value÷complexity; complexity sits beside the business outcome  
 
 ### Product benefits
 
 - **Fast start** — Create a room in seconds; share a short code  
 - **Psychological safety** — Brainstorm notes stay private on the server until Discuss  
 - **Facilitation control** — Host gates sections, icebreaker, and discussion walk; timers and vote budget are open on web  
-- **Clear closure** — Actions with owners; review decisions; roadmap quadrants  
+- **Clear closure** — Owned actions; planning / refinement / review calls; roadmap quadrants  
 - **Honest math** — Shared scoring in `@cadence/core` on web and mobile  
-- **Exportable record** — Retro summary downloads as CSV  
+- **Exportable record** — Retro summary downloads as CSV and as a consultant-style PPT  
 
 ---
 
@@ -37,10 +39,12 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Area | Capabilities |
 | --- | --- |
 | Rooms | Create/join by code, local identity, presence (20s), optional demo seed, max 40 people |
-| Retro | 62 templates (8 shelves + shape search/filters), 21 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8 + custom 1–60 min, summary CSV |
-| Review | Seeded checklist, multi-signer checks, goal, praise/change/question, ship·iterate·hold |
+| Retro | 62 templates (8 shelves + shape search/filters), 21 icebreakers, privacy, discuss walks + raise hand, votes (default 3), actions, web timers 3/5/8 + custom 1–60 min, summary CSV + PPT |
+| Planning | Why / What / How / Sprint Backlog (how-to on each). Forecast / Narrow / No goal (`commit` / `reshape` / `defer`) |
+| Refinement | Detail / Split / Size / Order (how-to on each). Selectable / Split / Return (`ready` / `split` / `park`) |
+| Review | Sprint Goal, Increment, stakeholders, adapt backlog. Release / Adapt / Hold (`ship` / `iterate` / `hold`) |
 | Roadmap | RICE / ICE / value÷complexity, complexity index, median & 3.5 guides, quadrants, insights |
-| Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` in core) |
+| Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` 31 entries / 5 groups) |
 | Platforms | Next.js web + Expo mobile + shared TypeScript core |
 | Credit | Developer credit footer (web site-wide; mobile home/create) |
 
@@ -87,13 +91,21 @@ The host moves the room through six sections. Each section shows only its own wo
 3. **Discuss** — Notes revealed; status walk or author walk; raise-hand speaking queue (named notes highlight; anonymous stay unattributed).  
 4. **Vote** — Dot budget (default 3; any joined person can set **1–10** on web). Notes are not editable while voting.  
 5. **Actions** — Text, owner, done; can start from a note.  
-6. **Summary** — Collect notes, dots, actions, icebreaker answers; download CSV (includes section timings).  
+6. **Summary** — Collect notes, dots, actions, icebreaker answers; download **CSV** and **PPT** (icebreaker, durations, discuss order, overview, categories, top votes, actions).  
 
-Each timed section has its own countdown (web presets 3 / 5 / 8 minutes, plus Custom 1–60) and stopwatch. Mobile joins the same phases and raise-hand controls; timer and vote-budget chrome are web-first.
+Each timed section has its own countdown (web presets 3 / 5 / 8 minutes, plus Custom 1–60) and stopwatch. Mobile joins the same phases and raise-hand controls; timer and vote-budget chrome are web-first. PPT export is web-first (`pptxgenjs`).
+
+### Sprint planning
+
+Shared checklist topics **Why / What / How / Sprint Backlog**, each with how-to steps. Sprint Goal field. Multi-signer checks, evidence notes, feedback. Call: **Forecast**, **Narrow**, or **No goal** (stored `commit` / `reshape` / `defer`).
+
+### Backlog refinement
+
+Shared checklist topics **Detail / Split / Size / Order**, each with how-to steps. Focus field for the item being refined. Call: **Selectable**, **Split**, or **Return** (stored `ready` / `split` / `park`).
 
 ### Sprint review
 
-Shared checklist (increment, story, evidence, closing the loop), multi-signer checks, sprint goal, live feedback, and one release decision: **ship**, **iterate**, or **hold**.
+Shared checklist topics **Sprint Goal / Increment / Stakeholders / Adapt**, each with how-to steps. Multi-signer checks, live feedback, and one call: **Release**, **Adapt**, or **Hold** (stored `ship` / `iterate` / `hold`).
 
 ### Roadmap
 
@@ -147,7 +159,7 @@ pm-collaboration/
 ├── packages/core     # Room rules, privacy, scoring, content, countries, glossary, export
 ├── apps/web          # Next.js UI (/guide, travel map, lineup order) + room API + store
 ├── apps/mobile       # Expo iOS/Android client (home / guide / create / room)
-└── docs/             # Product documentation suite (current as of 2026-11-20)
+└── docs/             # Product documentation suite (current as of 2026-11-20 evening)
 ```
 
 ---

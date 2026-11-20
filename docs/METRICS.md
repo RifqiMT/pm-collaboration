@@ -1,7 +1,7 @@
 # TeamCompass — Product Metrics & OKRs
 
 **Audience:** Product team, engineering leads, facilitators of internal adoption  
-**Last updated:** 2026-11-20 (Lineup icebreaker)  
+**Last updated:** 2026-11-20 (five rituals + retro PPT)  
 **Note:** TeamCompass MVP does not yet ship an analytics pipeline. Metrics below define what to measure when instrumentation is added, plus qualitative proxies available today from `rooms.json` and meeting outcomes.
 
 ---
@@ -62,7 +62,10 @@
 | Metric | Friendly name | Definition | Target |
 | --- | --- | --- | --- |
 | `web_vs_mobile_sessions` | Client mix | Sessions by client | Inform design investment |
-| `csv_export_rate` | CSV export rate | Exports / retros reaching summary | ≥ 40% for Maya’s teams |
+| `csv_export_rate` | CSV export rate | CSV downloads / retros reaching summary | ≥ 40% for Maya’s teams |
+| `ppt_export_rate` | PPT export rate | PPT downloads / retros reaching summary | Inform share-out quality; no hard target yet |
+| `planning_decision_rate` | Planning call recorded | Planning rooms with non-null decision / planning rooms | ≥ 85% |
+| `refinement_decision_rate` | Refinement call recorded | Refinement rooms with non-null decision / refinement rooms | ≥ 85% |
 | `raise_hand_rate` | Discuss raise-hand usage | Retros with ≥1 raise-hand op in Discuss / retros reaching Discuss | Inform facilitation quality; no hard target yet |
 | `guide_open_rate` | Definitions opens | Sessions that open `/guide` or mobile Guide / total sessions | Inform onboarding clarity; no hard target yet |
 

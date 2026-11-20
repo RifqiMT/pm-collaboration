@@ -5,7 +5,7 @@
 **CORS:** `Access-Control-Allow-Origin: *`  
 **Caching:** `Cache-Control: no-store`  
 **Runtime:** Node.js (`force-dynamic`)  
-**Last updated:** 2026-11-20 (Lineup icebreaker)  
+**Last updated:** 2026-11-20 (five rituals + retro PPT)  
 
 ---
 
@@ -36,7 +36,7 @@
 
 | Field | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `kind` | `"retro" \| "review" \| "roadmap"` | Yes | Ritual type |
+| `kind` | `"retro" \| "planning" \| "refinement" \| "review" \| "roadmap"` | Yes | Ritual type. Planning and refinement use the review checklist ops. |
 | `title` | string | No | Max 80 |
 | `hostName` | string | No | Max 40 |
 | `hostId` | string | No | Stable `person_…` id |
@@ -129,7 +129,9 @@ Fails with `full` if participants ≥ 40.
 | `retro.assignAction` | `actionId`, `ownerId` |
 | `retro.deleteAction` | `actionId` |
 
-### Review
+### Review, planning, and refinement
+
+These ops apply when the room has a checklist (`review`, `planning`, or `refinement`). `review.setDecision` must be one of the decisions for that kind. Planning: `commit` (Forecast), `reshape` (Narrow), `defer` (No goal). Refinement: `ready` (Selectable), `split` (Split), `park` (Return). Review: `ship` (Release), `iterate` (Adapt), `hold` (Hold). Any other value returns 400 with “That decision is not part of this checklist.”
 
 | `type` | Fields |
 | --- | --- |

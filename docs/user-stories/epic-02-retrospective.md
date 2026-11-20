@@ -148,19 +148,20 @@
 
 ---
 
-## US-2.8 Summary and CSV export
+## US-2.8 Summary, CSV, and PPT export
 
 **As** Maya  
-**I want** a summary view and CSV download  
+**I want** a summary view with CSV and PPT download  
 **So that** I can share outcomes without retyping  
 
 **Acceptance criteria**
 
 - [ ] Summary lists notes by column, votes, actions, icebreaker answers  
 - [ ] CSV includes section stopwatch/countdown seconds  
-- [ ] Web download and mobile share paths work  
+- [ ] Web PPT download builds a deck (icebreaker, durations, discuss order, overview, categories, top votes, actions) via `retrospectiveDeck` + `buildRetroPptx`  
+- [ ] Web download and mobile CSV share paths work (PPT is web-first)  
 
-**PRD:** FR-RET10 · **Code:** `retro-export.ts`, summary UI
+**PRD:** FR-RET10 · **Code:** `retro-export.ts`, `retro-deck.ts`, `lib/retro-pptx.ts`, summary UI (`.summary-downloads*`)
 
 ---
 

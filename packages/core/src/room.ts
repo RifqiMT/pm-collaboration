@@ -1,8 +1,10 @@
 import {
   ICEBREAKERS,
   RETRO_TEMPLATES,
+  checklistDecisions,
   columnsFor,
-  createReviewState,
+  createChecklistState,
+  isChecklistKind,
   icebreakerById,
   icebreakerChoices,
   acceptedShowMedia,
@@ -18,7 +20,7 @@ import {
   truthDisplayOrder,
   type IcebreakerGame,
 } from "./content";
-import { demoActions, demoNotesForColumns, demoReviewContent, demoRoadmapContent } from "./demo";
+import { demoActions, demoNotesForColumns, demoPlanningContent, demoRefinementContent, demoReviewContent, demoRoadmapContent } from "./demo";
 import { formatTravelWishlist, parseTravelWishlist } from "./countries";
 import { createId } from "./ids";
 import {
@@ -66,7 +68,7 @@ const DISCUSSION_BY: DiscussionBy[] = ["status", "author"];
 const ICEBREAKER_IDS = ICEBREAKERS.map((game) => game.id);
 const FRAMEWORKS: FrameworkId[] = ["rice", "ice", "value-complexity"];
 const HORIZONS: Horizon[] = ["now", "next", "later"];
-const DECISIONS: ReviewDecision[] = ["ship", "iterate", "hold"];
+const DECISIONS: ReviewDecision[] = ["ship", "iterate", "hold", "commit", "reshape", "defer", "ready", "split", "park"];
 const FEEDBACK: FeedbackKind[] = ["praise", "change", "question"];
 const TEMPLATES = Object.keys(RETRO_TEMPLATES) as RetroTemplateId[];
 
@@ -84,8 +86,8 @@ export function createRoom(input: CreateRoomInput, now: string): Room {
   if (!/^[A-Z0-9]{6}$/.test(input.code)) {
     throw new CadenceError("Room code must be 6 letters or numbers.", "code");
   }
-  if (!["retro", "review", "roadmap"].includes(input.kind)) {
-    throw new CadenceError("Choose a retrospective, a sprint review, or a roadmap.", "kind");
+  if (!["retro", "planning", "refinement", "review", "roadmap"].includes(input.kind)) {
+    throw new CadenceError("Choose a retrospective, a sprint planning, a backlog refinement, a sprint review, or a roadmap.", "kind");
   }
   const host = makeParticipant(input.hostId, input.hostName, 0, now);
   const title = cleanLine(input.title, LIMITS.title, "Title");
@@ -110,8 +112,9 @@ export function createRoom(input: CreateRoomInput, now: string): Room {
 
   if (input.kind === "retro") {
     room.retro = blankRetro(templateId, now);
-  } else if (input.kind === "review") {
-    room.review = createReviewState();
+  } else if (isChecklistKind(input.kind)) {
+    room.review = createChecklistState(input.kind);
+    startChecklistStopwatchIfNeeded(room.review, now);
   } else {
     room.roadmap = blankRoadmap();
   }
@@ -137,6 +140,10 @@ export function joinRoom(room: Room, input: { id: string; name: string }, now: s
   } else {
     participant.name = name;
     participant.lastSeen = now;
+  }
+  if (next.review) {
+    ensureChecklistStopwatches(next.review);
+    startChecklistStopwatchIfNeeded(next.review, now);
   }
   touch(next, now);
   return { room: next, participant: structuredClone(participant) };
@@ -211,6 +218,7 @@ export function applyOp(room: Room, op: Op, actorId: string, now: string): Room 
     case "review.deleteFeedback":
     case "review.setDecision":
     case "review.setDecisionNotes":
+    case "review.setSection":
       changed = applyReview(next, op, actorId, now);
       break;
     case "roadmap.setFramework":
@@ -244,7 +252,7 @@ export function presentRoom(room: Room, actorId: string | null, now: string): Ro
       active: Date.parse(now) - Date.parse(person.lastSeen) <= ACTIVE_MS,
     })),
     retro: room.retro ? presentRetro(room.retro, actorId, names) : null,
-    review: room.review ? structuredClone(room.review) : null,
+    review: room.review ? presentReview(room.review) : null,
     roadmap: room.roadmap ? structuredClone(room.roadmap) : null,
   };
 }
@@ -436,6 +444,8 @@ export function parseOp(input: unknown): Op {
       };
     case "review.setDecisionNotes":
       return { type, notes: String(record.notes ?? "") };
+    case "review.setSection":
+      return { type, sectionId: expectString(record.sectionId, "Section") };
     case "roadmap.setFramework":
       return { type, framework: expectEnum(record.framework, FRAMEWORKS, "Framework") };
     case "roadmap.setObjective":
@@ -715,10 +725,20 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
     }
     case "retro.raiseHand": {
       requirePhase(retro, "discuss", "Hands go up in the discuss section.");
+      ensureDiscussSpeakLog(retro);
       const hands = Array.isArray(retro.raisedHands) ? retro.raisedHands : [];
       const raised = hands.includes(actorId);
       if (op.raised === raised) return false;
-      retro.raisedHands = op.raised ? [...hands, actorId] : hands.filter((id) => id !== actorId);
+      if (op.raised) {
+        const groupKey = resolveDiscussFocusKey(retro);
+        retro.discussSpeakLog = [
+          ...retro.discussSpeakLog,
+          { personId: actorId, groupKey, at: now },
+        ];
+        retro.raisedHands = [...hands, actorId];
+      } else {
+        retro.raisedHands = hands.filter((id) => id !== actorId);
+      }
       return true;
     }
     case "retro.addAction": {
@@ -769,6 +789,8 @@ function applyRetro(room: Room, op: Op, actorId: string, now: string): boolean {
 
 function applyReview(room: Room, op: Op, actorId: string, now: string): boolean {
   const review = requireReview(room);
+  ensureChecklistStopwatches(review);
+  startChecklistStopwatchIfNeeded(review, now);
   switch (op.type) {
     case "review.setItemDone": {
       const item = findItem(review, op.itemId);
@@ -804,7 +826,8 @@ function applyReview(room: Room, op: Op, actorId: string, now: string): boolean 
       return true;
     }
     case "review.setGoal": {
-      const goal = cleanBlock(op.goal, LIMITS.goal, "Sprint goal");
+      const goalLabel = room.kind === "refinement" ? "Backlog item" : "Sprint goal";
+      const goal = cleanBlock(op.goal, LIMITS.goal, goalLabel);
       if (review.goal === goal) return false;
       review.goal = goal;
       return true;
@@ -823,6 +846,9 @@ function applyReview(room: Room, op: Op, actorId: string, now: string): boolean 
       return true;
     }
     case "review.setDecision": {
+      if (op.decision != null && !checklistDecisions(room.kind).some((item) => item.id === op.decision)) {
+        throw new CadenceError("That decision is not part of this checklist.", "decision");
+      }
       if (review.decision === op.decision) return false;
       review.decision = op.decision;
       return true;
@@ -831,6 +857,14 @@ function applyReview(room: Room, op: Op, actorId: string, now: string): boolean 
       const notes = cleanBlock(op.notes, LIMITS.decisionNotes, "Decision notes");
       if (review.decisionNotes === notes) return false;
       review.decisionNotes = notes;
+      return true;
+    }
+    case "review.setSection": {
+      if (!review.sections.some((section) => section.id === op.sectionId)) {
+        throw new CadenceError("That section is not on this checklist.", "section");
+      }
+      if (review.activeSectionId === op.sectionId) return false;
+      moveChecklistStopwatch(review, op.sectionId, now);
       return true;
     }
     default:
@@ -951,7 +985,8 @@ function presentRetro(retro: RetroState, actorId: string | null, names: Map<stri
   return {
     ...presented,
     cards,
-    raisedHands: presented.raisedHands.filter((id) => names.has(id)),
+    raisedHands: cleanRaisedHands(presented.raisedHands).filter((id) => names.has(id)),
+    discussSpeakLog: cleanDiscussSpeakLog(presented.discussSpeakLog),
     icebreakerAnswers: presentAnswers(presented, actorId),
   };
 }
@@ -1162,9 +1197,45 @@ export function sectionStopwatchMs(
   phase: RetroPhase,
   now: string | number = Date.now(),
 ): number {
-  const accrued = Math.max(0, Math.floor(Number(retro.stopwatchMs?.[phase] ?? 0)));
-  if (phase !== retro.phase || !retro.stopwatchRunningSince) return accrued;
-  const started = Date.parse(retro.stopwatchRunningSince);
+  return accruedStopwatchMs(
+    {
+      activeId: retro.phase,
+      stopwatchMs: retro.stopwatchMs,
+      stopwatchRunningSince: retro.stopwatchRunningSince,
+    },
+    phase,
+    now,
+  );
+}
+
+export function checklistStopwatchMs(
+  review: Pick<ReviewState, "activeSectionId" | "stopwatchMs" | "stopwatchRunningSince">,
+  sectionId: string,
+  now: string | number = Date.now(),
+): number {
+  return accruedStopwatchMs(
+    {
+      activeId: review.activeSectionId,
+      stopwatchMs: review.stopwatchMs,
+      stopwatchRunningSince: review.stopwatchRunningSince,
+    },
+    sectionId,
+    now,
+  );
+}
+
+function accruedStopwatchMs(
+  state: {
+    activeId: string;
+    stopwatchMs: Partial<Record<string, number>> | Record<string, number> | undefined;
+    stopwatchRunningSince: string | null;
+  },
+  sectionId: string,
+  now: string | number = Date.now(),
+): number {
+  const accrued = Math.max(0, Math.floor(Number(state.stopwatchMs?.[sectionId] ?? 0)));
+  if (sectionId !== state.activeId || !state.stopwatchRunningSince) return accrued;
+  const started = Date.parse(state.stopwatchRunningSince);
   if (!Number.isFinite(started)) return accrued;
   const nowMs = typeof now === "number" ? now : Date.parse(now);
   if (!Number.isFinite(nowMs)) return accrued;
@@ -1245,6 +1316,7 @@ function withIcebreaker(retro: RetroState): RetroState {
     discussionBy: retro.discussionBy === "author" ? "author" : "status",
     discussedGroupKey: typeof retro.discussedGroupKey === "string" ? retro.discussedGroupKey : null,
     raisedHands: cleanRaisedHands(retro.raisedHands),
+    discussSpeakLog: cleanDiscussSpeakLog(retro.discussSpeakLog),
   };
 }
 
@@ -1255,6 +1327,43 @@ function cleanRaisedHands(value: unknown): string[] {
     if (typeof id === "string" && /^[A-Za-z0-9_-]{8,80}$/.test(id) && !ids.includes(id)) ids.push(id);
   }
   return ids;
+}
+
+function cleanDiscussSpeakLog(value: unknown): RetroState["discussSpeakLog"] {
+  if (!Array.isArray(value)) return [];
+  const entries: RetroState["discussSpeakLog"] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    const personId = typeof record.personId === "string" ? record.personId : "";
+    const groupKey = typeof record.groupKey === "string" ? record.groupKey.trim() : "";
+    const at = typeof record.at === "string" ? record.at : "";
+    if (!/^[A-Za-z0-9_-]{8,80}$/.test(personId)) continue;
+    if (!groupKey || groupKey.length > 80) continue;
+    if (!Number.isFinite(Date.parse(at))) continue;
+    entries.push({ personId, groupKey, at });
+  }
+  return entries;
+}
+
+function ensureDiscussSpeakLog(retro: RetroState): void {
+  retro.discussSpeakLog = cleanDiscussSpeakLog(retro.discussSpeakLog);
+}
+
+function resolveDiscussFocusKey(retro: RetroState): string {
+  if (typeof retro.discussedGroupKey === "string" && retro.discussedGroupKey.trim()) {
+    return retro.discussedGroupKey.trim();
+  }
+  if (retro.discussionBy === "author") {
+    const firstNamed = retro.cards.find((card) => card.body && !card.anonymous && card.authorId);
+    if (firstNamed?.authorId) return firstNamed.authorId;
+    if (retro.cards.some((card) => card.body && card.anonymous)) return "anonymous";
+    return "room";
+  }
+  const firstColumn = retro.columns.find((column) =>
+    retro.cards.some((card) => card.columnId === column.id && Boolean(card.body)),
+  );
+  return firstColumn?.id ?? retro.columns[0]?.id ?? "room";
 }
 
 function withStopwatches(retro: RetroState): Pick<RetroState, "stopwatchMs" | "stopwatchRunningSince"> {
@@ -1296,6 +1405,60 @@ function startStopwatchIfNeeded(retro: RetroState, now: string): void {
   if (!retro.stopwatchRunningSince) retro.stopwatchRunningSince = now;
 }
 
+function presentReview(review: ReviewState): ReviewState {
+  const next = structuredClone(review);
+  ensureChecklistStopwatches(next);
+  return next;
+}
+
+function withChecklistStopwatches(
+  review: ReviewState,
+): Pick<ReviewState, "activeSectionId" | "stopwatchMs" | "stopwatchRunningSince"> {
+  const known = new Set(review.sections.map((section) => section.id));
+  const fallback = review.sections[0]?.id ?? "";
+  const activeSectionId =
+    typeof review.activeSectionId === "string" && known.has(review.activeSectionId)
+      ? review.activeSectionId
+      : fallback;
+  const stopwatchMs: Record<string, number> = {};
+  if (review.stopwatchMs && typeof review.stopwatchMs === "object") {
+    for (const [sectionId, value] of Object.entries(review.stopwatchMs)) {
+      if (!known.has(sectionId)) continue;
+      if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
+        stopwatchMs[sectionId] = Math.floor(value);
+      }
+    }
+  }
+  const running =
+    typeof review.stopwatchRunningSince === "string" && Number.isFinite(Date.parse(review.stopwatchRunningSince))
+      ? review.stopwatchRunningSince
+      : null;
+  return { activeSectionId, stopwatchMs, stopwatchRunningSince: running };
+}
+
+function ensureChecklistStopwatches(review: ReviewState): void {
+  const next = withChecklistStopwatches(review);
+  review.activeSectionId = next.activeSectionId;
+  review.stopwatchMs = next.stopwatchMs;
+  review.stopwatchRunningSince = next.stopwatchRunningSince;
+}
+
+function moveChecklistStopwatch(review: ReviewState, nextSectionId: string, now: string): void {
+  ensureChecklistStopwatches(review);
+  const previous = review.activeSectionId;
+  if (review.stopwatchRunningSince && previous) {
+    const elapsed = checklistStopwatchMs(review, previous, now);
+    review.stopwatchMs = { ...review.stopwatchMs, [previous]: elapsed };
+  }
+  review.activeSectionId = nextSectionId;
+  review.stopwatchRunningSince = now;
+}
+
+function startChecklistStopwatchIfNeeded(review: ReviewState, now: string): void {
+  ensureChecklistStopwatches(review);
+  if (!review.stopwatchRunningSince) review.stopwatchRunningSince = now;
+}
+
 function withTimers(retro: RetroState): Pick<RetroState, "timers" | "timerEndsAt"> {
   const timers: Partial<Record<RetroPhase, string>> = {};
   const stored = retro.timers && typeof retro.timers === "object" ? retro.timers : null;
@@ -1329,6 +1492,7 @@ function ensureIcebreaker(retro: RetroState): void {
   retro.discussionBy = next.discussionBy;
   retro.discussedGroupKey = next.discussedGroupKey;
   retro.raisedHands = next.raisedHands;
+  retro.discussSpeakLog = next.discussSpeakLog;
   retro.timers = next.timers;
   retro.timerEndsAt = next.timerEndsAt;
   retro.stopwatchMs = next.stopwatchMs;
@@ -1350,6 +1514,7 @@ function blankRetro(templateId: RetroTemplateId, now: string): RetroState {
     discussionBy: "status",
     discussedGroupKey: null,
     raisedHands: [],
+    discussSpeakLog: [],
     icebreaker: "one-word",
     icebreakerRound: 0,
     icebreakerPairs: null,
@@ -1411,11 +1576,29 @@ function fillDemo(room: Room, hostId: string, now: string): void {
       body: ["Focused", "Steady", "Curious"][index] ?? "Ready",
       createdAt: now,
     }));
+    const startCol = room.retro.columns[0]?.id ?? "start";
+    const stopCol = room.retro.columns[1]?.id ?? "stop";
+    const continueCol = room.retro.columns[2]?.id ?? "continue";
+    room.retro.discussedGroupKey = startCol;
+    room.retro.discussSpeakLog = [
+      { personId: alex.id, groupKey: startCol, at: now },
+      { personId: host.id, groupKey: startCol, at: now },
+      { personId: sam.id, groupKey: stopCol, at: now },
+      { personId: alex.id, groupKey: stopCol, at: now },
+      { personId: host.id, groupKey: continueCol, at: now },
+      { personId: jordan.id, groupKey: continueCol, at: now },
+    ];
+    room.retro.raisedHands = [alex.id, host.id];
     moveStopwatch(room.retro, "discuss", now);
   }
 
   if (room.review) {
-    const seed = demoReviewContent(authors, now);
+    const seed =
+      room.kind === "planning"
+        ? demoPlanningContent(authors, now)
+        : room.kind === "refinement"
+          ? demoRefinementContent(authors, now)
+          : demoReviewContent(authors, now);
     room.review.goal = seed.goal;
     room.review.decision = seed.decision;
     room.review.decisionNotes = seed.decisionNotes;
@@ -1429,6 +1612,8 @@ function fillDemo(room: Room, hostId: string, now: string): void {
         if (item.required) check(room.review, item.id, sam.id);
       }
     }
+    ensureChecklistStopwatches(room.review);
+    startChecklistStopwatchIfNeeded(room.review, now);
   }
 
   if (room.roadmap) {
@@ -1460,7 +1645,7 @@ function requireRetro(room: Room): RetroState {
 }
 
 function requireReview(room: Room): ReviewState {
-  if (!room.review) throw new CadenceError("This room is not a sprint review.", "kind");
+  if (!room.review) throw new CadenceError("This room does not have a checklist.", "kind");
   return room.review;
 }
 

@@ -2,8 +2,8 @@
 
 **Purpose:** Exhaustive catalog of product and domain variables used across TeamCompass.  
 **Format:** Variable name · Friendly name · Definition · Formula / rule · Location · Example  
-**Source of truth:** `packages/core/src/{types,scoring,room,text,content,countries,ids,glossary,retro-export}.ts`, web/mobile clients  
-**Last updated:** 2026-11-20 (Lineup icebreaker)  
+**Source of truth:** `packages/core/src/{types,scoring,room,text,content,countries,ids,glossary,retro-export,retro-deck}.ts`, `apps/web/src/lib/retro-pptx.ts`, web/mobile clients  
+**Last updated:** 2026-11-20 (five rituals + retro PPT)  
 
 In-app Definitions for facilitators and contributors live in `packages/core/src/glossary.ts` (`GLOSSARY`) and render on web `/guide` and the mobile Guide screen. This file remains the **engineering** catalog (limits, sync, store env, CSV columns). Prefer updating `GLOSSARY` when changing user-facing wording; prefer updating this file when changing contracts.
 
@@ -26,7 +26,7 @@ In-app Definitions for facilitators and contributors live in `packages/core/src/
 | Variable name | Friendly name | Definition | Formula / rule | Location in the apps | Example |
 | --- | --- | --- | --- | --- | --- |
 | `code` | Room code | Six-character public join key for the room | Alphabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (excludes I, O, 0, 1); unique in store | `store.ts` `makeCode`; home join; `/r/[code]` | `K7M9QX` |
-| `kind` | Ritual type | Which board the room hosts | Enum: `retro` \| `review` \| `roadmap` | Create form; `Room.kind`; home ritual cards | `retro` |
+| `kind` | Ritual type | Which board the room hosts | Enum: `retro` \| `planning` \| `refinement` \| `review` \| `roadmap` | Create form; `Room.kind`; home ritual cards; `RITUALS` | `planning` |
 | `title` | Room title | Human label for the meeting | Cleaned line; max `LIMITS.title` (80) | `room.rename`; room header | `Sprint 42 Retro` |
 | `version` | Room version | Monotonic revision counter for sync | Increments on successful mutation; clients ignore older snapshots | `Room.version`; `use-room.ts` | `17` |
 | `hostId` | Host participant id | Participant who owns facilitation privileges | Set at create; host-gated ops compare actor to `hostOf(room)` | `Room.hostId`; phase/icebreaker ops | `person_a1b2c3d4e5f67890` |
@@ -141,20 +141,29 @@ In-app Definitions for facilitators and contributors live in `packages/core/src/
 
 ---
 
-## 6. Sprint review variables
+## 6. Checklist ritual variables (planning · refinement · review)
+
+Planning, refinement, and sprint review share `Room.review` (`ReviewState`) and the `review.*` ops. Kind is fixed at create.
 
 | Variable name | Friendly name | Definition | Formula / rule | Location | Example |
 | --- | --- | --- | --- | --- | --- |
-| `goal` | Sprint goal | Shared goal for the review | Max 240 | Review board | `Reduce checkout latency` |
-| `sections[]` | Checklist sections | Grouped readiness criteria | Seeded at create | `createReviewState` | Increment / Story / … |
+| `ChecklistKind` | Checklist ritual | Rituals that use the shared checklist board | `planning` \| `refinement` \| `review` | `isChecklistKind`; `createChecklistState` | `planning` |
+| `goal` | Goal / focus | Shared goal or refinement focus | Max 240; UI label from `checklistRitual(kind).goalLabel` | Checklist board | Sprint Goal / item being refined |
+| `sections[]` | Checklist sections | Grouped topics with how-to steps | Seeded per kind: planning Why/What/How/Sprint Backlog; refinement Detail/Split/Size/Order; review Sprint Goal/Increment/Stakeholders/Adapt | `createChecklistState` | Why / What / … |
+| `activeSectionId` | Active checklist section | Section driving the shared stopwatch | Set when the room focuses a section | `ReviewState`; `review-board.tsx` | `why` |
+| `stopwatchMs` (checklist) | Checklist stopwatch map | Accrued ms per section while that section was active | Updated when leaving a section | `ReviewState.stopwatchMs` | `{ why: 120000 }` |
+| `checklistStopwatchMs` | Checklist elapsed helper | Elapsed ms for a section including live accrual | Same pattern as retro `sectionStopwatchMs` | `room.ts`; review board | `185000` |
 | `ChecklistItem.required` | Required item | Whether item counts for readiness | Boolean | Checklist | `true` |
 | `ChecklistItem.doneBy` | Signers | Participants who checked the item | Desired-state membership for actor | Checks | two ids |
 | `ChecklistItem.note` | Evidence note | Supporting note on an item | Max 800 | Item note field | `See PR #412` |
-| `checklistProgress` | Checklist progress | Share of required items with ≥1 signer | UI helper over required items | Review header | `75%` |
+| `checklistProgress` | Checklist progress | Share of required items with ≥1 signer | UI helper over required items | Checklist header | `75%` |
 | `feedback[]` | Feedback notes | Live feedback list | Cap 100 | Feedback panel | — |
 | `FeedbackKind` | Feedback kind | Tag on feedback | `praise` \| `change` \| `question` | Chips | `change` |
-| `decision` | Release decision | Outcome of the review | `ship` \| `iterate` \| `hold` \| `null` | Decision control | `iterate` |
-| `decisionNotes` | Decision notes | Rationale for the decision | Max 2000 | Notes field | `Need a11y pass` |
+| `ReviewDecision` | Stored decision id | Machine value for the ritual call | Review: `ship` \| `iterate` \| `hold`. Planning: `commit` \| `reshape` \| `defer`. Refinement: `ready` \| `split` \| `park`. Cross-kind values rejected | `review.setDecision`; `checklistDecisions(kind)` | `commit` |
+| Decision labels | Facilitation call labels | UI labels for stored ids | Planning: Forecast / Narrow / No goal. Refinement: Selectable / Split / Return. Review: Release / Adapt / Hold | `CHECKLIST_RITUALS` | Forecast |
+| `decisionNotes` | Decision notes | Rationale for the decision | Max 2000 | Notes field | `Narrow: drop analytics` |
+
+`checklistRitual(kind)` supplies headings, placeholders, and the three allowed decisions. Demo seeds: `demoPlanningContent` / `demoRefinementContent` / `demoReviewContent`.
 
 ---
 
@@ -264,6 +273,8 @@ flowchart TB
   participants --> lastSeen
 
   kind -->|retro| RetroState
+  kind -->|planning| ReviewState
+  kind -->|refinement| ReviewState
   kind -->|review| ReviewState
   kind -->|roadmap| RoadmapState
 
@@ -381,7 +392,7 @@ Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or
 | `GlossaryKind` | `variable` \| `metric` \| `formula` |
 | `GlossaryEntry` | `id`, `name`, `kind`, `plain`, optional `formula` / `example`, `where` |
 | `GlossaryGroup` | `id`, `title`, `intro`, `entries[]` |
-| Groups | `retro` · `review` · `roadmap` |
+| Groups | `retro` · `planning` · `refinement` · `review` · `roadmap` (**31** entries) |
 | Location | `packages/core/src/glossary.ts`; web `apps/web/src/app/guide/page.tsx`; mobile `Guide` in `App.js` |
 
 ### Entry inventory (id → friendly name → kind)
@@ -395,6 +406,10 @@ Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or
 | retro | `dot` | Dot | variable |
 | retro | `dots-left` | Dots left | metric |
 | retro | `vote-count` | Vote count | metric |
+| planning | `planning-goal` | Sprint Goal | variable |
+| planning | `planning-decision` | Planning call | variable |
+| refinement | `refinement-focus` | Refinement focus | variable |
+| refinement | `refinement-decision` | Refinement call | variable |
 | review | `checklist-item` | Checklist item | variable |
 | review | `checklist-bar` | Checklist bar | metric |
 | review | `evidence` | Evidence | variable |
@@ -455,7 +470,7 @@ flowchart LR
 
 ## 13. Retro CSV export columns
 
-Source: `packages/core/src/retro-export.ts` `CSV_HEADER` (**20** columns; no `media` column).
+Source: `packages/core/src/retro-export.ts` `CSV_HEADER` (**20** columns; no `media` column). CSV remains the tabular export; PPT is a separate deck (§13b).
 
 | Column | Friendly name | Definition | Example |
 | --- | --- | --- | --- |
@@ -479,6 +494,26 @@ Source: `packages/core/src/retro-export.ts` `CSV_HEADER` (**20** columns; no `me
 | `created_at` | Created at | ISO timestamp | `2026-11-18T…` |
 | `stopwatch_seconds` | Time spent | Whole seconds the section was open | `320` |
 | `timer_seconds` | Time left | Whole seconds left on countdown; empty if none; `0` if finished | `120` |
+
+---
+
+## 13b. Retro PPT deck (`retrospectiveDeck`)
+
+| Variable name | Friendly name | Definition | Formula / rule | Location | Example |
+| --- | --- | --- | --- | --- | --- |
+| `RetroDeck` | Deck model | Structured slides for PowerPoint export | Built from `retrospectiveExport` + discuss/raise-hand context | `packages/core/src/retro-deck.ts` | slides[] |
+| `retrospectiveDeck` | Build deck | Pure function returning deck or null | Requires `room.retro` | Core; Summary UI | — |
+| `buildRetroPptx` | Render PPTX | Browser blob from deck | `pptxgenjs` LAYOUT_WIDE; TeamCompass chrome; brand tokens | `apps/web/src/lib/retro-pptx.ts` | `.pptx` blob |
+| Slide kinds | Deck slide types | Ordered slide union | `icebreaker` · `durations` · `discussOrder` · `overview` · category slides · `topVotes` · `actions` | `RetroDeckSlide` | `overview` |
+| Summary download UI | Export chrome | CSV + PPT buttons | `.summary-downloads*` | `retro-board.tsx` Summary | PPT filename `teamcompass-{code}-retrospective.pptx` |
+
+```mermaid
+flowchart LR
+  RoomView --> CSV[retrospectiveExport / CSV]
+  RoomView --> Deck[retrospectiveDeck]
+  Deck --> PPTX[buildRetroPptx]
+  PPTX --> File[".pptx download"]
+```
 
 ---
 

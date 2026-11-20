@@ -33,6 +33,9 @@ import {
   searchRetroTemplates,
   RITUALS,
   checklistProgress,
+  checklistRitual,
+  checklistHow,
+  isChecklistKind,
   discussionGroups,
   formatScore,
   scoreRoadmap,
@@ -314,7 +317,15 @@ function Home({ server, onServer, onCreate, onOpen, onGuide }) {
           key={ritual.kind}
           style={({ pressed }) => [
             styles.card,
-            ritual.kind === "review" ? styles.accentReview : ritual.kind === "roadmap" ? styles.accentRoadmap : styles.accentRetro,
+            ritual.kind === "review"
+              ? styles.accentReview
+              : ritual.kind === "roadmap"
+                ? styles.accentRoadmap
+                : ritual.kind === "planning"
+                  ? styles.accentPlanning
+                  : ritual.kind === "refinement"
+                    ? styles.accentRefinement
+                    : styles.accentRetro,
             pressed ? { opacity: 0.88 } : null,
           ]}
           onPress={async () => {
@@ -633,13 +644,13 @@ function Room({ server, code, identity, onIdentity, onBack }) {
       </Pressable>
       <View style={styles.headerCard}>
         <Text style={styles.code}>{code}</Text>
-        <Text style={styles.headerKicker}>{room?.kind === "review" ? "Sprint review" : room?.kind === "roadmap" ? "Roadmap" : "Retrospective"}</Text>
+        <Text style={styles.headerKicker}>{RITUALS.find((item) => item.kind === room?.kind)?.name ?? "Room"}</Text>
         <Text style={styles.headerTitle}>{room?.title ?? "Joining…"}</Text>
         {room ? <Text style={styles.headerMeta}>{room.participants.map((person) => person.name).join("  ·  ")}</Text> : null}
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {room?.kind === "retro" && room.retro ? <Retro room={room} actorId={actor.id} send={send} /> : null}
-      {room?.kind === "review" && room.review ? <Review room={room} actorId={actor.id} send={send} /> : null}
+      {room && isChecklistKind(room.kind) && room.review ? <Review room={room} actorId={actor.id} send={send} /> : null}
       {room?.kind === "roadmap" && room.roadmap ? <Roadmap room={room} send={send} /> : null}
     </ScrollView>
   );
@@ -1795,13 +1806,14 @@ function GifPreview({ body }) {
 
 function Review({ room, actorId, send }) {
   const review = room.review;
+  const ritual = checklistRitual(room.kind);
   const progress = checklistProgress(review);
   const [feedback, setFeedback] = useState("");
   return (
     <View style={{ gap: 12 }}>
       <View style={styles.card}>
-        <Text style={styles.kicker}>Sprint goal</Text>
-        <Text style={styles.lede}>{review.goal || "No sprint goal yet."}</Text>
+        <Text style={styles.kicker}>{ritual.goalLabel}</Text>
+        <Text style={styles.lede}>{review.goal || `No ${ritual.goalLabel.toLowerCase()} yet.`}</Text>
         <View style={styles.progressTrack}>
           <View
             style={[
@@ -1818,6 +1830,10 @@ function Review({ room, actorId, send }) {
         <View key={section.id} style={styles.card}>
           <Text style={styles.cardTitle}>{section.title}</Text>
           <Text style={styles.meta}>{section.intent}</Text>
+          {checklistHow(room.kind, section.id).length > 0 ? <Text style={styles.kicker}>How to do it</Text> : null}
+          {checklistHow(room.kind, section.id).map((step, index) => (
+            <Text key={step} style={styles.meta}>{index + 1}. {step}</Text>
+          ))}
           {section.items.map((item) => {
             const mine = item.doneBy.includes(actorId);
             return (
@@ -1832,13 +1848,13 @@ function Review({ room, actorId, send }) {
         </View>
       ))}
       <View style={styles.row}>
-        {["ship", "iterate", "hold"].map((decision) => (
+        {ritual.decisions.map((decision) => (
           <Pressable
-            key={decision}
-            style={[styles.chip, review.decision === decision ? styles.chipOn : null]}
-            onPress={() => send({ type: "review.setDecision", decision: review.decision === decision ? null : decision })}
+            key={decision.id}
+            style={[styles.chip, review.decision === decision.id ? styles.chipOn : null]}
+            onPress={() => send({ type: "review.setDecision", decision: review.decision === decision.id ? null : decision.id })}
           >
-            <Text style={review.decision === decision ? styles.chipTextOn : styles.chipText}>{decision}</Text>
+            <Text style={review.decision === decision.id ? styles.chipTextOn : styles.chipText}>{decision.label}</Text>
           </Pressable>
         ))}
       </View>
