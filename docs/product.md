@@ -1,6 +1,6 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-20 (product direction)  
+**Status:** Current as of repository state 2026-11-22 (product requirements + artifact examples)  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
 **Canonical path:** `docs/product.md` (use this casing in links for case-sensitive hosts).
@@ -9,7 +9,7 @@
 
 ## 1. Product overview
 
-TeamCompass is a **shared collaboration room** for six rituals:
+TeamCompass is a **shared collaboration room** for eight rituals:
 
 1. **Retrospective** — warm up, write privately, discuss, vote, own actions, export a summary  
 2. **Sprint planning** — set a Sprint Goal, let Developers forecast what can be Done, and plan how  
@@ -17,6 +17,8 @@ TeamCompass is a **shared collaboration room** for six rituals:
 4. **Sprint review** — inspect the Increment with stakeholders and adapt the Product Backlog  
 5. **Roadmap** — score initiatives with RICE, ICE, or value÷complexity, with complexity as a first-class lens  
 6. **Product direction** — write a product vision or a product strategy in a professional framework, then read it back as one statement  
+7. **Product requirements** — make one requirement clear (who it helps, why it matters, what Done means) before it becomes backlog items  
+8. **Artifact examples** — browse finished sample docs for the Unified Agent Platform, Contact Center Platform, and CS data products  
 
 People join with a **six-character room code**. There are **no accounts**. Everyone who has the code edits the same board. The **web app** is the full room experience and hosts the API. The **phone app** (Expo) joins the same rooms over the same HTTP API and shared domain package.
 
@@ -31,7 +33,8 @@ People join with a **six-character room code**. There are **no accounts**. Every
 | Fast room start | Create a ritual room in seconds; share a short code |
 | Psychological safety in retros | Notes stay private on the server during brainstorm |
 | Facilitation control | Host gates phase, icebreaker, and discussion walk; timers and vote budget are open on web |
-| Decision clarity | Planning ends in commit / reshape / defer. Refinement ends in ready / split / park. Review ends in ship / iterate / hold. Each call keeps notes. |
+| Decision clarity | Planning ends in commit / reshape / defer. Refinement ends in ready / split / park. Review ends in ship / iterate / hold. Requirements end in Ready / Thin / Still open. Each call keeps notes. |
+| Shared artifact language | Worked examples across eight artifact types × three platforms so onboarding uses the same Scrum / Agile / SAFe wording |
 | Honest roadmap math | Score and complexity sit on the same card; quadrants explain trade-offs |
 | Cross-device parity | Web and mobile share `@cadence/core` rules and the same room document |
 | Exportable outcomes | Retro summary downloads as **CSV** and as a consultant-style **PPT** (deck model in `@cadence/core`, rendered with `pptxgenjs` on web) |
@@ -48,12 +51,11 @@ Primary users are agile product and engineering teams running time-boxed rituals
 
 ### 3.1 Rooms and presence
 
-- Create a room by ritual kind (`retro` | `planning` | `refinement` | `review` | `roadmap` | `direction`), optional title, host name, and (for retros) template  
-- Optional **demo** seed: 10 notes per retro column, checklist demos for planning / refinement / review, roadmap bets, and a filled product-direction example (`demoDirectionContent`)  
-- Planning and refinement store their board in `room.review` via `createChecklistState(kind)` (same checklist ops as sprint review; decisions are kind-scoped)  
+- Create a room by ritual kind (`retro` | `planning` | `refinement` | `review` | `roadmap` | `direction` | `prd` | `artifacts`), optional title, host name, and (for retros) template  
+- Optional **demo** seed: 10 notes per retro column, checklist demos for planning / refinement / review / product requirements, roadmap bets, filled product-direction (`demoDirectionContent`), and artifact demos opened on Contact Center **Sprint Backlog**  
+- Planning, refinement, and product requirements store their board in `room.review` via `createChecklistState(kind)` (same checklist ops as sprint review; decisions are kind-scoped)  
 - Product direction stores `room.direction` (`DirectionState`: framework + answers map)  
-
- 
+- Artifact examples store `room.artifacts` via `blankArtifacts()` (`artifact: "prd"`, `product: "unified-agent"`); prose comes from `artifactExample` (not edited in-room)  
 - Join by six-character code and display name  
 - Local identity persisted in browser `localStorage` / mobile AsyncStorage (`person_…` id + name)  
 - Presence: a participant is **active** if `lastSeen` is within **20 seconds** (`ACTIVE_MS`)  
@@ -139,9 +141,36 @@ A shared room for a product vision or a product strategy. Switching framework ke
 
 The room reads the answers back as one statement. An example room fills every framework with a unified agent platform for customer service on a travel marketplace the size of Booking.com.
 
+### 3.10 Product requirements
+
+A shared checklist for one requirement, before it becomes Product Backlog items. Each part includes how to fill it in.
+
+- **Product** (Agile): the user and the job, the outcome, stories a Sprint could finish, and acceptance criteria in given, when, then form  
+- **Business** (SAFe): the benefit hypothesis, leading indicators, the smallest test (MVP), cost of delay against job size, and the evidence that would continue, change, or stop the work  
+- **Technical** (Scrum and SAFe): the Definition of Done the Developers own, non-functional requirements, enablers sized for a Sprint, and dependencies  
+
+The call is **Ready for the backlog**, **Thin the MVP**, or **Still open** (`baseline` / `thin` / `open`). An example fills the page for a unified agent platform on a travel marketplace.
+
+### 3.11 Artifact examples
+
+A shared reading room for eight worked artifacts. Switch the platform and the artifact. The examples follow Scrum, Agile, and SAFe, and they describe the same service: the Contact Center Platform routes a guest, the Unified Agent Platform resolves the trip, and CS data products publish the certified number for that resolution.
+
+| Artifact | Practice | What the example shows |
+| --- | --- | --- |
+| PRD | Agile, SAFe, Scrum | One requirement, the personas it serves, and a RACI map of who decides |
+| Lean Business Case | SAFe | Outcomes hypothesis, scope, MVP, go/no-go, and a WSJF signal |
+| Epics | SAFe | Business epic hypothesis, enabler epic, and the Features they spawn |
+| Features | SAFe | Benefit hypothesis, PI fit, acceptance, and a story split with enablers |
+| User stories | Agile, Scrum | INVEST stories with given/when/then, estimate cues, and readiness notes |
+| Product Backlog | Scrum | Product Goal commitment plus an ordered list with value and size |
+| Sprint Backlog | Scrum | Sprint Goal, selected forecast, and the plan for the first days |
+| Increment & Definition of Done | Scrum | What is Done this Sprint, what is not, and the quality bar |
+
+Each example names the personas and maps stakeholders with RACI: one person is Responsible, Accountable, Consulted, or Informed. An example room opens on the Contact Center Platform Sprint Backlog. An empty room opens on the Unified Agent Platform PRD.
+
 ### 3.8 Definitions (cross-cutting)
 
-Plain-English **variables**, **metrics**, and **formulas** for the rituals, shared from `@cadence/core` `GLOSSARY` (**33** entries across **6** groups: retro, planning, refinement, review, roadmap, and product direction).
+Plain-English **variables**, **metrics**, and **formulas** for the rituals, shared from `@cadence/core` `GLOSSARY` (**44** entries across **7** groups: retro, planning, refinement, review, roadmap, product direction, and product requirements).
 
 | Surface | Entry point |
 | --- | --- |
@@ -156,7 +185,7 @@ Kinds: Variable (something the team enters) · Metric (a number the board calcul
 | --- | --- |
 | Web (`apps/web`) | Full UI, App Router pages (`/`, `/new`, `/r/[code]`, `/guide`), room API, persistence (`file` / `supabase` / `redis`) |
 | Mobile (`apps/mobile`) | Expo client: home / guide / create / room (2s poll; raise hand; no timer or vote-budget chrome) |
-| Core (`packages/core`) | Types, ops, privacy, scoring, content (21 icebreakers + checklist rituals + direction frameworks), **countries**, demo seed, CSV export, **retro deck**, **glossary** (33/6) |
+| Core (`packages/core`) | Types, ops, privacy, scoring, content (21 icebreakers + checklist rituals incl. prd + direction frameworks), `artifacts.ts` (8×3), **countries**, demo seed, CSV export, **retro deck**, **glossary** (44/7) |
 | Credit | Site-wide developer credit footer on web; home/create on mobile (`credit-footer`) |
 
 ---

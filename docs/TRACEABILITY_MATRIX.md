@@ -2,7 +2,7 @@
 
 **Document type:** Requirements ↔ Stories ↔ Implementation ↔ Verification  
 **Product:** TeamCompass (`@cadence/*`)  
-**Last updated:** 2026-11-20 (product direction)  
+**Last updated:** 2026-11-22 (product requirements + artifact examples)  
 
 ---
 
@@ -22,7 +22,7 @@
 
 | Req ID | Requirement (short) | Story | Implementation | Verification | Status |
 | --- | --- | --- | --- | --- | --- |
-| FR-R1 | Create ritual room (6 kinds) | US-1.1 | `api/rooms/route.ts`, `new-room-form.tsx`, `createRoom`, `createChecklistState`, `blankDirection` | `room.test.ts` create flows | Implemented |
+| FR-R1 | Create ritual room (8 kinds) | US-1.1 | `api/rooms/route.ts`, `new-room-form.tsx`, `createRoom`, `createChecklistState`, `blankDirection`, `blankArtifacts` | `room.test.ts` create flows | Implemented |
 | FR-R2 | 6-char code | US-1.1 | `store.ts` `makeCode` | Manual + create API | Implemented |
 | FR-R3 | Join with code + name | US-1.2 | `…/join/route.ts`, `room-app.tsx` | Core join + full room | Implemented |
 | FR-R4 | Persist identity | US-1.3 | `identity.ts`, mobile AsyncStorage | Manual | Implemented |
@@ -95,6 +95,26 @@
 | FR-DIR2 | Strategy frameworks | US-7.1 | Playing to Win, strategy kernel, DHM (+ metric/tactic) | Framework switch test | Implemented |
 | FR-DIR3 | How-to per framework | US-7.1 | `DirectionFramework.how`, direction board how panel | Manual + content coverage | Implemented |
 | FR-DIR4 | Statement and kept answers | US-7.1 | `directionReadback` / `directionStatement`, `direction.setAnswer` keeps answers on switch | Demo seed + statement test | Implemented |
+
+---
+
+## 5c. Product requirements
+
+| Req ID | Requirement (short) | Story | Implementation | Verification | Status |
+| --- | --- | --- | --- | --- | --- |
+| FR-PRD1 | Product checks | US-8.1 | `PRD_SECTIONS` product, `checklistHow` | `room.test.ts` PRD cases | Implemented |
+| FR-PRD2 | Business checks | US-8.1 | SAFe hypothesis, indicators, MVP, cost of delay | How-to and demo notes | Implemented |
+| FR-PRD3 | Technical checks | US-8.1 | Definition of Done, NFRs, enablers | Demo note on `tech-dod` | Implemented |
+| FR-PRD4 | Kind-scoped call | US-8.1 | `baseline` / `thin` / `open` | Cross-kind decision rejected | Implemented |
+
+## 5d. Artifact examples
+
+| Req | Requirement | Story | Code | Test | Status |
+| --- | --- | --- | --- | --- | --- |
+| FR-ART1 | Eight artifacts | US-9.1 | `ARTIFACT_GUIDES`, `artifacts.setArtifact` | `room.test.ts` artifact examples (length 8) | Implemented |
+| FR-ART2 | Three products | US-9.1 | `ARTIFACT_PRODUCTS`, `artifacts.setProduct` | Every product × every artifact, including CS data products | Implemented |
+| FR-ART3 | Scrum, Agile, SAFe shape | US-9.1 | `packages/core/src/artifacts.ts` | Epic, Feature, LBC/WSJF, Product Goal, forecast, DoD | Implemented |
+| FR-ART4 | Selection only on the room | US-9.1 | `ArtifactState` | Demo opens contact-center sprint backlog | Implemented |
 
 ---
 

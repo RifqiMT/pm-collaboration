@@ -10,6 +10,8 @@ Stories are grouped by epic. Acceptance criteria are testable against the curren
 | E6 Planning & refinement | [epic-06-planning-refinement.md](./epic-06-planning-refinement.md) | Maya, Jordan, Priya |
 | E4 Roadmap | [epic-04-roadmap.md](./epic-04-roadmap.md) | Priya, Maya |
 | E7 Product direction | [epic-07-product-direction.md](./epic-07-product-direction.md) | Priya, Maya |
+| E8 Product requirements | [epic-08-product-requirements.md](./epic-08-product-requirements.md) | Priya, Maya, Jordan |
+| E9 Artifact examples | [epic-09-artifact-examples.md](./epic-09-artifact-examples.md) | Priya, Maya, Jordan |
 | E5 Platforms, sync & Definitions | [epic-05-platforms.md](./epic-05-platforms.md) | All |
 
 ### Story format

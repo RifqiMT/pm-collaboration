@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const detail: Record<RoomKind, string> = {
-  retro: "An icebreaker, private notes, a discussion, a dot vote, actions with owners, and a summary you can download.",
-  planning: "Sprint Planning answers why this Sprint is valuable, what Developers can finish, and how they will do it. The Sprint Goal is the commitment. The items are a forecast.",
-  refinement: "An ongoing pass over the Product Backlog: add detail, split what cannot finish in one Sprint, let Developers size it, and let the Product Owner order it.",
-  review: "Inspect the Sprint Goal and the Increment with stakeholders, then adapt the Product Backlog. The call is release, adapt, or hold.",
-  roadmap: "Score each bet next to the business outcome, then read the complexity.",
-  direction: "Fill a published vision or strategy board, then read the direction back as one statement.",
+  retro: "Warm up, write private notes, discuss, vote, assign owners, and download a summary.",
+  planning: "Set the Sprint Goal, pull what you can finish, and plan the first days. Selected work is a forecast.",
+  refinement: "Add detail, split oversized work, size it, and order the backlog — without starting the Sprint.",
+  review: "Check the goal, show what's Done, hear stakeholders, then update the backlog.",
+  roadmap: "Score each idea next to the outcome and difficulty so priorities are easy to see.",
+  direction: "Fill a vision or strategy board, then read it back as one clear statement.",
+  prd: "Walk one requirement through people, business value, and build quality before it becomes backlog work.",
+  artifacts: "Open finished sample docs for the agent workspace, contact center, and CS data products.",
 };
 
 export function HomeScreen() {
@@ -59,10 +61,10 @@ export function HomeScreen() {
       </header>
       <section className="hero">
         <p className="eyebrow">Sprint rooms</p>
-        <h1>Planning, refinement, reviews, retros, roadmaps, and direction on one board.</h1>
+        <h1>One shared board for planning, review, and what comes next.</h1>
         <p className="lede">
-          Helps teams align on direction, review progress, and decide what comes next. Share a six-character code.
-          Everyone sees the same notes, the same checklist, and the same score. No accounts.
+          Create a room, share a six-character code, and work together in real time. Same notes, same checklist, same
+          scores. No accounts.
         </p>
       </section>
       {error ? <p role="alert">{error}</p> : null}

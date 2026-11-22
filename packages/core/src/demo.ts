@@ -2474,6 +2474,62 @@ export function demoRefinementContent(authors: DemoAuthor[], now: string): {
   };
 }
 
+export function demoPrdContent(authors: DemoAuthor[], now: string): {
+  goal: string;
+  decision: ReviewDecision;
+  decisionNotes: string;
+  feedback: FeedbackNote[];
+  itemNotes: Record<string, string>;
+} {
+  const [host, alex, sam] = padAuthors(authors);
+  return {
+    goal: "Unified Agent Platform: one workspace so an agent can resolve a guest's broken trip without opening another tool.",
+    decision: "baseline",
+    decisionNotes:
+      "The stay-change slice can become backlog items. Flight changes wait until the property status feed is reliable. Review the leading indicator in four weeks.",
+    feedback: [
+      {
+        id: "note_prdpraise01",
+        authorId: alex.id,
+        kind: "praise",
+        body: "The outcome is the guest hearing an answer in the first conversation, and the screen is still free to change.",
+        createdAt: now,
+      },
+      {
+        id: "note_prdchange01",
+        authorId: sam.id,
+        kind: "change",
+        body: "Name the privacy rule for the guest timeline before Developers select the first story.",
+        createdAt: now,
+      },
+      {
+        id: "note_prdquestion1",
+        authorId: host.id,
+        kind: "question",
+        body: "Is the leading indicator first-contact resolution for stay changes, or for every contact type?",
+        createdAt: now,
+      },
+    ],
+    itemNotes: {
+      "product-user": "Customer service agents on a travel marketplace the size of Booking.com, resolving a guest's stay change.",
+      "product-outcome": "The guest hears a resolution in the first conversation because the agent already has the trip.",
+      "product-stories": "One story shows the stay and the property status. A second story offers the allowed change. Flight changes are a later slice.",
+      "product-acceptance": "Given a disrupted stay, when the agent opens the case, then the booking, the property status, and one allowed change are on the same screen.",
+      "product-change": "If agents still open the supplier portal, rewrite the outcome before adding another channel.",
+      "business-hypothesis": "Service leads gain a lower cost per stay-change contact, proved by a rise in first-contact resolution.",
+      "business-indicators": "Share of stay changes resolved in the first conversation. Review it four weeks after the first market.",
+      "business-mvp": "The test is stay changes in one market, inside the agent desktop. Flights, a guest chatbot, and other brands wait.",
+      "business-wsjf": "A failed stay has a high cost of delay. The stay-change slice is smaller than a full trip workspace, so it goes first.",
+      "business-decision": "Continue if first-contact resolution rises. Change the slice if agents still leave the workspace. Stop if guest satisfaction falls.",
+      "tech-dod": "Developers agree the Increment is integrated, tested, and usable in the agent desktop before it is called Done.",
+      "tech-nfr": "The trip timeline loads with the case. Guest data stays inside the service role. The page can be used with a keyboard.",
+      "tech-enabler": "A property-status feed is the enabler. It unlocks the stay-change outcome and is sized for one Sprint.",
+      "tech-deps": "The property systems owner must confirm the status feed before the second story starts.",
+      "tech-ready": "Developers could select the stay-and-status story in the next Sprint Planning.",
+    },
+  };
+}
+
 export function demoDirectionContent(): { framework: DirectionFrameworkId; answers: DirectionState["answers"] } {
   return {
     framework: "vision-board",

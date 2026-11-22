@@ -5,7 +5,7 @@
 **CORS:** `Access-Control-Allow-Origin: *`  
 **Caching:** `Cache-Control: no-store`  
 **Runtime:** Node.js (`force-dynamic`)  
-**Last updated:** 2026-11-20 (product direction)  
+**Last updated:** 2026-11-22 (product requirements + artifact examples)  
 
 ---
 
@@ -36,7 +36,7 @@
 
 | Field | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `kind` | `"retro" \| "planning" \| "refinement" \| "review" \| "roadmap" \| "direction"` | Yes | Ritual type. Planning and refinement use the review checklist ops. Direction uses `direction.setFramework` and `direction.setAnswer`. |
+| `kind` | `"retro" \| "planning" \| "refinement" \| "review" \| "roadmap" \| "direction" \| "prd" \| "artifacts"` | Yes | Ritual type. Planning, refinement, and product requirements use the review checklist ops. Direction uses `direction.setFramework` and `direction.setAnswer`. Artifact examples use `artifacts.setArtifact` and `artifacts.setProduct`. |
 | `title` | string | No | Max 80 |
 | `hostName` | string | No | Max 40 |
 | `hostId` | string | No | Stable `person_…` id |
@@ -131,18 +131,28 @@ Fails with `full` if participants ≥ 40.
 
 ### Review, planning, and refinement
 
-These ops apply when the room has a checklist (`review`, `planning`, or `refinement`). `review.setDecision` must be one of the decisions for that kind. Planning: `commit` (Forecast), `reshape` (Narrow), `defer` (No goal). Refinement: `ready` (Selectable), `split` (Split), `park` (Return). Review: `ship` (Release), `iterate` (Adapt), `hold` (Hold). Any other value returns 400 with “That decision is not part of this checklist.”
+These ops apply when the room has a checklist (`review`, `planning`, `refinement`, or `prd`). `review.setDecision` must be one of the decisions for that kind. Planning: `commit` (Forecast), `reshape` (Narrow), `defer` (No goal). Refinement: `ready` (Selectable), `split` (Split), `park` (Return). Review: `ship` (Release), `iterate` (Adapt), `hold` (Hold). Product requirements: `baseline` (Ready for the backlog), `thin` (Thin the MVP), `open` (Still open). Any other value returns 400 with “That decision is not part of this checklist.”
+
+| `type` | Fields | Notes |
+| --- | --- | --- |
+| `review.setItemDone` | `itemId`, `done` | |
+| `review.setItemNote` | `itemId`, `note` | |
+| `review.addItem` | `sectionId`, `label` | |
+| `review.setSection` | `sectionId` | Shared focus section; must belong to the checklist; same section is a no-op |
+| `review.setGoal` | `goal` | |
+| `review.addFeedback` | `body`, `kind` | |
+| `review.deleteFeedback` | `feedbackId` | |
+| `review.setDecision` | `decision` | Kind-scoped |
+| `review.setDecisionNotes` | `notes` | |
+
+### Artifact examples
+
+These ops apply when `kind` is `artifacts`. Prose is derived from catalogs; the room only stores the selected artifact and product.
 
 | `type` | Fields |
 | --- | --- |
-| `review.setItemDone` | `itemId`, `done` |
-| `review.setItemNote` | `itemId`, `note` |
-| `review.addItem` | `sectionId`, `label` |
-| `review.setGoal` | `goal` |
-| `review.addFeedback` | `body`, `kind` |
-| `review.deleteFeedback` | `feedbackId` |
-| `review.setDecision` | `decision` |
-| `review.setDecisionNotes` | `notes` |
+| `artifacts.setArtifact` | `artifact` (`ArtifactId`, 8 values) |
+| `artifacts.setProduct` | `product` (`ArtifactProductId`: `unified-agent` \| `contact-center` \| `cs-data`) |
 
 ### Roadmap
 

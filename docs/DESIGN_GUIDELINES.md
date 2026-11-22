@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-20 (product direction)  
+**Last updated:** 2026-11-22 (product requirements + artifact examples)  
 
 ---
 
@@ -95,6 +95,19 @@ Mobile also uses ritual accent washes (e.g. `accentRetro: #fff8f5`) for card tin
 | Light | **Only shipped theme** |
 | Dark | Not implemented — do not invent an unofficial dark palette in docs as shipped |
 
+### 3.6 Ritual accent washes (home cards)
+
+| Kind class | Accent wash (approx.) | Role |
+| --- | --- | --- |
+| `kind-retro` | Warm / brand-adjacent | Retrospective |
+| `kind-planning` | Soft green | Sprint planning |
+| `kind-refinement` | Soft violet `rgba(109, 40, 217, 0.08)` | Backlog refinement |
+| `kind-review` | Soft blue | Sprint review |
+| `kind-roadmap` | Soft gold | Roadmap scoring |
+| `kind-direction` | Cyan `rgba(14, 116, 144, 0.1)` | Product direction |
+| `kind-prd` | Rose `rgba(159, 18, 57, 0.08)` | Product requirements |
+| `kind-artifacts` | Teal `rgba(15, 118, 110, 0.1)` | Artifact examples |
+
 ---
 
 ## 4. Column & phase semantics
@@ -140,7 +153,7 @@ Hover (pointer devices): stronger border + `--shadow-lift`; ritual cards lift `-
 
 - Bordered card, not a dashboard grid of metrics  
 - Index `01…`, title, promise, detail, step list  
-- Kind-specific class `kind-retro|planning|refinement|review|roadmap|direction`  
+- Kind-specific class `kind-retro|planning|refinement|review|roadmap|direction|prd|artifacts`  
 
 ### 5.4 Forms & fields
 
@@ -152,9 +165,10 @@ Hover (pointer devices): stronger border + `--shadow-lift`; ritual cards lift `-
 | Board | Design notes |
 | --- | --- |
 | Retro | Columns with glyphs that scale with note volume; phase tools; timers; Summary CSV/PPT downloads |
-| Planning / Refinement / Review | Shared checklist board (`ReviewBoard`) with ritual eyebrow, how-to steps, goal/focus, feedback, kind-scoped decision trio |
+| Planning / Refinement / Review / Requirements | Shared checklist board (`ReviewBoard`) with ritual eyebrow, how-to steps, goal/focus, feedback, kind-scoped decision trio (`kind-prd` rose accent) |
 | Roadmap | Initiative cards + score/complexity chart + insights |
 | Direction | Framework picker (vision vs strategy), part rail, prompt fields, live readback masthead (`.direction-*` / `.ritual.direction`) |
+| Artifacts | Document reader with sticky platform/artifact controls (`.artifact-*`, teal `kind-artifacts`) |
 
 ### 5.6 Icebreaker This or That
 
@@ -206,7 +220,7 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 ### 5.6e Definitions (`/guide`)
 
 - Quiet `.guide-link` in wordmark rows (home, room) and roadmap scoring help  
-- Guide page: legend for Variable / Metric / Formula kinds, jump nav by ritual (six groups), entry cards with plain / formula / example / where  
+- Guide page: legend for Variable / Metric / Formula kinds, jump nav by **seven** glossary groups (`retro` … `requirements`; artifact terms under requirements), entry cards with plain / formula / example / where  
 - Kind chips use semantic tones without competing with ritual boards  
 - Mobile Guide mirrors the same content hierarchy without the web jump chrome  
 
@@ -215,6 +229,21 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 - Group `.summary-downloads` with copy + CSV/PPT actions (`.summary-download-btn`)  
 - PPT is primary for facilitator share-out; CSV remains available as ghost/secondary  
 - Keep export chrome in Summary only—do not promote downloads into earlier phases  
+
+### 5.6h Product requirements
+
+- Same checklist board as planning, refinement, and review, with a rose accent for `kind-prd`  
+- Three parts stay distinct: Product, Business, Technical. How-to stays with the active part  
+- The call uses Ready for the backlog, Thin the MVP, and Still open  
+
+### 5.6i Artifact examples
+
+- Teal accent for `kind-artifacts`
+- Masthead + dark callout for the example headline; sticky compact platform toggle and numbered artifact tabs
+- Left rail: numbered “How to read it”, on-this-page TOC, previous/next artifact
+- Document stage: numbered sections, pill field labels, long pieces span full width; Given/When/Then blocks split for scanning
+- Platform and artifact are shared choices. The example text is read-only
+- Responsive: controls and stage stack; pieces become a single column under 720px
 
 ### 5.6g Product direction
 
@@ -295,6 +324,8 @@ Site-wide attribution sits at the bottom of the shell (web) and at the end of ho
 - Icebreakers: `icebreaker-panel.tsx`, `travel-map.tsx`, `world-map-paths.ts`, `people-order.tsx`, `apps/web/public/flags/`  
 - PPT export: `apps/web/src/lib/retro-pptx.ts` (brand hex mirrored from CSS tokens)  
 - Product direction: `apps/web/src/components/direction-board.tsx`, mobile direction screen in `App.js`  
+- Artifact examples: `apps/web/src/components/artifact-board.tsx`, `packages/core/src/artifacts.ts`, mobile artifacts screen  
+
 - Definitions page: `apps/web/src/app/guide/page.tsx`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
 - Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  

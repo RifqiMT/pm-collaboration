@@ -2,7 +2,7 @@
 
 **Purpose:** Technical and business limitations that constrain product development.  
 **Audience:** Engineers, PMs, designers, security reviewers  
-**Last updated:** 2026-11-20 (product direction)  
+**Last updated:** 2026-11-22 (product requirements + artifact examples)  
 
 Violating a hard guardrail without an approved architecture change is a product defect, not a stretch goal.
 
@@ -80,11 +80,13 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-FAC-1 Host authority** | Phase, icebreaker selection, This or That pairs, Lineup title (`setOrderTitle`), discuss mode (not vote budget or timers) | Product assumes a facilitator role; timer/budget controls are open to joined actors on web; renaming a Lineup clears shared orders |
 | **G-FAC-2 Section isolation** | Each retro section shows its work | Resist “show everything always” feature requests |
 | **G-FAC-3 Summary is terminal collection** | No timer/stopwatch on Summary | Keep Summary for export/review, not timed work |
-| **G-FAC-4 One ritual per room** | `kind` fixed at create (`retro` \| `planning` \| `refinement` \| `review` \| `roadmap` \| `direction`) | No multi-ritual mashup room without redesign |
+| **G-FAC-4 One ritual per room** | `kind` fixed at create (`retro` \| `planning` \| `refinement` \| `review` \| `roadmap` \| `direction` \| `prd` \| `artifacts`) | No multi-ritual mashup room without redesign |
 | **G-FAC-8 Direction field scope** | `direction.setAnswer` only for fields on the **current** framework | Do not invent free-form fields; keep answers when switching frameworks |
 | **G-FAC-5 Definitions single source** | `GLOSSARY` in `@cadence/core` | Do not fork plain-English copy into web-only or mobile-only strings |
 | **G-FAC-6 Checklist decision scope** | `review.setDecision` must match `checklistDecisions(kind)` | Do not accept Release on planning or Forecast on review |
 | **G-FAC-7 PPT is web-first** | Deck render uses `pptxgenjs` in the browser | Do not claim mobile PPT parity until a shared render path exists |
+| **G-FAC-9 Artifacts are read-only prose** | Room stores only `artifact` + `product` selection | Do not persist edited example text on the room document; change catalogs in `artifacts.ts` |
+| **G-FAC-10 Glossary groups ≠ room kinds** | Definitions use **7** glossary groups (artifact terms under `requirements`) while rooms have **8** kinds | Do not invent an eighth glossary group without content + guide UI work |
 
 ---
 

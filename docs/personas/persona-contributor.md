@@ -33,6 +33,7 @@
 - Votes with remaining budget; does not edit notes in vote phase  
 - Takes or completes actions  
 - Signs checklist lines; posts feedback  
+- May open product requirements or artifact examples when clarifying language for a story  
 
 ## Needs from the product
 

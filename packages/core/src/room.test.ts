@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ARTIFACT_GUIDES, ARTIFACT_PRODUCTS, artifactExample, presentArtifactPiece } from "./artifacts";
 import { columnMark, previewMediaCandidates, DIRECTION_FRAMEWORKS, RETRO_TEMPLATE_GROUPS, RETRO_TEMPLATES, RITUALS, checklistHow, directionStatement, retroColumnCounts, searchRetroTemplates, truthDisplayOrder } from "./content";
 import { formatScore, formulaLine, scoreInitiative, scoreRoadmap } from "./scoring";
 import { retrospectiveExport } from "./retro-export";
@@ -241,7 +242,7 @@ describe("media previews", () => {
 
 describe("rituals", () => {
   it("offers the collaboration rooms", () => {
-    expect(RITUALS.map((ritual) => ritual.kind)).toEqual(["retro", "planning", "refinement", "review", "roadmap", "direction"]);
+    expect(RITUALS.map((ritual) => ritual.kind)).toEqual(["retro", "planning", "refinement", "review", "roadmap", "direction", "prd", "artifacts"]);
   });
 });
 
@@ -1013,6 +1014,175 @@ describe("product direction", () => {
     expect(answers["mo-for"]).toContain("Booking.com");
     expect(answers["ptw-where"]).toMatch(/stay and flight/i);
     expect(directionStatement({ ...filled, framework: "positioning" })).toContain("Unified Agent Platform is a service workspace");
+  });
+});
+
+describe("product requirements", () => {
+  it("seeds product, business, and technical checks and rejects a sprint decision", () => {
+    let room = createRoom(
+      { code: "PRD001", kind: "prd", title: "Requirements", hostId: HOST, hostName: "Rifqi" },
+      NOW,
+    );
+    expect(room.review?.sections.map((section) => section.id)).toEqual(["product", "business", "technical"]);
+    expect(room.review?.sections.flatMap((section) => section.items).some((item) => item.id === "product-user")).toBe(true);
+    expect(room.roadmap).toBeNull();
+    expect(room.direction).toBeNull();
+    expect(checklistHow("prd", "product").length).toBeGreaterThanOrEqual(3);
+    expect(checklistHow("prd", "product").join(" ")).toMatch(/Sprint/);
+    expect(checklistHow("prd", "business").join(" ")).toMatch(/hypothesis/);
+    expect(checklistHow("prd", "technical").join(" ")).toMatch(/Definition of Done/);
+    expect(() => applyOp(room, { type: "review.setDecision", decision: "ship" }, HOST, NOW)).toThrow(/not part of this checklist/);
+    room = applyOp(room, { type: "review.setDecision", decision: "baseline" }, HOST, NOW);
+    expect(room.review?.decision).toBe("baseline");
+    room = applyOp(room, { type: "review.setGoal", goal: "Unified Agent Platform for a broken stay" }, HOST, NOW);
+    expect(room.review?.goal).toContain("Unified Agent Platform");
+  });
+
+  it("fills a professional example for a travel service workspace", () => {
+    const room = createRoom(
+      { code: "PRDDEM", kind: "prd", title: "Requirements", hostId: HOST, hostName: "Rifqi", demo: true },
+      NOW,
+    );
+    expect(room.review?.decision).toBe("baseline");
+    expect(room.review?.goal.length).toBeGreaterThan(40);
+    const items = room.review?.sections.flatMap((section) => section.items) ?? [];
+    expect(items.every((item) => item.note.length > 40)).toBe(true);
+    expect(items.some((item) => item.id === "tech-dod" && item.note.includes("Increment"))).toBe(true);
+    expect(room.review?.goal).toMatch(/Unified Agent Platform/);
+  });
+});
+
+describe("artifact examples", () => {
+  it("starts on the unified agent PRD and switches the example the room is reading", () => {
+    let room = createRoom(
+      { code: "ART001", kind: "artifacts", title: "Examples", hostId: HOST, hostName: "Rifqi" },
+      NOW,
+    );
+    expect(room.artifacts).toEqual({ artifact: "prd", product: "unified-agent" });
+    expect(room.review).toBeNull();
+    expect(room.direction).toBeNull();
+    expect(artifactExample("prd", "unified-agent").headline).toMatch(/disrupted stay/);
+    expect(() => applyOp(room, { type: "artifacts.setArtifact", artifact: "rice" as never }, HOST, NOW)).toThrow(
+      /PRD|Lean Business Case|Increment/,
+    );
+    room = applyOp(room, { type: "artifacts.setArtifact", artifact: "sprint-backlog" }, HOST, NOW);
+    room = applyOp(room, { type: "artifacts.setProduct", product: "contact-center" }, HOST, NOW);
+    expect(room.artifacts).toEqual({ artifact: "sprint-backlog", product: "contact-center" });
+    room = applyOp(room, { type: "artifacts.setProduct", product: "cs-data" }, HOST, NOW);
+    expect(room.artifacts?.product).toBe("cs-data");
+    expect(artifactExample("prd", "cs-data").headline).toMatch(/first-contact/);
+    room = applyOp(room, { type: "artifacts.setArtifact", artifact: "lean-business-case" }, HOST, NOW);
+    room = applyOp(room, { type: "artifacts.setArtifact", artifact: "feature" }, HOST, NOW);
+    room = applyOp(room, { type: "artifacts.setArtifact", artifact: "increment" }, HOST, NOW);
+    expect(room.artifacts?.artifact).toBe("increment");
+    const retro = createRoom(
+      { code: "ARTRET", kind: "retro", title: "Retro", hostId: HOST, hostName: "Rifqi" },
+      NOW,
+    );
+    expect(() => applyOp(retro, { type: "artifacts.setProduct", product: "contact-center" }, HOST, NOW)).toThrow(/artifact example/);
+  });
+
+  it("gives both platforms a professional example of every artifact", () => {
+    for (const product of ARTIFACT_PRODUCTS) {
+      for (const guide of ARTIFACT_GUIDES) {
+        const example = artifactExample(guide.id, product.id);
+        expect(guide.how.length, guide.id).toBeGreaterThanOrEqual(3);
+        expect(example.headline.length, `${product.id}:${guide.id}`).toBeGreaterThan(40);
+        for (const section of example.sections) {
+          expect(section.pieces.length, section.title).toBeGreaterThan(0);
+          for (const piece of section.pieces) {
+            expect(piece.text.length, `${product.id}:${guide.id}:${piece.label}`).toBeGreaterThan(40);
+          }
+        }
+      }
+    }
+    expect(ARTIFACT_GUIDES).toHaveLength(8);
+    const epic = artifactExample("epic", "unified-agent").sections.flatMap((section) => section.pieces);
+    expect(epic.some((piece) => piece.text.includes("We will know this is true"))).toBe(true);
+    expect(artifactExample("user-story", "contact-center").sections[0]?.pieces.length).toBeGreaterThanOrEqual(3);
+    expect(artifactExample("product-backlog", "contact-center").headline).toMatch(/Product Goal/);
+    expect(artifactExample("product-backlog", "unified-agent").sections.some((section) => section.title === "Product Goal")).toBe(true);
+    expect(
+      artifactExample("sprint-backlog", "unified-agent").sections.some((section) =>
+        section.pieces.some((piece) => /forecast/i.test(piece.text)),
+      ),
+    ).toBe(true);
+    expect(artifactExample("lean-business-case", "unified-agent").sections.some((section) => /WSJF/i.test(section.title))).toBe(true);
+    expect(artifactExample("feature", "contact-center").sections.some((section) => /Story split/i.test(section.title))).toBe(true);
+    expect(artifactExample("increment", "unified-agent").sections.some((section) => /Definition of Done/i.test(section.title))).toBe(true);
+    expect(ARTIFACT_PRODUCTS.map((product) => product.id)).toEqual(["unified-agent", "contact-center", "cs-data"]);
+    expect(artifactExample("prd", "cs-data").headline).toMatch(/first-contact/);
+    for (const product of ARTIFACT_PRODUCTS) {
+      for (const guide of ARTIFACT_GUIDES) {
+        const sections = artifactExample(guide.id, product.id).sections;
+        const personas = sections.find((section) => section.title === "Personas");
+        const stakeholders = sections.find((section) => section.title === "Stakeholders");
+        expect(personas?.pieces.length, `${product.id}:${guide.id} personas`).toBe(3);
+        expect(stakeholders?.pieces.map((piece) => piece.label), `${product.id}:${guide.id} raci`).toEqual([
+          "Responsible",
+          "Accountable",
+          "Consulted",
+          "Informed",
+        ]);
+      }
+    }
+    for (const product of ARTIFACT_PRODUCTS) {
+      for (const guide of ARTIFACT_GUIDES) {
+        const pieces = artifactExample(guide.id, product.id).sections.flatMap((section) => section.pieces);
+        expect(
+          pieces.some((piece) => /acceptance criteria/i.test(`${piece.label} ${piece.text}`)),
+          `${product.id}:${guide.id}`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("opens an example room on the contact center sprint backlog", () => {
+    const room = createRoom(
+      { code: "ARTDEM", kind: "artifacts", title: "Examples", hostId: HOST, hostName: "Rifqi", demo: true },
+      NOW,
+    );
+    expect(room.artifacts).toEqual({ artifact: "sprint-backlog", product: "contact-center" });
+  });
+
+  it("reads stories, acceptance criteria, and backlog lines as a spec", () => {
+    const story = presentArtifactPiece(
+      "As a customer service agent, I want the disrupted stay and the property status on the case I already have open, so that I can answer the guest without opening the supplier portal. Estimate: Developers compare it with the last case-view story. Ready when the status contract is agreed.",
+    );
+    expect(story.kind).toBe("story");
+    if (story.kind === "story") {
+      expect(story.role).toBe("customer service agent");
+      expect(story.estimate).toMatch(/case-view/);
+      expect(story.ready).toMatch(/status contract/);
+    }
+    const criteria = presentArtifactPiece(
+      "Given a disrupted stay, when the agent opens the case, then the booking, the property status, and one allowed change are on the same screen. Given a stay the policy cannot change, when the agent opens the case, then the screen says so and does not offer a change.",
+    );
+    expect(criteria.kind).toBe("criteria");
+    if (criteria.kind === "criteria") {
+      expect(criteria.items).toHaveLength(2);
+      expect(criteria.items[0]?.then).toMatch(/one allowed change/);
+    }
+    const record = presentArtifactPiece(
+      "Description: show the disrupted stay and property status on the open case. Order: 1. Value: agent stops searching. Size: Developers compare with the last case-view story. Acceptance criteria: given a disrupted stay, when the agent opens the case, then the booking and the property status are on that case.",
+    );
+    expect(record.kind).toBe("record");
+    if (record.kind === "record") {
+      expect(record.order).toBe("1");
+      expect(record.criteria).toHaveLength(1);
+    }
+    for (const product of ARTIFACT_PRODUCTS) {
+      for (const guide of ARTIFACT_GUIDES) {
+        for (const piece of artifactExample(guide.id, product.id).sections.flatMap((section) => section.pieces)) {
+          const view = presentArtifactPiece(piece.text);
+          if (/given\s+[^,]+,\s*when\s+/i.test(piece.text)) {
+            const items = view.kind === "criteria" ? view.items : view.kind === "record" ? view.criteria : [];
+            expect(items.length, `${product.id}:${piece.label}`).toBeGreaterThan(0);
+          }
+          if (/^As an?\s/i.test(piece.text)) expect(view.kind, piece.label).toBe("story");
+        }
+      }
+    }
   });
 });
 

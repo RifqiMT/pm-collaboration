@@ -1,7 +1,7 @@
 # TeamCompass — Product Metrics & OKRs
 
 **Audience:** Product team, engineering leads, facilitators of internal adoption  
-**Last updated:** 2026-11-20 (product direction)  
+**Last updated:** 2026-11-22 (product requirements + artifact examples)  
 **Note:** TeamCompass MVP does not yet ship an analytics pipeline. Metrics below define what to measure when instrumentation is added, plus qualitative proxies available today from `rooms.json` and meeting outcomes.
 
 ---
@@ -68,6 +68,8 @@
 | `refinement_decision_rate` | Refinement call recorded | Refinement rooms with non-null decision / refinement rooms | ≥ 85% |
 | `direction_completion_rate` | Direction fields filled | Filled prompts / prompts on active framework at leave | ≥ 70% when used |
 | `direction_framework_mix` | Direction framework mix | Creates/switches by `DirectionFrameworkId` | Inform method preference; no hard target |
+| `prd_decision_rate` | Requirements call recorded | PRD rooms with non-null decision / prd rooms | ≥ 85% |
+| `artifact_switch_rate` | Artifact exploration | Rooms with ≥2 artifact or product switches / artifacts rooms | Inform onboarding use; no hard target |
 | `raise_hand_rate` | Discuss raise-hand usage | Retros with ≥1 raise-hand op in Discuss / retros reaching Discuss | Inform facilitation quality; no hard target yet |
 | `guide_open_rate` | Definitions opens | Sessions that open `/guide` or mobile Guide / total sessions | Inform onboarding clarity; no hard target yet |
 
@@ -84,6 +86,7 @@ Suggested quarterly OKR set for an adopting product org. Adjust numbers to your 
 | KR1.1 | `retro_phase_completion` | 75% of non-demo retros reach Summary |
 | KR1.2 | `actions_with_owners_rate` | 85% of actions have owners at Summary |
 | KR1.3 | `review_decision_rate` | 90% of reviews record ship/iterate/hold |
+| KR1.4 | `prd_decision_rate` | 85% of requirements rooms record Ready / Thin / Still open |
 
 ### Objective 2 — Keep brainstorm psychologically safe
 

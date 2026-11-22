@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-20 (product direction)  
+**Last documentation refresh:** 2026-11-22 (product requirements + artifact examples)  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -55,10 +55,11 @@ This index is the reading map for product, engineering, design, and leadership s
 | Travel wishlist catalog | `packages/core/src/countries.ts` (`TRAVEL_COUNTRIES` 175) |
 | Shape picker UI | `apps/web/.../new-room-form.tsx`, mobile create in `App.js`, `.shape-finder*` |
 | Health / Travel / Lineup UI | `icebreaker-panel.tsx`, `travel-map.tsx`, `people-order.tsx`, `public/flags/*.svg`; mobile counterparts in `App.js` |
-| Planning / refinement / review board | `review-board.tsx` + mobile checklist screens; kind-scoped decisions |
+| Planning / refinement / review / prd board | `review-board.tsx` + mobile checklist screens; kind-scoped decisions (incl. `baseline` / `thin` / `open`) |
 | Product direction | `DIRECTION_FRAMEWORKS`, `directionReadback` / `directionStatement`; `direction-board.tsx`; mobile direction screen |
-| Demo seed data | `packages/core/src/demo.ts` (incl. planning + refinement + direction demos) |
-| In-app Definitions glossary | `packages/core/src/glossary.ts` (33 entries / 6 groups) |
+| Artifact examples | `packages/core/src/artifacts.ts` (`ARTIFACT_GUIDES` 8 × `ARTIFACT_PRODUCTS` 3, `artifactExample`); `artifact-board.tsx`; mobile artifacts screen |
+| Demo seed data | `packages/core/src/demo.ts` (incl. planning + refinement + direction + prd + artifacts demos) |
+| In-app Definitions glossary | `packages/core/src/glossary.ts` (44 entries / 7 groups) |
 | Retro CSV export | `packages/core/src/retro-export.ts` |
 | Retro PPT deck | `packages/core/src/retro-deck.ts` → `apps/web/src/lib/retro-pptx.ts` (`pptxgenjs`) |
 | Web UI & polling | `apps/web/src/components/` |

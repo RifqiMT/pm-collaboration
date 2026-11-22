@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-20 (product direction)  
+**Last updated:** 2026-11-22 (product requirements + artifact examples)  
 
 ---
 
@@ -12,7 +12,7 @@
 | Web framework | Next.js **15.5.x** (App Router) | `@cadence/web` |
 | UI library | React **19.x** | Web + mobile |
 | Mobile | Expo **~58**, React Native **0.88** | `@cadence/mobile` |
-| Domain | `@cadence/core` pure TS (incl. `glossary.ts`) | Vitest unit tests |
+| Domain | `@cadence/core` pure TS (`content`, `artifacts`, `glossary`, deck/export) | Vitest unit tests |
 | Storage | JSON file (preferred) / Supabase / Upstash Redis | Auto-select via env |
 | Font (web) | Instrument Sans (Google via `next/font`) | `--font-sans` |
 | Node | **≥ 20** | Root engines |
@@ -43,6 +43,7 @@ Root package name remains `cadence@0.1.0` while product brand is **TeamCompass**
 | next ^15.5.4 | App + API routes |
 | react / react-dom ^19.1.1 | UI |
 | @cadence/core * | Domain |
+| pptxgenjs ^3.12 | Retro PPT download (web-only) |
 | @upstash/redis | Optional Redis room store (Vercel alternative to Supabase) |
 | vitest ^3.2 | Helper + store tests |
 

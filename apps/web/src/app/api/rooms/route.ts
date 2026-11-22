@@ -5,7 +5,7 @@ import { openRoom } from "@/server/store";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const kinds: RoomKind[] = ["retro", "planning", "refinement", "review", "roadmap", "direction"];
+const kinds: RoomKind[] = ["retro", "planning", "refinement", "review", "roadmap", "direction", "prd", "artifacts"];
 const templates = Object.keys(RETRO_TEMPLATES) as RetroTemplateId[];
 
 export function OPTIONS() {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const kind = body.kind;
     if (typeof kind !== "string" || !kinds.includes(kind as RoomKind)) {
       throw new CadenceError(
-        "Choose a retrospective, a sprint planning, a backlog refinement, a sprint review, a roadmap, or a product direction.",
+        "Choose a retrospective, a sprint planning, a backlog refinement, a sprint review, a roadmap, a product direction, a product requirements document, or artifact examples.",
         "kind",
       );
     }

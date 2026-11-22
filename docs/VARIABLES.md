@@ -2,8 +2,8 @@
 
 **Purpose:** Exhaustive catalog of product and domain variables used across TeamCompass.  
 **Format:** Variable name · Friendly name · Definition · Formula / rule · Location · Example  
-**Source of truth:** `packages/core/src/{types,scoring,room,text,content,countries,ids,glossary,retro-export,retro-deck}.ts`, `apps/web/src/lib/retro-pptx.ts`, web/mobile clients  
-**Last updated:** 2026-11-20 (product direction)  
+**Source of truth:** `packages/core/src/{types,scoring,room,text,content,artifacts,countries,ids,glossary,retro-export,retro-deck}.ts`, `apps/web/src/lib/retro-pptx.ts`, web/mobile clients  
+**Last updated:** 2026-11-22 (product requirements + artifact examples)  
 
 In-app Definitions for facilitators and contributors live in `packages/core/src/glossary.ts` (`GLOSSARY`) and render on web `/guide` and the mobile Guide screen. This file remains the **engineering** catalog (limits, sync, store env, CSV columns). Prefer updating `GLOSSARY` when changing user-facing wording; prefer updating this file when changing contracts.
 
@@ -26,7 +26,7 @@ In-app Definitions for facilitators and contributors live in `packages/core/src/
 | Variable name | Friendly name | Definition | Formula / rule | Location in the apps | Example |
 | --- | --- | --- | --- | --- | --- |
 | `code` | Room code | Six-character public join key for the room | Alphabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (excludes I, O, 0, 1); unique in store | `store.ts` `makeCode`; home join; `/r/[code]` | `K7M9QX` |
-| `kind` | Ritual type | Which board the room hosts | Enum: `retro` \| `planning` \| `refinement` \| `review` \| `roadmap` \| `direction` | Create form; `Room.kind`; home ritual cards; `RITUALS` | `direction` |
+| `kind` | Ritual type | Which board the room hosts | Enum: `retro` \| `planning` \| `refinement` \| `review` \| `roadmap` \| `direction` \| `prd` \| `artifacts` | Create form; `Room.kind`; home ritual cards; `RITUALS` | `prd` |
 | `title` | Room title | Human label for the meeting | Cleaned line; max `LIMITS.title` (80) | `room.rename`; room header | `Sprint 42 Retro` |
 | `version` | Room version | Monotonic revision counter for sync | Increments on successful mutation; clients ignore older snapshots | `Room.version`; `use-room.ts` | `17` |
 | `hostId` | Host participant id | Participant who owns facilitation privileges | Set at create; host-gated ops compare actor to `hostOf(room)` | `Room.hostId`; phase/icebreaker ops | `person_a1b2c3d4e5f67890` |
@@ -130,7 +130,8 @@ In-app Definitions for facilitators and contributors live in `packages/core/src/
 | Travel wishlist body | Wishlist answer body | Ordered unique ISO country codes | 1–5 known codes, comma-separated, no duplicates; `parseTravelWishlist` / `formatTravelWishlist` | `normalizeIcebreaker` (`map`); body max cleaned length 40 | `JP,IS,NZ` |
 | `travelWishlistExportText` | Wishlist export text | Human-readable country names for summary/CSV | Codes → `name` joined with `", "` | `countries.ts`; `retro-export.ts` | `Japan, Iceland, New Zealand` |
 | `countryFlagEmoji` / flags | Country flag visuals | Flag presentation on wishlist chips | Emoji from ISO code; web also uses `apps/web/public/flags/{code}.svg` (~175) | `countries.ts`; `travel-map.tsx` | `🇯🇵` / `jp.svg` |
-| `icebreakerRound` | Icebreaker round | Room-level round index for multi-round games | Integer; This or That answers also carry per-answer `round` from the client | `RetroState`; icebreaker panels | `0` |
+| `icebreakerRound` | Icebreaker round (legacy) | Room-level round index kept for older rooms/clients | Integer; **not advanced by any op** after `retro.nextIcebreakerRound` removal; clamped when pairs shrink. Prefer per-answer `IcebreakerAnswer.round` for This or That | `RetroState`; fallback read in icebreaker panels | `0` |
+| `RetroCardView.hidden` | Card hidden flag | Viewer privacy hint on presented cards | Always `false` in `presentRoom`; brainstorm privacy is **filter-based** (non-authors never receive others’ cards), not `hidden: true` | `presentRetro`; UI still guards `!card.hidden` defensively | `false` |
 | `icebreakerPairs` | Custom pairs | Host-written This or That pairs | 1–8 pairs; sides distinct; question derived | Host editor | left/right labels |
 | `icebreakerAnswers` | Icebreaker answers | Submissions for the game | Cap 240; game-specific body rules (`scale`/`map`/etc.) | Panel; `icebreaker-panel.tsx`; mobile | — |
 | `ActionItem.body` | Action text | Follow-up work item | Max 500 | Actions panel | `Fix flaky deploy` |
@@ -142,15 +143,15 @@ In-app Definitions for facilitators and contributors live in `packages/core/src/
 
 ---
 
-## 6. Checklist ritual variables (planning · refinement · review)
+## 6. Checklist ritual variables (planning · refinement · review · prd)
 
-Planning, refinement, and sprint review share `Room.review` (`ReviewState`) and the `review.*` ops. Kind is fixed at create.
+Planning, refinement, sprint review, and product requirements share `Room.review` (`ReviewState`) and the `review.*` ops. Kind is fixed at create.
 
 | Variable name | Friendly name | Definition | Formula / rule | Location | Example |
 | --- | --- | --- | --- | --- | --- |
-| `ChecklistKind` | Checklist ritual | Rituals that use the shared checklist board | `planning` \| `refinement` \| `review` | `isChecklistKind`; `createChecklistState` | `planning` |
-| `goal` | Goal / focus | Shared goal or refinement focus | Max 240; UI label from `checklistRitual(kind).goalLabel` | Checklist board | Sprint Goal / item being refined |
-| `sections[]` | Checklist sections | Grouped topics with how-to steps | Seeded per kind: planning Why/What/How/Sprint Backlog; refinement Detail/Split/Size/Order; review Sprint Goal/Increment/Stakeholders/Adapt | `createChecklistState` | Why / What / … |
+| `ChecklistKind` | Checklist ritual | Rituals that use the shared checklist board | `planning` \| `refinement` \| `review` \| `prd` | `isChecklistKind`; `createChecklistState` | `prd` |
+| `goal` | Goal / focus | Shared goal, refinement focus, or requirement title | Max 240; UI label from `checklistRitual(kind).goalLabel` | Checklist board | Sprint Goal / requirement |
+| `sections[]` | Checklist sections | Grouped topics with how-to steps | Seeded per kind: planning Why/What/How/Sprint Backlog; refinement Detail/Split/Size/Order; review Sprint Goal/Increment/Stakeholders/Adapt; **prd** Product/Business/Technical | `createChecklistState` | Product / Business / … |
 | `activeSectionId` | Active checklist section | Section driving the shared stopwatch | Set when the room focuses a section | `ReviewState`; `review-board.tsx` | `why` |
 | `stopwatchMs` (checklist) | Checklist stopwatch map | Accrued ms per section while that section was active | Updated when leaving a section | `ReviewState.stopwatchMs` | `{ why: 120000 }` |
 | `checklistStopwatchMs` | Checklist elapsed helper | Elapsed ms for a section including live accrual | Same pattern as retro `sectionStopwatchMs` | `room.ts`; review board | `185000` |
@@ -160,11 +161,11 @@ Planning, refinement, and sprint review share `Room.review` (`ReviewState`) and 
 | `checklistProgress` | Checklist progress | Share of required items with ≥1 signer | UI helper over required items | Checklist header | `75%` |
 | `feedback[]` | Feedback notes | Live feedback list | Cap 100 | Feedback panel | — |
 | `FeedbackKind` | Feedback kind | Tag on feedback | `praise` \| `change` \| `question` | Chips | `change` |
-| `ReviewDecision` | Stored decision id | Machine value for the ritual call | Review: `ship` \| `iterate` \| `hold`. Planning: `commit` \| `reshape` \| `defer`. Refinement: `ready` \| `split` \| `park`. Cross-kind values rejected | `review.setDecision`; `checklistDecisions(kind)` | `commit` |
-| Decision labels | Facilitation call labels | UI labels for stored ids | Planning: Forecast / Narrow / No goal. Refinement: Selectable / Split / Return. Review: Release / Adapt / Hold | `CHECKLIST_RITUALS` | Forecast |
-| `decisionNotes` | Decision notes | Rationale for the decision | Max 2000 | Notes field | `Narrow: drop analytics` |
+| `ReviewDecision` | Stored decision id | Machine value for the ritual call | Review: `ship` \| `iterate` \| `hold`. Planning: `commit` \| `reshape` \| `defer`. Refinement: `ready` \| `split` \| `park`. **PRD:** `baseline` \| `thin` \| `open`. Cross-kind values rejected | `review.setDecision`; `checklistDecisions(kind)` | `baseline` |
+| Decision labels | Facilitation call labels | UI labels for stored ids | Planning: Forecast / Narrow / No goal. Refinement: Selectable / Split / Return. Review: Release / Adapt / Hold. **PRD:** Ready for the backlog / Thin the MVP / Still open | `CHECKLIST_RITUALS` | Ready for the backlog |
+| `decisionNotes` | Decision notes | Rationale for the decision | Max 2000 | Notes field | `Thin: drop enabler this Sprint` |
 
-`checklistRitual(kind)` supplies headings, placeholders, and the three allowed decisions. Demo seeds: `demoPlanningContent` / `demoRefinementContent` / `demoReviewContent`.
+`checklistRitual(kind)` supplies headings, placeholders, and the three allowed decisions. Demo seeds: `demoPlanningContent` / `demoRefinementContent` / `demoReviewContent` / `demoPrdContent`.
 
 ---
 
@@ -277,8 +278,10 @@ flowchart TB
   kind -->|planning| ReviewState
   kind -->|refinement| ReviewState
   kind -->|review| ReviewState
+  kind -->|prd| ReviewState
   kind -->|roadmap| RoadmapState
   kind -->|direction| DirectionState
+  kind -->|artifacts| ArtifactState
 
   subgraph retro [Retrospective]
     phase[phase]
@@ -394,7 +397,7 @@ Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or
 | `GlossaryKind` | `variable` \| `metric` \| `formula` |
 | `GlossaryEntry` | `id`, `name`, `kind`, `plain`, optional `formula` / `example`, `where` |
 | `GlossaryGroup` | `id`, `title`, `intro`, `entries[]` |
-| Groups | `retro` · `planning` · `refinement` · `review` · `roadmap` · `direction` (**33** entries) |
+| Groups | `retro` · `review` · `roadmap` · `planning` · `refinement` · `direction` · `requirements` (**44** entries / **7** groups). Artifact-example terms live under `requirements` (not a separate glossary group). |
 | Location | `packages/core/src/glossary.ts`; web `apps/web/src/app/guide/page.tsx`; mobile `Guide` in `App.js` |
 
 ### Entry inventory (id → friendly name → kind)
@@ -408,10 +411,10 @@ Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or
 | retro | `dot` | Dot | variable |
 | retro | `dots-left` | Dots left | metric |
 | retro | `vote-count` | Vote count | metric |
-| planning | `planning-goal` | Sprint Goal | variable |
-| planning | `planning-decision` | Planning call | variable |
+| planning | `planning-goal` | Sprint goal | variable |
+| planning | `planning-decision` | Planning decision | variable |
 | refinement | `refinement-focus` | Refinement focus | variable |
-| refinement | `refinement-decision` | Refinement call | variable |
+| refinement | `refinement-decision` | Refinement decision | variable |
 | review | `checklist-item` | Checklist item | variable |
 | review | `checklist-bar` | Checklist bar | metric |
 | review | `evidence` | Evidence | variable |
@@ -434,6 +437,17 @@ Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or
 | roadmap | `rank` | Rank | metric |
 | direction | `product-vision` | Product vision | variable |
 | direction | `product-strategy` | Product strategy | variable |
+| requirements | `product-requirement` | Product requirement | variable |
+| requirements | `benefit-hypothesis` | Benefit hypothesis | variable |
+| requirements | `enabler` | Enabler | variable |
+| requirements | `lean-business-case` | Lean Business Case | variable |
+| requirements | `wsjf` | WSJF | formula |
+| requirements | `safe-feature` | Feature | variable |
+| requirements | `product-backlog` | Product Backlog | variable |
+| requirements | `sprint-backlog` | Sprint Backlog | variable |
+| requirements | `increment-definition-of-done` | Increment and Definition of Done | variable |
+| requirements | `persona` | Persona | variable |
+| requirements | `raci` | RACI | variable |
 
 ```mermaid
 flowchart LR
@@ -460,6 +474,7 @@ flowchart LR
   OrderMode --> PeopleOrderUI[people-order.tsx / mobile]
   DirectionFW[DIRECTION_FRAMEWORKS 5] --> DirectionBoard[direction-board]
   DirectionBoard --> Readback[directionReadback / directionStatement]
+  ArtifactsCatalog[artifacts.ts 8x3] --> ArtifactBoard[artifact-board]
 ```
 
 ### Icebreaker body contracts (quick reference)
@@ -533,6 +548,29 @@ flowchart LR
 | `directionParts` | Framework parts | Grouped prompts for UI rails | Derived from field `part` labels | `content.ts`; direction board | Vision / Business model |
 | `directionReadback` | Structured readback | Rows or sentence mode for the live statement | Framework-specific assembly of filled prompts | `content.ts`; board masthead | rows / sentence |
 | `directionStatement` | Direction statement | Flattened one-statement string | Built from `directionReadback` | Direction board / export helpers | `Vision: …` |
+
+---
+
+## 13d. Artifact examples
+
+Prose is **catalog-derived** (`packages/core/src/artifacts.ts`). The room only stores the selected artifact and product.
+
+| Variable name | Friendly name | Definition | Formula / rule | Location | Example |
+| --- | --- | --- | --- | --- | --- |
+| `ArtifactId` | Artifact type | Which worked example is shown | `prd` \| `lean-business-case` \| `epic` \| `feature` \| `user-story` \| `product-backlog` \| `sprint-backlog` \| `increment` (**8**) | `ARTIFACT_GUIDES`; `artifacts.setArtifact` | `sprint-backlog` |
+| `ArtifactProductId` | Example product | Which product line the example describes | `unified-agent` \| `contact-center` \| `cs-data` (**3**) | `ARTIFACT_PRODUCTS`; `artifacts.setProduct` | `contact-center` |
+| `ArtifactState` | Artifact room state | Selected artifact + product | Stored on `room.artifacts`; switching either id recomputes the reader from catalogs | `artifacts.ts`; `artifact-board.tsx`; mobile | `{ artifact, product }` |
+| `ARTIFACT_GUIDES` | Artifact catalog | How-to + metadata per artifact | Framework tags Scrum / Agile / SAFe | Core; reader how-to rail | PRD, Epic, … |
+| Example body | Worked prose | Sections and pieces for the selected pair | Pure lookup; not persisted on the room document | `artifactExample(artifact, product)` | Sprint Goal + forecast |
+
+```mermaid
+flowchart LR
+  ArtifactsRoom[kind artifacts] --> ArtifactState
+  ArtifactState --> Guides[ARTIFACT_GUIDES 8]
+  ArtifactState --> Products[ARTIFACT_PRODUCTS 3]
+  Guides --> Reader[artifact-board reader]
+  Products --> Reader
+```
 
 ---
 

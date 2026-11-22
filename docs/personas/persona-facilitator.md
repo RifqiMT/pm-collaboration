@@ -36,6 +36,8 @@
 - Opens Summary and downloads CSV and PPT (health answers export as Anonymous; travel as country names; lineup as ranked names)  
 - Hosts planning or refinement checklists when the team needs a Forecast / Selectable call  
 - May open a product direction room when the team needs a shared vision or strategy statement  
+- Uses product requirements when a single requirement needs a Ready / Thin / Still open call  
+- Points the team at artifact examples when onboarding language for Scrum / Agile / SAFe docs  
 
 ## Needs from the product
 

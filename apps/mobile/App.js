@@ -36,6 +36,11 @@ import {
   directionFramework,
   directionParts,
   directionStatement,
+  ARTIFACT_GUIDES,
+  ARTIFACT_PRODUCTS,
+  artifactExample,
+  artifactGuide,
+  presentArtifactPiece,
   checklistProgress,
   checklistRitual,
   checklistHow,
@@ -321,7 +326,11 @@ function Home({ server, onServer, onCreate, onOpen, onGuide }) {
           key={ritual.kind}
           style={({ pressed }) => [
             styles.card,
-            ritual.kind === "direction"
+            ritual.kind === "artifacts"
+              ? styles.accentArtifacts
+              : ritual.kind === "prd"
+              ? styles.accentPrd
+              : ritual.kind === "direction"
               ? styles.accentDirection
               : ritual.kind === "review"
               ? styles.accentReview
@@ -406,7 +415,7 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
         method: "POST",
         body: JSON.stringify({
           kind,
-          title: title.trim() || ritual.name,
+          title: kind === "artifacts" ? ritual.name : title.trim() || ritual.name,
           hostName: name.trim(),
           hostId: hostId || undefined,
           templateId: kind === "retro" ? templateId : undefined,
@@ -431,8 +440,12 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
       <Text style={styles.lede}>{ritual.promise}</Text>
       <Text style={styles.label}>Your name</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} maxLength={40} />
-      <Text style={styles.label}>Session title</Text>
-      <TextInput style={styles.input} value={title} onChangeText={setTitle} maxLength={80} />
+      {kind === "artifacts" ? null : (
+        <>
+          <Text style={styles.label}>Session title</Text>
+          <TextInput style={styles.input} value={title} onChangeText={setTitle} maxLength={80} />
+        </>
+      )}
       {kind === "retro" ? (
         <View style={{ gap: 8 }}>
           <Text style={styles.label}>Search shapes</Text>
@@ -512,18 +525,35 @@ function Create({ server, kind, hostId, onBack, onCreated }) {
           })
         : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Pressable style={styles.button} disabled={pending} onPress={() => create(false)}>
-        <Text style={styles.buttonText}>{pending ? "Creating…" : "Create an empty room"}</Text>
-      </Pressable>
-      <Pressable style={styles.ghost} disabled={pending} onPress={() => create(true)}>
-        <Text style={styles.ghostText}>Start from an example</Text>
-      </Pressable>
-      <Text style={styles.meta}>
-        Ten notes in every retro column, a finished checklist, ten scored roadmap bets, or a unified agent platform for customer service on a travel marketplace.
-      </Text>
+      {kind === "artifacts" ? (
+        <Pressable style={styles.button} disabled={pending} onPress={() => create(false)}>
+          <Text style={styles.buttonText}>{pending ? "Opening…" : "Open the examples"}</Text>
+        </Pressable>
+      ) : (
+        <>
+          <Pressable style={styles.button} disabled={pending} onPress={() => create(false)}>
+            <Text style={styles.buttonText}>{pending ? "Creating…" : "Create an empty room"}</Text>
+          </Pressable>
+          <Pressable style={styles.ghost} disabled={pending} onPress={() => create(true)}>
+            <Text style={styles.ghostText}>Start from an example</Text>
+          </Pressable>
+          <Text style={styles.meta}>{exampleNoteFor(kind)}</Text>
+        </>
+      )}
       <CreditFooter />
     </ScrollView>
   );
+}
+
+function exampleNoteFor(kind) {
+  if (kind === "retro") return "Fills this shape with ten notes in every column.";
+  if (kind === "planning") return "Fills the checklist with a Sprint Goal and a forecast.";
+  if (kind === "refinement") return "Fills the checklist with items that are selectable, split, or returned.";
+  if (kind === "review") return "Fills the checklist with evidence on the Increment and a release call.";
+  if (kind === "roadmap") return "Fills the board with ten scored bets.";
+  if (kind === "direction") return "Fills the vision and strategy for the Unified Agent Platform.";
+  if (kind === "prd") return "Fills the requirement for the user, the business hypothesis, and the technical bar.";
+  return "Opens the Contact Center Sprint Backlog. Switch product and artifact inside the room.";
 }
 
 function Room({ server, code, identity, onIdentity, onBack }) {
@@ -651,7 +681,7 @@ function Room({ server, code, identity, onIdentity, onBack }) {
       <View style={styles.headerCard}>
         <Text style={styles.code}>{code}</Text>
         <Text style={styles.headerKicker}>{RITUALS.find((item) => item.kind === room?.kind)?.name ?? "Room"}</Text>
-        <Text style={styles.headerTitle}>{room?.title ?? "Joining…"}</Text>
+        <Text style={styles.headerTitle}>{room?.kind === "artifacts" ? "Artifact examples" : room?.title ?? "Joining…"}</Text>
         {room ? <Text style={styles.headerMeta}>{room.participants.map((person) => person.name).join("  ·  ")}</Text> : null}
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -659,6 +689,7 @@ function Room({ server, code, identity, onIdentity, onBack }) {
       {room && isChecklistKind(room.kind) && room.review ? <Review room={room} actorId={actor.id} send={send} /> : null}
       {room?.kind === "roadmap" && room.roadmap ? <Roadmap room={room} send={send} /> : null}
       {room?.kind === "direction" && room.direction ? <Direction room={room} send={send} /> : null}
+      {room?.kind === "artifacts" && room.artifacts ? <Artifacts room={room} send={send} /> : null}
     </ScrollView>
   );
 }
@@ -1882,6 +1913,121 @@ function Review({ room, actorId, send }) {
       >
         <Text style={styles.ghostText}>Add feedback</Text>
       </Pressable>
+    </View>
+  );
+}
+
+function ArtifactPieceBody({ text }) {
+  const view = presentArtifactPiece(text);
+  if (view.kind === "story") {
+    return (
+      <View style={{ gap: 6 }}>
+        <Text style={styles.lede}>As {view.article} {view.role}</Text>
+        <Text style={styles.lede}>I want {view.want}</Text>
+        <Text style={styles.lede}>So that {view.reason}</Text>
+        {view.estimate ? <Text style={styles.meta}>Estimate: {view.estimate}</Text> : null}
+        {view.ready ? <Text style={styles.meta}>Ready when {view.ready}</Text> : null}
+      </View>
+    );
+  }
+  if (view.kind === "criteria") {
+    return (
+      <View style={{ gap: 8 }}>
+        {view.lead ? <Text style={styles.lede}>{view.lead}</Text> : null}
+        {view.items.map((item, index) => (
+          <Text key={`${item.given}-${index}`} style={styles.lede}>
+            {item.name ? `${item.name}. ` : ""}Given {item.given}. When {item.when}. Then {item.then}.
+          </Text>
+        ))}
+        {view.tail ? <Text style={styles.meta}>{view.tail}</Text> : null}
+      </View>
+    );
+  }
+  if (view.kind === "record") {
+    return (
+      <View style={{ gap: 6 }}>
+        <Text style={styles.lede}>{view.description}</Text>
+        <Text style={styles.meta}>
+          {[view.order ? `Order ${view.order}` : "", view.value ? `Value: ${view.value}` : "", view.size ? `Size: ${view.size}` : ""]
+            .filter(Boolean)
+            .join(" · ")}
+        </Text>
+        {view.criteria.map((item, index) => (
+          <Text key={`${item.given}-${index}`} style={styles.lede}>
+            Given {item.given}. When {item.when}. Then {item.then}.
+          </Text>
+        ))}
+        {view.criteriaNote ? <Text style={styles.meta}>{view.criteriaNote}</Text> : null}
+      </View>
+    );
+  }
+  return <Text style={styles.lede}>{view.text}</Text>;
+}
+
+function Artifacts({ room, send }) {
+  const state = room.artifacts;
+  const guide = artifactGuide(state.artifact);
+  const example = artifactExample(state.artifact, state.product);
+  const product = ARTIFACT_PRODUCTS.find((item) => item.id === state.product);
+  const frameworks = guide.frameworks ?? [];
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={styles.card}>
+        <Text style={styles.kicker}>Artifact examples</Text>
+        <Text style={styles.cardTitle}>{guide.name}</Text>
+        <Text style={styles.lede}>{guide.summary}</Text>
+        <Text style={styles.meta}>{frameworks.join(" · ") || guide.practice}</Text>
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.kicker}>{product?.name}</Text>
+        <Text style={styles.lede}>{example.headline}</Text>
+      </View>
+      <Text style={styles.kicker}>Platform</Text>
+      <View style={styles.row}>
+        {ARTIFACT_PRODUCTS.map((item) => (
+          <Pressable
+            key={item.id}
+            style={[styles.chip, state.product === item.id ? styles.chipOn : null]}
+            onPress={() => send({ type: "artifacts.setProduct", product: item.id })}
+          >
+            <Text style={state.product === item.id ? styles.chipTextOn : styles.chipText}>{item.name}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <Text style={styles.kicker}>
+        Artifact {ARTIFACT_GUIDES.findIndex((item) => item.id === state.artifact) + 1}/{ARTIFACT_GUIDES.length}
+      </Text>
+      <View style={styles.row}>
+        {ARTIFACT_GUIDES.map((item) => (
+          <Pressable
+            key={item.id}
+            style={[styles.chip, state.artifact === item.id ? styles.chipOn : null]}
+            onPress={() => send({ type: "artifacts.setArtifact", artifact: item.id })}
+          >
+            <Text style={state.artifact === item.id ? styles.chipTextOn : styles.chipText}>{item.name}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.kicker}>How to read it</Text>
+        <Text style={styles.meta}>{guide.practice}</Text>
+        {guide.how.map((step, index) => (
+          <Text key={step} style={styles.meta}>
+            {index + 1}. {step}
+          </Text>
+        ))}
+      </View>
+      {example.sections.map((section) => (
+        <View key={section.title} style={styles.card}>
+          <Text style={styles.kicker}>{section.title}</Text>
+          {section.pieces.map((piece) => (
+            <View key={piece.label} style={{ gap: 6, marginTop: 12 }}>
+              <Text style={styles.label}>{piece.label}</Text>
+              <ArtifactPieceBody text={piece.text} />
+            </View>
+          ))}
+        </View>
+      ))}
     </View>
   );
 }

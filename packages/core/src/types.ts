@@ -1,4 +1,4 @@
-export type RoomKind = "retro" | "planning" | "refinement" | "review" | "roadmap" | "direction";
+export type RoomKind = "retro" | "planning" | "refinement" | "review" | "roadmap" | "direction" | "prd" | "artifacts";
 
 export type RetroTemplateId =
   | "start-stop-continue"
@@ -104,11 +104,40 @@ export interface DirectionState {
   answers: Record<string, string>;
 }
 
+export type ArtifactId =
+  | "prd"
+  | "lean-business-case"
+  | "epic"
+  | "feature"
+  | "user-story"
+  | "product-backlog"
+  | "sprint-backlog"
+  | "increment";
+
+export type ArtifactProductId = "unified-agent" | "contact-center" | "cs-data";
+
+export interface ArtifactState {
+  artifact: ArtifactId;
+  product: ArtifactProductId;
+}
+
 export type ImpactLevel = 0.25 | 0.5 | 1 | 2 | 3;
 
 export type Horizon = "now" | "next" | "later";
 
-export type ReviewDecision = "ship" | "iterate" | "hold" | "commit" | "reshape" | "defer" | "ready" | "split" | "park";
+export type ReviewDecision =
+  | "ship"
+  | "iterate"
+  | "hold"
+  | "commit"
+  | "reshape"
+  | "defer"
+  | "ready"
+  | "split"
+  | "park"
+  | "baseline"
+  | "thin"
+  | "open";
 
 export type FeedbackKind = "praise" | "change" | "question";
 
@@ -205,6 +234,11 @@ export interface RetroState {
    */
   discussSpeakLog: DiscussSpeakEntry[];
   icebreaker: IcebreakerId;
+  /**
+   * Legacy room-level round index. Kept for persisted rooms and older clients.
+   * No op advances it anymore; prefer `IcebreakerAnswer.round` for This or That.
+   * Still clamped when custom pairs shrink.
+   */
   icebreakerRound: number;
   /** Host-written This or That pairs. Null uses the built-in pairs. */
   icebreakerPairs: IcebreakerPair[] | null;
@@ -290,6 +324,7 @@ export interface Room {
   review: ReviewState | null;
   roadmap: RoadmapState | null;
   direction: DirectionState | null;
+  artifacts: ArtifactState | null;
 }
 
 export interface RetroCardView {
@@ -302,6 +337,10 @@ export interface RetroCardView {
   votes: string[];
   voteCount: number;
   createdAt: string;
+  /**
+   * Always `false` from `presentRoom`. Brainstorm privacy filters cards out for
+   * non-authors instead of setting `hidden: true`. Kept so clients can guard defensively.
+   */
   hidden: boolean;
   mine: boolean;
 }
@@ -327,6 +366,7 @@ export interface RoomView {
   review: ReviewState | null;
   roadmap: RoadmapState | null;
   direction: DirectionState | null;
+  artifacts: ArtifactState | null;
 }
 
 export interface Insight {
@@ -386,7 +426,9 @@ export type Op =
   | { type: "roadmap.patchInitiative"; initiativeId: string; patch: InitiativePatch }
   | { type: "roadmap.deleteInitiative"; initiativeId: string }
   | { type: "direction.setFramework"; framework: DirectionFrameworkId }
-  | { type: "direction.setAnswer"; fieldId: string; value: string };
+  | { type: "direction.setAnswer"; fieldId: string; value: string }
+  | { type: "artifacts.setArtifact"; artifact: ArtifactId }
+  | { type: "artifacts.setProduct"; product: ArtifactProductId };
 
 export interface InitiativePatch {
   title?: string;

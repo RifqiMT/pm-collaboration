@@ -11,38 +11,50 @@ export const RITUALS: RitualCopy[] = [
   {
     kind: "retro",
     name: "Retrospective",
-    promise: "Surface what the sprint felt like, then leave with owners.",
+    promise: "Talk through the sprint, then leave with clear owners.",
     steps: ["Icebreaker", "Private notes", "Discuss", "Dot vote", "Actions", "Summary"],
   },
   {
     kind: "planning",
     name: "Sprint planning",
-    promise: "Set a Sprint Goal, forecast what can be Done, and plan how.",
+    promise: "Agree why this Sprint matters, what you can finish, and how you'll start.",
     steps: ["Why", "What", "How", "Forecast"],
   },
   {
     kind: "refinement",
     name: "Backlog refinement",
-    promise: "Add detail, size, and order so an item can be selected later.",
+    promise: "Sharpen backlog items so they're ready to pull into a Sprint.",
     steps: ["Detail", "Split", "Size", "Order"],
   },
   {
     kind: "review",
     name: "Sprint review",
-    promise: "Inspect the Increment with stakeholders, then adapt the Product Backlog.",
+    promise: "Show what's done, hear stakeholders, then update the backlog.",
     steps: ["Sprint Goal", "Increment", "Stakeholders", "Adapt"],
   },
   {
     kind: "roadmap",
     name: "Roadmap",
-    promise: "Score bets with RICE, and read complexity next to the business outcome.",
+    promise: "Score ideas side by side so you can see what to do first.",
     steps: ["Outcome", "Score", "Complexity", "Sequence"],
   },
   {
     kind: "direction",
     name: "Product direction",
-    promise: "Write a product vision or a product strategy in a framework the team can read back.",
+    promise: "Write a vision or strategy the whole room can say out loud.",
     steps: ["Vision", "Strategy", "Statement"],
+  },
+  {
+    kind: "prd",
+    name: "Product requirements",
+    promise: "Make sure one requirement is clear before it hits the backlog.",
+    steps: ["Product", "Business", "Technical"],
+  },
+  {
+    kind: "artifacts",
+    name: "Artifact examples",
+    promise: "Browse finished examples of the docs teams use in Scrum, Agile, and SAFe.",
+    steps: ["PRD", "Lean Business Case", "Epics", "Features", "User stories", "Product Backlog", "Sprint Backlog", "Increment"],
   },
 ];
 
@@ -2008,6 +2020,137 @@ const REFINEMENT_SECTIONS: ReviewSeedSection[] = [
   },
 ];
 
+const PRD_SECTIONS: ReviewSeedSection[] = [
+  {
+    id: "product",
+    title: "Product",
+    intent: "Who needs this and what success looks like — written so the solution can still change. (Agile)",
+    how: [
+      "Name the user and the job they are trying to finish. A job title alone is too thin.",
+      "Write the outcome the user can recognize. Leave room to change the design when the team learns.",
+      "Slice the work into stories that are valuable on their own and small enough for one Sprint.",
+      "Give each slice acceptance criteria in given, when, then form. The user should be able to tell when that slice is complete.",
+      "Treat the page as a conversation. Rewrite a line when the team learns something new.",
+    ],
+    items: [
+      {
+        id: "product-user",
+        label: "The user and the job are named",
+        detail: "Who is this for, and what are they trying to get done?",
+        required: true,
+      },
+      {
+        id: "product-outcome",
+        label: "The outcome is written, and the design can still change",
+        detail: "Say what becomes true for the user. The screen can change.",
+        required: true,
+      },
+      {
+        id: "product-stories",
+        label: "The work is sliced into stories a Sprint could finish",
+        detail: "Each slice should be valuable on its own.",
+        required: true,
+      },
+      {
+        id: "product-acceptance",
+        label: "Each slice has acceptance criteria the user could check",
+        detail: "Given, when, then. These criteria belong to this requirement.",
+        required: true,
+      },
+      {
+        id: "product-change",
+        label: "The team can say which line they would rewrite after learning",
+        detail: "A requirement that cannot change is a contract, not an Agile page.",
+      },
+    ],
+  },
+  {
+    id: "business",
+    title: "Business",
+    intent: "Why the business should care, and the smallest test that would prove it. (SAFe)",
+    how: [
+      "Write the benefit hypothesis: who gains, and which outcome would prove the idea.",
+      "Name leading indicators you can see before the full financial result, and a date to look at them.",
+      "The MVP is the smallest test of that hypothesis. Write what the test includes and what waits.",
+      "Write the cost of delay and the job size. SAFe orders work by weighted shortest job first: a higher cost of delay and a smaller job go first.",
+      "Say what evidence would make the team continue, change the slice, or stop.",
+    ],
+    items: [
+      {
+        id: "business-hypothesis",
+        label: "The benefit hypothesis names who gains and the outcome that would prove it",
+        detail: "A large idea stays a hypothesis until the evidence arrives.",
+        required: true,
+      },
+      {
+        id: "business-indicators",
+        label: "Leading indicators have a review date",
+        detail: "These are early signals, before the full financial result.",
+        required: true,
+      },
+      {
+        id: "business-mvp",
+        label: "The MVP is the smallest test, and the rest of the idea waits",
+        detail: "Write what is in the test and what is out.",
+        required: true,
+      },
+      {
+        id: "business-wsjf",
+        label: "Cost of delay and job size are both written",
+        detail: "Order this against other work. A valuable, smaller job goes first.",
+      },
+      {
+        id: "business-decision",
+        label: "The room knows what evidence would stop or reshape the work",
+        detail: "Continue, change the slice, or stop. Name the signal for each.",
+      },
+    ],
+  },
+  {
+    id: "technical",
+    title: "Technical",
+    intent: "What Done means, limits you must keep, and enabling work the Sprint needs. (Scrum + SAFe)",
+    how: [
+      "Write the Definition of Done the Developers will apply to the Increment. The Developers own that list.",
+      "Keep acceptance criteria on this requirement. The Definition of Done applies to every Increment.",
+      "Write non-functional requirements for this work: speed, privacy, availability, and accessibility, each specific enough to test.",
+      "Name enablers: exploration, architecture, infrastructure, or compliance. Tie each one to the outcome it unlocks, and size it so a Sprint can finish it.",
+      "Ask the Developers whether they could select a slice in Sprint Planning.",
+    ],
+    items: [
+      {
+        id: "tech-dod",
+        label: "The Definition of Done for the Increment is written",
+        detail: "Developers own it. It applies to every item, not only this one.",
+        required: true,
+      },
+      {
+        id: "tech-nfr",
+        label: "Non-functional requirements are specific enough to test",
+        detail: "Speed, privacy, availability, or accessibility. A vague 'fast and secure' is not a requirement.",
+        required: true,
+      },
+      {
+        id: "tech-enabler",
+        label: "Enabling work is named, sized, and tied to the outcome it unlocks",
+        detail: "Exploration, architecture, infrastructure, or compliance. Each one should fit a Sprint.",
+        required: true,
+      },
+      {
+        id: "tech-deps",
+        label: "Dependencies have an owner outside the team",
+        detail: "Name who must act, and by when.",
+      },
+      {
+        id: "tech-ready",
+        label: "Developers could select a slice in Sprint Planning",
+        detail: "If they could not, the requirement is not ready for a Sprint.",
+        required: true,
+      },
+    ],
+  },
+];
+
 export interface ChecklistDecisionCopy {
   id: ReviewDecision;
   label: string;
@@ -2033,7 +2176,7 @@ export interface ChecklistRitualCopy {
   decisions: ChecklistDecisionCopy[];
 }
 
-const CHECKLIST_RITUALS: Record<"review" | "planning" | "refinement", ChecklistRitualCopy> = {
+const CHECKLIST_RITUALS: Record<"review" | "planning" | "refinement" | "prd", ChecklistRitualCopy> = {
   review: {
     eyebrow: "Sprint review",
     headline: "Inspect the Increment. Adapt the Product Backlog.",
@@ -2100,18 +2243,41 @@ const CHECKLIST_RITUALS: Record<"review" | "planning" | "refinement", ChecklistR
       { id: "park", label: "Return", detail: "A Product Owner decision is still open." },
     ],
   },
+  prd: {
+    eyebrow: "Product requirements",
+    headline: "Product, business, and technical.",
+    lede: "Check one requirement three ways: who it helps, why it matters, and what quality bar it must meet.",
+    goalLabel: "Requirement",
+    goalPlaceholder: "Which requirement is this page for?",
+    goalHint: "One requirement. Backlog items come out of the checks",
+    progressLabel: "Requirement checks",
+    decisionHeading: "Ready for the backlog?",
+    decisionIdle: "Ready for the backlog, thin the MVP, or keep it open.",
+    decisionNotesLabel: "What still has to be true",
+    decisionNotesPlaceholder: "Which slice can become backlog items, and which question is still open?",
+    noteLabel: "Requirement note",
+    notePlaceholder: "Who it helps, an early signal, or a quality limit",
+    feedbackLede: "A question from product, business, or engineering.",
+    feedbackEmpty: "Something that would change the requirement before it becomes backlog items.",
+    decisions: [
+      { id: "baseline", label: "Ready for the backlog", detail: "Product, business, and technical checks are clear enough to become Product Backlog items." },
+      { id: "thin", label: "Thin the MVP", detail: "The hypothesis stays. The slice is still too big for a Sprint." },
+      { id: "open", label: "Still open", detail: "A product, business, or technical question blocks selection." },
+    ],
+  },
 };
 
-const CHECKLIST_SECTIONS: Record<"review" | "planning" | "refinement", ReviewSeedSection[]> = {
+const CHECKLIST_SECTIONS: Record<"review" | "planning" | "refinement" | "prd", ReviewSeedSection[]> = {
   review: REVIEW_SECTIONS,
   planning: PLANNING_SECTIONS,
   refinement: REFINEMENT_SECTIONS,
+  prd: PRD_SECTIONS,
 };
 
-export type ChecklistKind = "review" | "planning" | "refinement";
+export type ChecklistKind = "review" | "planning" | "refinement" | "prd";
 
 export function isChecklistKind(kind: RoomKind): kind is ChecklistKind {
-  return kind === "review" || kind === "planning" || kind === "refinement";
+  return kind === "review" || kind === "planning" || kind === "refinement" || kind === "prd";
 }
 
 export function checklistRitual(kind: RoomKind): ChecklistRitualCopy {

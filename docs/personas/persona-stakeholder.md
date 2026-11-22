@@ -35,6 +35,7 @@
 - Patches initiative fields; reads quadrant insights  
 - Sequences big bets vs do-first items  
 - Opens a **product direction** room for vision or strategy; fills frameworks and reads the statement back  
+- Runs a **product requirements** checklist before backlog selection; browses **artifact examples** for shared language  
 
 ## Needs from the product
 

@@ -8,7 +8,9 @@ export default async function NewPage({ searchParams }: { searchParams: Promise<
     params.kind === "roadmap" ||
     params.kind === "planning" ||
     params.kind === "refinement" ||
-    params.kind === "direction"
+    params.kind === "direction" ||
+    params.kind === "prd" ||
+    params.kind === "artifacts"
       ? params.kind
       : "retro";
   return <NewRoomForm initialKind={kind} />;

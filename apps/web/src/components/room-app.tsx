@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { createIdentityId, initials, readIdentity, writeIdentity, type Identity } from "./identity";
 import { RetroBoard } from "./retro-board";
 import { ReviewBoard } from "./review-board";
+import { ArtifactBoard } from "./artifact-board";
 import { DirectionBoard } from "./direction-board";
 import { RoadmapBoard } from "./roadmap-board";
 import { SharedField } from "./shared-field";
@@ -97,13 +98,15 @@ export function RoomApp({ code }: { code: string }) {
           </span>
           <div className="room-heading">
             <p className="eyebrow">{ritual?.name}</p>
-            <SharedField
-              value={room.title}
-              onCommit={(title) => send({ type: "room.rename", title })}
-              ariaLabel="Session title"
-              className="room-title"
-              maxLength={80}
-            />
+            {room.kind === "artifacts" ? null : (
+              <SharedField
+                value={room.title}
+                onCommit={(title) => send({ type: "room.rename", title })}
+                ariaLabel="Session title"
+                className="room-title"
+                maxLength={80}
+              />
+            )}
           </div>
         </div>
         <div className="room-meta">
@@ -152,6 +155,7 @@ function Board({ room, actorId, send }: { room: RoomView; actorId: string; send:
   if (room.kind === "retro") return <RetroBoard room={room} actorId={actorId} send={send} />;
   if (isChecklistKind(room.kind)) return <ReviewBoard room={room} actorId={actorId} send={send} />;
   if (room.kind === "direction") return <DirectionBoard room={room} send={send} />;
+  if (room.kind === "artifacts") return <ArtifactBoard room={room} send={send} />;
   return <RoadmapBoard room={room} actorId={actorId} send={send} />;
 }
 

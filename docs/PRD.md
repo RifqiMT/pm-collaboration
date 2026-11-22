@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-20 (product direction) |
+| Last updated | 2026-11-22 (product requirements + artifact examples) |
 
 ---
 
@@ -62,7 +62,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-R1 | User can create a room for retro, planning, refinement, review, roadmap, or product direction | Must |
+| FR-R1 | User can create a room for retro, planning, refinement, review, roadmap, product direction, product requirements, or artifact examples | Must |
 | FR-R2 | System issues a unique 6-character room code (ambiguous chars excluded) | Must |
 | FR-R3 | User can join with code + display name | Must |
 | FR-R4 | Identity persists locally across sessions on the same device | Should |
@@ -137,7 +137,25 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-DIR3 | Each framework shows how to fill it in | Must |
 | FR-DIR4 | Answers read back as one statement; switching framework keeps answers | Must |
 
-### 4.8 Platforms & API
+### 4.8 Product requirements
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-PRD1 | Product checks from Agile: user, outcome, Sprint-sized stories, acceptance criteria, and how to write them | Must |
+| FR-PRD2 | Business checks from SAFe: benefit hypothesis, leading indicators, MVP, cost of delay and job size | Must |
+| FR-PRD3 | Technical checks from Scrum and SAFe: Definition of Done, non-functional requirements, enablers, dependencies | Must |
+| FR-PRD4 | Call is Ready for the backlog, Thin the MVP, or Still open (`baseline` / `thin` / `open`); other decisions rejected | Must |
+
+### 4.9 Artifact examples
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-ART1 | A room can show a PRD, Lean Business Case, epic, feature, user stories, Product Backlog, Sprint Backlog, or Increment & Definition of Done | Must |
+| FR-ART2 | Each artifact has an example for the Unified Agent Platform, the Contact Center Platform, and CS data products | Must |
+| FR-ART3 | Examples follow Scrum, Agile, and SAFe: outcome and acceptance criteria, benefit hypothesis, Feature story split, WSJF, Product Goal, Sprint Goal as a forecast, Definition of Done | Must |
+| FR-ART4 | Switching artifact or platform is a shared op. The prose is derived, not stored on the room | Must |
+
+### 4.10 Platforms & API
 
 | ID | Requirement | Priority |
 | --- | --- | --- |

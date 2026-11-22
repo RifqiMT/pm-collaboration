@@ -14,47 +14,77 @@ const titles: Record<RoomKind, string> = {
   review: "Sprint review",
   roadmap: "Roadmap bets",
   direction: "Product direction",
+  prd: "Product requirements",
+  artifacts: "Artifact examples",
 };
 
 const stepHint: Record<Exclude<RoomKind, "retro">, Record<string, string>> = {
   planning: {
-    Why: "Product Owner proposes the value. The Scrum Team writes the Sprint Goal.",
-    What: "Developers pull items they can finish to the Definition of Done.",
-    How: "Developers plan the first days. The plan is theirs.",
-    Forecast: "Sprint Goal, selected items, and the plan. That is the Sprint Backlog.",
+    Why: "Say why this Sprint is worth doing. Write that as the Sprint Goal.",
+    What: "Pull only what the team can finish to Done this Sprint.",
+    How: "Plan the first few days. The team owns that plan.",
+    Forecast: "Sprint Goal + selected work + early plan. That is the Sprint Backlog.",
   },
   refinement: {
-    Detail: "One Product Backlog item: user, outcome, and acceptance criteria.",
-    Split: "If it cannot be Done in one Sprint, break it into thinner slices.",
-    Size: "Developers size it by comparing it with work they already finished.",
-    Order: "Product Owner places it. Selectable, split, or return.",
+    Detail: "Who is it for, what changes, and how will you know it worked?",
+    Split: "If it won't fit in one Sprint, cut it into smaller slices.",
+    Size: "Compare it with work the team has already finished.",
+    Order: "Put the most valuable ready work near the top.",
   },
   review: {
-    "Sprint Goal": "Read the goal first. Say whether it was met.",
-    Increment: "Show only what meets the Definition of Done.",
-    Stakeholders: "A working session with people who can judge the outcome.",
-    Adapt: "Product Owner changes the Product Backlog before the room ends.",
+    "Sprint Goal": "Start with the goal. Did you meet it?",
+    Increment: "Show only work that meets the Definition of Done.",
+    Stakeholders: "Invite people who can judge the outcome.",
+    Adapt: "Update the backlog before everyone leaves.",
   },
   roadmap: {
-    Outcome: "The business result stays on the same card as the score.",
-    Score: "RICE, ICE, or value divided by complexity.",
-    Complexity: "Technical difficulty, dependencies, and uncertainty.",
-    Sequence: "A high score with high complexity is a bet to order, not a task for Monday.",
+    Outcome: "Keep the business result on the same card as the score.",
+    Score: "Use RICE, ICE, or value ÷ complexity.",
+    Complexity: "How hard is it: tech, dependencies, unknowns?",
+    Sequence: "A high score with high complexity is a bet to sequence, not Monday's task.",
   },
   direction: {
-    Vision: "Product Vision Board or a positioning statement. This is the future you are aiming at.",
-    Strategy: "Playing to Win, the strategy kernel, or DHM. This is how you will get there.",
-    Statement: "Read the prompts back as one direction the team can repeat.",
+    Vision: "Where you're headed — a vision board or positioning sentence.",
+    Strategy: "How you'll get there — choices, trade-offs, and what must be true.",
+    Statement: "Read the answers back as one direction the team can repeat.",
+  },
+  prd: {
+    Product: "Who needs this, what success looks like, and how you'll check it.",
+    Business: "Why it matters, what early signal to watch, and the smallest test.",
+    Technical: "What Done means, limits you must keep, and enabling work.",
+  },
+  artifacts: {
+    PRD: "One clear requirement: people, business case, and build quality.",
+    "Lean Business Case": "Should we fund the smallest test? Scope, signals, and priority.",
+    Epics: "The big bet and the tech work that unlocks the first test.",
+    Features: "A mid-size slice: benefit, acceptance, and the stories inside it.",
+    "User stories": "Small user-facing slices with clear acceptance checks.",
+    "Product Backlog": "The product goal, then one ordered list of work.",
+    "Sprint Backlog": "This Sprint's goal, the work pulled in, and the early plan.",
+    Increment: "What is finished and usable, and the quality bar that made it Done.",
   },
 };
 
+const exampleNote: Record<RoomKind, string> = {
+  retro: "Fills this shape with ten notes in every column.",
+  planning: "Fills the checklist with a Sprint Goal and a forecast.",
+  refinement: "Fills the checklist with items that are selectable, split, or returned.",
+  review: "Fills the checklist with evidence on the Increment and a release call.",
+  roadmap: "Fills the board with ten scored bets.",
+  direction: "Fills the vision and strategy for the Unified Agent Platform.",
+  prd: "Fills the requirement for the user, the business hypothesis, and the technical bar.",
+  artifacts: "Opens the Contact Center Sprint Backlog. Switch product and artifact inside the room.",
+};
+
 const kindBlurb: Record<RoomKind, string> = {
-  retro: "Notes, discussion, votes, and owners in one room.",
-  planning: "Why this Sprint matters, what Developers forecast, and how they will do it.",
-  refinement: "Detail, split, size, and order on the Product Backlog. No Sprint starts here.",
-  review: "Inspect the Increment with stakeholders, then adapt the Product Backlog.",
-  roadmap: "Score bets, then read them against complexity.",
-  direction: "A product vision or a product strategy, on the full published board.",
+  retro: "Warm up, write notes, discuss, vote, and assign next steps.",
+  planning: "Sprint Goal first. Selected work is a forecast, not a promise.",
+  refinement: "Add detail and order now. Don't start the Sprint here.",
+  review: "Demo what is Done, then decide release, adapt, or hold.",
+  roadmap: "Put outcome, score, and difficulty on one card.",
+  direction: "Fill a published framework, then read it back as one statement.",
+  prd: "Cover who it helps, why the business cares, and what Done means.",
+  artifacts: "Switch product and document type. Same guest journey, three platforms.",
 };
 
 export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
@@ -94,7 +124,7 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           kind,
-          title: title.trim() || titles[kind],
+          title: kind === "artifacts" ? titles.artifacts : title.trim() || titles[kind],
           hostName: name.trim(),
           hostId: readIdentity()?.id,
           templateId: kind === "retro" ? templateId : undefined,
@@ -181,21 +211,23 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
               </span>
             </label>
 
-            <label className="field">
-              <span className="field-label">
-                <span>Session title</span>
-              </span>
-              <span className="field-shell">
-                <input
-                  className="field-control"
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  maxLength={80}
-                  required
-                  placeholder={titles[kind]}
-                />
-              </span>
-            </label>
+            {kind === "artifacts" ? null : (
+              <label className="field">
+                <span className="field-label">
+                  <span>Session title</span>
+                </span>
+                <span className="field-shell">
+                  <input
+                    className="field-control"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    maxLength={80}
+                    required
+                    placeholder={titles[kind]}
+                  />
+                </span>
+              </label>
+            )}
 
             {kind === "retro" ? (
               <div className="setup-selected" aria-live="polite">
@@ -219,17 +251,25 @@ export function NewRoomForm({ initialKind }: { initialKind: RoomKind }) {
               </p>
             ) : null}
 
-            <div className="setup-actions">
-              <button type="submit" className="btn primary" disabled={pending}>
-                {pending ? "Creating…" : "Create an empty room"}
-              </button>
-              <button type="button" className="btn ghost" disabled={pending} onClick={() => void create(true)}>
-                Start from an example
-              </button>
-            </div>
-            <p className="muted setup-note">
-              An example fills the session. A retrospective gets ten notes in every column. Sprint planning, backlog refinement, and the sprint review each get a finished checklist, evidence, feedback, and that room's decision. A roadmap gets ten scored bets. A product direction fills every vision and strategy framework with a unified agent platform for customer service on a travel marketplace.
-            </p>
+            {kind === "artifacts" ? (
+              <div className="setup-actions">
+                <button type="submit" className="btn primary" disabled={pending}>
+                  {pending ? "Opening…" : "Open the examples"}
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="setup-actions">
+                  <button type="submit" className="btn primary" disabled={pending}>
+                    {pending ? "Creating…" : "Create an empty room"}
+                  </button>
+                  <button type="button" className="btn ghost" disabled={pending} onClick={() => void create(true)}>
+                    Start from an example
+                  </button>
+                </div>
+                <p className="muted setup-note">{exampleNote[kind]}</p>
+              </>
+            )}
           </form>
         </aside>
 

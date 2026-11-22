@@ -83,6 +83,8 @@ export const styles = StyleSheet.create({
   accentRefinement: { backgroundColor: "#f7f5ff" },
   accentRoadmap: { backgroundColor: "#f4faf6" },
   accentDirection: { backgroundColor: "#f3fbfd" },
+  accentPrd: { backgroundColor: "#fdf2f4" },
+  accentArtifacts: { backgroundColor: "#f2faf8" },
   cardTitle: { fontSize: 20, fontWeight: "600", color: colors.ink, letterSpacing: -0.3 },
   row: { flexDirection: "row", gap: 8, flexWrap: "wrap", alignItems: "center" },
   error: {

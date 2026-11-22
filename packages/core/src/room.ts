@@ -22,7 +22,8 @@ import {
   truthDisplayOrder,
   type IcebreakerGame,
 } from "./content";
-import { demoActions, demoDirectionContent, demoNotesForColumns, demoPlanningContent, demoRefinementContent, demoReviewContent, demoRoadmapContent } from "./demo";
+import { demoActions, demoDirectionContent, demoNotesForColumns, demoPlanningContent, demoPrdContent, demoRefinementContent, demoReviewContent, demoRoadmapContent } from "./demo";
+import { ARTIFACT_GUIDES, ARTIFACT_PRODUCTS } from "./artifacts";
 import { formatTravelWishlist, parseTravelWishlist } from "./countries";
 import { createId } from "./ids";
 import {
@@ -64,6 +65,9 @@ import {
   type RoomKind,
   type DirectionFrameworkId,
   type DirectionState,
+  type ArtifactId,
+  type ArtifactProductId,
+  type ArtifactState,
   type RoomView,
 } from "./types";
 
@@ -72,8 +76,23 @@ const DISCUSSION_BY: DiscussionBy[] = ["status", "author"];
 const ICEBREAKER_IDS = ICEBREAKERS.map((game) => game.id);
 const FRAMEWORKS: FrameworkId[] = ["rice", "ice", "value-complexity"];
 const DIRECTION_IDS: DirectionFrameworkId[] = DIRECTION_FRAMEWORKS.map((item) => item.id);
+const ARTIFACT_IDS: ArtifactId[] = ARTIFACT_GUIDES.map((item) => item.id);
+const ARTIFACT_PRODUCT_IDS: ArtifactProductId[] = ARTIFACT_PRODUCTS.map((item) => item.id);
 const HORIZONS: Horizon[] = ["now", "next", "later"];
-const DECISIONS: ReviewDecision[] = ["ship", "iterate", "hold", "commit", "reshape", "defer", "ready", "split", "park"];
+const DECISIONS: ReviewDecision[] = [
+  "ship",
+  "iterate",
+  "hold",
+  "commit",
+  "reshape",
+  "defer",
+  "ready",
+  "split",
+  "park",
+  "baseline",
+  "thin",
+  "open",
+];
 const FEEDBACK: FeedbackKind[] = ["praise", "change", "question"];
 const TEMPLATES = Object.keys(RETRO_TEMPLATES) as RetroTemplateId[];
 
@@ -91,9 +110,9 @@ export function createRoom(input: CreateRoomInput, now: string): Room {
   if (!/^[A-Z0-9]{6}$/.test(input.code)) {
     throw new CadenceError("Room code must be 6 letters or numbers.", "code");
   }
-  if (!["retro", "planning", "refinement", "review", "roadmap", "direction"].includes(input.kind)) {
+  if (!["retro", "planning", "refinement", "review", "roadmap", "direction", "prd", "artifacts"].includes(input.kind)) {
     throw new CadenceError(
-      "Choose a retrospective, a sprint planning, a backlog refinement, a sprint review, a roadmap, or a product direction.",
+      "Choose a retrospective, a sprint planning, a backlog refinement, a sprint review, a roadmap, a product direction, a product requirements document, or artifact examples.",
       "kind",
     );
   }
@@ -117,6 +136,7 @@ export function createRoom(input: CreateRoomInput, now: string): Room {
     review: null,
     roadmap: null,
     direction: null,
+    artifacts: null,
   };
 
   if (input.kind === "retro") {
@@ -126,8 +146,10 @@ export function createRoom(input: CreateRoomInput, now: string): Room {
     startChecklistStopwatchIfNeeded(room.review, now);
   } else if (input.kind === "roadmap") {
     room.roadmap = blankRoadmap();
-  } else {
+  } else if (input.kind === "direction") {
     room.direction = blankDirection();
+  } else {
+    room.artifacts = blankArtifacts();
   }
 
   if (input.demo) fillDemo(room, host.id, now);
@@ -243,6 +265,10 @@ export function applyOp(room: Room, op: Op, actorId: string, now: string): Room 
     case "direction.setAnswer":
       changed = applyDirection(next, op);
       break;
+    case "artifacts.setArtifact":
+    case "artifacts.setProduct":
+      changed = applyArtifacts(next, op);
+      break;
     default:
       throw new CadenceError("Unknown update.", "op");
   }
@@ -270,6 +296,7 @@ export function presentRoom(room: Room, actorId: string | null, now: string): Ro
     review: room.review ? presentReview(room.review) : null,
     roadmap: room.roadmap ? structuredClone(room.roadmap) : null,
     direction: room.direction ? structuredClone(room.direction) : null,
+    artifacts: room.artifacts ? structuredClone(room.artifacts) : null,
   };
 }
 
@@ -480,6 +507,10 @@ export function parseOp(input: unknown): Op {
       return { type, framework: expectEnum(record.framework, DIRECTION_IDS, "Framework") };
     case "direction.setAnswer":
       return { type, fieldId: expectString(record.fieldId, "Prompt"), value: String(record.value ?? "") };
+    case "artifacts.setArtifact":
+      return { type, artifact: expectEnum(record.artifact, ARTIFACT_IDS, "Artifact") };
+    case "artifacts.setProduct":
+      return { type, product: expectEnum(record.product, ARTIFACT_PRODUCT_IDS, "Product") };
     default:
       throw new CadenceError("Unknown update.", "op");
   }
@@ -846,7 +877,7 @@ function applyReview(room: Room, op: Op, actorId: string, now: string): boolean 
       return true;
     }
     case "review.setGoal": {
-      const goalLabel = room.kind === "refinement" ? "Backlog item" : "Sprint goal";
+      const goalLabel = room.kind === "refinement" ? "Backlog item" : room.kind === "prd" ? "Requirement" : "Sprint goal";
       const goal = cleanBlock(op.goal, LIMITS.goal, goalLabel);
       if (review.goal === goal) return false;
       review.goal = goal;
@@ -991,7 +1022,8 @@ function presentRetro(retro: RetroState, actorId: string | null, names: Map<stri
       votes: conceal ? card.votes.filter((id) => id === actorId) : [...card.votes],
       voteCount: card.votes.length,
       createdAt: card.createdAt,
-        hidden: false,
+      // Privacy is the filter above; keep false for older UI that checks `!card.hidden`.
+      hidden: false,
       mine,
     };
   });
@@ -1551,6 +1583,42 @@ function blankDirection(): DirectionState {
   return { framework: "vision-board", answers: {} };
 }
 
+function blankArtifacts(): ArtifactState {
+  return { artifact: "prd", product: "unified-agent" };
+}
+
+function requireArtifacts(room: Room): ArtifactState {
+  if (!room.artifacts) throw new CadenceError("This room is not an artifact example.", "kind");
+  return room.artifacts;
+}
+
+function applyArtifacts(room: Room, op: Op): boolean {
+  const artifacts = requireArtifacts(room);
+  switch (op.type) {
+    case "artifacts.setArtifact": {
+      if (!ARTIFACT_IDS.includes(op.artifact)) {
+        throw new CadenceError(
+          "Choose a PRD, Lean Business Case, epic, feature, user stories, Product Backlog, Sprint Backlog, or Increment.",
+          "artifact",
+        );
+      }
+      if (artifacts.artifact === op.artifact) return false;
+      artifacts.artifact = op.artifact;
+      return true;
+    }
+    case "artifacts.setProduct": {
+      if (!ARTIFACT_PRODUCT_IDS.includes(op.product)) {
+        throw new CadenceError("Choose the Unified Agent Platform, the Contact Center Platform, or CS data products.", "product");
+      }
+      if (artifacts.product === op.product) return false;
+      artifacts.product = op.product;
+      return true;
+    }
+    default:
+      return false;
+  }
+}
+
 function applyDirection(room: Room, op: Op): boolean {
   const direction = requireDirection(room);
   switch (op.type) {
@@ -1647,7 +1715,9 @@ function fillDemo(room: Room, hostId: string, now: string): void {
         ? demoPlanningContent(authors, now)
         : room.kind === "refinement"
           ? demoRefinementContent(authors, now)
-          : demoReviewContent(authors, now);
+          : room.kind === "prd"
+            ? demoPrdContent(authors, now)
+            : demoReviewContent(authors, now);
     room.review.goal = seed.goal;
     room.review.decision = seed.decision;
     room.review.decisionNotes = seed.decisionNotes;
@@ -1676,6 +1746,11 @@ function fillDemo(room: Room, hostId: string, now: string): void {
     const seed = demoDirectionContent();
     room.direction.framework = seed.framework;
     room.direction.answers = seed.answers;
+  }
+
+  if (room.artifacts) {
+    room.artifacts.artifact = "sprint-backlog";
+    room.artifacts.product = "contact-center";
   }
 }
 

@@ -2,7 +2,7 @@
 
 **Helps teams align on direction, review progress, and decide what comes next.**
 
-TeamCompass is a shared collaboration room for six rituals—**retrospective**, **sprint planning**, **backlog refinement**, **sprint review**, **roadmap scoring**, and **product direction**. A team joins with a six-character code and edits one board together. The web app is the full room and hosts the API. The phone app joins the same rooms. There are no accounts.
+TeamCompass is a shared collaboration room for eight rituals—**retrospective**, **sprint planning**, **backlog refinement**, **sprint review**, **roadmap scoring**, **product direction**, **product requirements**, and **artifact examples**. A team joins with a six-character code and edits one board together. The web app is the full room and hosts the API. The phone app joins the same rooms. There are no accounts.
 
 | | |
 | --- | --- |
@@ -23,6 +23,8 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 4. **Sprint review** — Inspect the Sprint Goal and the Increment with stakeholders, then adapt the Product Backlog: release / adapt / hold  
 5. **Roadmap** — Score bets with RICE, ICE, or value÷complexity; complexity sits beside the business outcome  
 6. **Product direction** — A product vision or a product strategy, using a professional framework, read back as one statement  
+7. **Product requirements** — Make one requirement clear: who it helps, why it matters, and what Done means  
+8. **Artifact examples** — Finished sample docs (PRD through Increment) for the Unified Agent Platform, Contact Center Platform, and CS data products  
 
 ### Product benefits
 
@@ -46,7 +48,9 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Review | Sprint Goal, Increment, stakeholders, adapt backlog. Release / Adapt / Hold (`ship` / `iterate` / `hold`) |
 | Roadmap | RICE / ICE / value÷complexity, complexity index, median & 3.5 guides, quadrants, insights |
 | Direction | Extended Product Vision Board, Moore positioning, Playing to Win cascade, Rumelt kernel, and DHM with a metric and a tactic. Each framework includes how to fill it in. |
-| Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` 33 entries / 6 groups) |
+| Requirements | Product, business, and technical checks (Agile, SAFe, Scrum). Ready for the backlog / Thin the MVP / Still open (`baseline` / `thin` / `open`) |
+| Artifacts | Finished sample docs for the Unified Agent Platform, Contact Center Platform, and CS data products |
+| Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` 44 entries / 7 groups) |
 | Platforms | Next.js web + Expo mobile + shared TypeScript core |
 | Credit | Developer credit footer (web site-wide; mobile home/create) |
 
@@ -117,7 +121,15 @@ Initiatives carry outcome, assumption, score inputs, complexity (technical · de
 
 Pick a vision or strategy framework (Product Vision Board, Moore positioning, Playing to Win, Rumelt kernel, or DHM). Fill the prompts with how-to guidance. Switching frameworks keeps answers. The board reads answers back as one statement.
 
-Scoring and direction variables: [docs/VARIABLES.md](docs/VARIABLES.md) · product detail: [docs/product.md](docs/product.md)
+### Product requirements
+
+Shared checklist in three parts—**Product**, **Business**, **Technical**—each with how-to steps (Agile / SAFe / Scrum). Call: **Ready for the backlog**, **Thin the MVP**, or **Still open** (stored `baseline` / `thin` / `open`).
+
+### Artifact examples
+
+Reading room for eight worked artifacts across three products (Unified Agent Platform, Contact Center Platform, CS data products). Switch artifact or product; prose is catalog-derived, not edited in the room.
+
+Variables and catalogs: [docs/VARIABLES.md](docs/VARIABLES.md) · product detail: [docs/product.md](docs/product.md)
 
 ---
 
@@ -165,7 +177,7 @@ pm-collaboration/
 ├── packages/core     # Room rules, privacy, scoring, content, countries, glossary, export
 ├── apps/web          # Next.js UI (/guide, travel map, lineup order) + room API + store
 ├── apps/mobile       # Expo iOS/Android client (home / guide / create / room)
-└── docs/             # Product documentation suite (current as of 2026-11-20 — product direction)
+└── docs/             # Product documentation suite (current as of 2026-11-22)
 ```
 
 ---
