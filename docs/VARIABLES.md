@@ -3,7 +3,7 @@
 **Purpose:** Exhaustive catalog of product and domain variables used across TeamCompass.  
 **Format:** Variable name · Friendly name · Definition · Formula / rule · Location · Example  
 **Source of truth:** `packages/core/src/{types,scoring,room,text,content,artifacts,countries,ids,glossary,retro-export,retro-deck}.ts`, `apps/web/src/lib/retro-pptx.ts`, web/mobile clients  
-**Last updated:** 2026-11-22 (product requirements + artifact examples)  
+**Last updated:** 2026-11-23 (Definitions browser + glossary prose)  
 
 In-app Definitions for facilitators and contributors live in `packages/core/src/glossary.ts` (`GLOSSARY`) and render on web `/guide` and the mobile Guide screen. This file remains the **engineering** catalog (limits, sync, store env, CSV columns). Prefer updating `GLOSSARY` when changing user-facing wording; prefer updating this file when changing contracts.
 
@@ -397,8 +397,13 @@ Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or
 | `GlossaryKind` | `variable` \| `metric` \| `formula` |
 | `GlossaryEntry` | `id`, `name`, `kind`, `plain`, optional `formula` / `example`, `where` |
 | `GlossaryGroup` | `id`, `title`, `intro`, `entries[]` |
-| Groups | `retro` · `review` · `roadmap` · `planning` · `refinement` · `direction` · `requirements` (**44** entries / **7** groups). Artifact-example terms live under `requirements` (not a separate glossary group). |
-| Location | `packages/core/src/glossary.ts`; web `apps/web/src/app/guide/page.tsx`; mobile `Guide` in `App.js` |
+| Groups | `retro` · `review` · `roadmap` · `planning` · `refinement` · `direction` · `requirements` (**44** entries / **7** groups; kinds **30** variable · **9** metric · **5** formula). Artifact-example terms live under `requirements`. |
+| `glossaryParagraphs(text)` | Splits `plain` on blank lines and collapses internal whitespace for full-width guide cards |
+| Location | `packages/core/src/glossary.ts`; web `guide/page.tsx` + `guide-browser.tsx`; mobile `Guide` in `App.js` |
+
+| Variable name | Friendly name | Definition | Formula / rule | Location | Example |
+| --- | --- | --- | --- | --- | --- |
+| `glossaryParagraphs` | Glossary paragraphs | Turns glossary `plain` text into display paragraphs | Split on `\n\n+`; trim; collapse runs of whitespace; empty input → `[]` | `glossary.ts`; `GuideBrowser` | `["The stopwatch…", "…"]` |
 
 ### Entry inventory (id → friendly name → kind)
 
@@ -451,9 +456,12 @@ Prefer local file store off-Vercel. On Vercel, configure Supabase (preferred) or
 
 ```mermaid
 flowchart LR
-  GLOSSARY[GLOSSARY in @cadence/core] --> WebGuide["/guide page"]
+  GLOSSARY[GLOSSARY in @cadence/core] --> Paras[glossaryParagraphs]
+  GLOSSARY --> WebGuide[GuideBrowser /guide]
   GLOSSARY --> MobileGuide[Mobile Guide screen]
-  WebGuide --> Users[Facilitators and contributors]
+  Paras --> WebGuide
+  WebGuide --> Filter[kind filter + search]
+  Filter --> Users[Facilitators and contributors]
   MobileGuide --> Users
   VARIABLES[VARIABLES.md engineering catalog] -.->|contracts| CoreCode[types / scoring / room]
   GLOSSARY -.->|plain English| CoreCode

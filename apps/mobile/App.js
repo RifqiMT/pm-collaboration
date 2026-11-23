@@ -276,9 +276,9 @@ function Guide({ onBack }) {
         <Text style={styles.back}>Back</Text>
       </Pressable>
       <Text style={styles.kicker}>Definitions</Text>
-      <Text style={styles.title}>Plain English</Text>
+      <Text style={styles.title}>Words the board uses</Text>
       <Text style={styles.lede}>
-        A variable is something the team enters. A metric is a number the board calculates. A formula is the math for that number.
+        A variable is something the team enters. A metric is a number the board calculates. A formula is the math behind that number.
       </Text>
       {GLOSSARY.map((group) => (
         <View key={group.id} style={{ gap: 10 }}>
@@ -286,12 +286,27 @@ function Guide({ onBack }) {
           <Text style={styles.lede}>{group.intro}</Text>
           {group.entries.map((entry) => (
             <View key={entry.id} style={styles.card}>
-              <Text style={styles.kicker}>{entry.kind}</Text>
-              <Text style={styles.cardTitle}>{entry.name}</Text>
-              <Text style={{ color: colors.ink, fontSize: 16, lineHeight: 22 }}>{entry.plain}</Text>
-              {entry.formula ? <Text style={{ fontWeight: "700", marginTop: 6 }}>{entry.formula}</Text> : null}
-              {entry.example ? <Text style={styles.meta}>{entry.example}</Text> : null}
-              <Text style={styles.meta}>{entry.where}</Text>
+              <View style={styles.row}>
+                <Text style={styles.cardTitle}>{entry.name}</Text>
+                <Text style={styles.kicker}>{entry.kind}</Text>
+              </View>
+              <Text style={{ color: colors.ink, fontSize: 16, lineHeight: 26 }}>{entry.plain}</Text>
+              {entry.formula ? (
+                <View style={{ gap: 4, marginTop: 8, padding: 10, borderRadius: 12, backgroundColor: colors.paper }}>
+                  <Text style={styles.kicker}>Formula</Text>
+                  <Text style={{ fontWeight: "700", lineHeight: 24, color: colors.ink }}>{entry.formula}</Text>
+                </View>
+              ) : null}
+              {entry.example ? (
+                <View style={{ gap: 4, marginTop: 8, padding: 10, borderRadius: 12, backgroundColor: colors.paper }}>
+                  <Text style={styles.kicker}>Example</Text>
+                  <Text style={{ color: colors.soft, fontSize: 14, lineHeight: 21 }}>{entry.example}</Text>
+                </View>
+              ) : null}
+              <View style={{ gap: 4, marginTop: 8, padding: 10, borderRadius: 12, backgroundColor: colors.paper }}>
+                <Text style={styles.kicker}>Where you see it</Text>
+                <Text style={{ color: colors.soft, fontSize: 14, lineHeight: 21 }}>{entry.where}</Text>
+              </View>
             </View>
           ))}
         </View>

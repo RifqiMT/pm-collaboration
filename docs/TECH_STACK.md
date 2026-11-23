@@ -1,6 +1,6 @@
 # TeamCompass — Technology Stack
 
-**Last updated:** 2026-11-22 (product requirements + artifact examples)  
+**Last updated:** 2026-11-23 (Definitions browser + glossary prose)  
 
 ---
 
@@ -98,7 +98,8 @@ npx expo start
 | Routing (mobile) | In-app screen state in `App.js` (not Expo Router yet) |
 | Identity | localStorage / AsyncStorage |
 | HTTP | `fetch` |
-| Validation / scoring / deck model | `@cadence/core` (incl. `retrospectiveDeck`) |
+| Validation / scoring / deck / glossary | `@cadence/core` (incl. `retrospectiveDeck`, `GLOSSARY`, `glossaryParagraphs`) |
+| Definitions UI (web) | `guide-browser.tsx` client search + kind filter on `/guide` |
 | PPT export (web) | `pptxgenjs` ^3.12 (`apps/web/src/lib/retro-pptx.ts`) |
 | Styling (web) | Global CSS variables + component classes |
 | Styling (mobile) | `StyleSheet` + `colors` object |

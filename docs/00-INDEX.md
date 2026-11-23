@@ -3,7 +3,7 @@
 **Product:** TeamCompass  
 **Internal package namespace:** `@cadence/*` (historical codename; user-facing brand is TeamCompass)  
 **Version:** web/core `0.1.0` · mobile `1.0.0`  
-**Last documentation refresh:** 2026-11-22 (product requirements + artifact examples)  
+**Last documentation refresh:** 2026-11-23 (Definitions browser + glossary prose)  
 
 This index is the reading map for product, engineering, design, and leadership stakeholders. Every document below is grounded in the current monorepo source of truth.
 
@@ -59,11 +59,11 @@ This index is the reading map for product, engineering, design, and leadership s
 | Product direction | `DIRECTION_FRAMEWORKS`, `directionReadback` / `directionStatement`; `direction-board.tsx`; mobile direction screen |
 | Artifact examples | `packages/core/src/artifacts.ts` (`ARTIFACT_GUIDES` 8 × `ARTIFACT_PRODUCTS` 3, `artifactExample`); `artifact-board.tsx`; mobile artifacts screen |
 | Demo seed data | `packages/core/src/demo.ts` (incl. planning + refinement + direction + prd + artifacts demos) |
-| In-app Definitions glossary | `packages/core/src/glossary.ts` (44 entries / 7 groups) |
+| In-app Definitions glossary | `packages/core/src/glossary.ts` (`GLOSSARY` 44/7 · `glossaryParagraphs`; kinds 30/9/5) |
 | Retro CSV export | `packages/core/src/retro-export.ts` |
 | Retro PPT deck | `packages/core/src/retro-deck.ts` → `apps/web/src/lib/retro-pptx.ts` (`pptxgenjs`) |
 | Web UI & polling | `apps/web/src/components/` |
-| Definitions page | `apps/web/src/app/guide/page.tsx` (`/guide`) |
+| Definitions page | `apps/web/src/app/guide/page.tsx` + `guide-browser.tsx` (`/guide` search + kind filter) |
 | Mobile Definitions | `Guide` screen in `apps/mobile/App.js` |
 | Developer credit | `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `App.js` |
 | Room API & persistence | `apps/web/src/app/api/`, `apps/web/src/server/{store,persistence,http}.ts` |

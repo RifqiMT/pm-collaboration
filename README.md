@@ -31,7 +31,7 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 - **Fast start** — Create a room in seconds; share a short code  
 - **Psychological safety** — Brainstorm notes stay private on the server until Discuss  
 - **Facilitation control** — Host gates sections, icebreaker, and discussion walk; timers and vote budget are open on web  
-- **Clear closure** — Owned actions; planning / refinement / review calls; roadmap quadrants  
+- **Clear closure** — Owned actions; planning / refinement / review / requirements calls; roadmap quadrants; direction readback  
 - **Honest math** — Shared scoring in `@cadence/core` on web and mobile  
 - **Exportable record** — Retro summary downloads as CSV and as a consultant-style PPT  
 
@@ -50,7 +50,7 @@ TeamCompass replaces scattered sticky notes, slides, and spreadsheets with one c
 | Direction | Extended Product Vision Board, Moore positioning, Playing to Win cascade, Rumelt kernel, and DHM with a metric and a tactic. Each framework includes how to fill it in. |
 | Requirements | Product, business, and technical checks (Agile, SAFe, Scrum). Ready for the backlog / Thin the MVP / Still open (`baseline` / `thin` / `open`) |
 | Artifacts | Finished sample docs for the Unified Agent Platform, Contact Center Platform, and CS data products |
-| Definitions | Plain-English variables, metrics, and formulas (`/guide` web · Guide screen mobile · `GLOSSARY` 44 entries / 7 groups) |
+| Definitions | Plain-English variables, metrics, and formulas (`/guide` search + kind filter · Guide screen mobile · `GLOSSARY` 44/7 · kinds 30/9/5) |
 | Platforms | Next.js web + Expo mobile + shared TypeScript core |
 | Credit | Developer credit footer (web site-wide; mobile home/create) |
 
@@ -177,7 +177,7 @@ pm-collaboration/
 ├── packages/core     # Room rules, privacy, scoring, content, countries, glossary, export
 ├── apps/web          # Next.js UI (/guide, travel map, lineup order) + room API + store
 ├── apps/mobile       # Expo iOS/Android client (home / guide / create / room)
-└── docs/             # Product documentation suite (current as of 2026-11-22)
+└── docs/             # Product documentation suite (current as of 2026-11-23)
 ```
 
 ---

@@ -523,8 +523,8 @@ const EXAMPLES: Record<ArtifactProductId, Record<ArtifactId, ArtifactExample>> =
               text: "A guest with a broken stay currently waits while the agent hunts for the property. This Sprint removes that hunt for the first market.",
             },
           ],
-        },
-        {
+            },
+            {
           title: "Forecast",
           pieces: [
             {
@@ -939,8 +939,8 @@ const EXAMPLES: Record<ArtifactProductId, Record<ArtifactId, ArtifactExample>> =
               text: "A misrouted stay-change call makes the guest tell the story twice. This Sprint removes that misroute on voice.",
             },
           ],
-        },
-        {
+            },
+            {
           title: "Forecast",
           pieces: [
             {

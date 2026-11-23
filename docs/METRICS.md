@@ -1,7 +1,7 @@
 # TeamCompass — Product Metrics & OKRs
 
 **Audience:** Product team, engineering leads, facilitators of internal adoption  
-**Last updated:** 2026-11-22 (product requirements + artifact examples)  
+**Last updated:** 2026-11-23 (Definitions browser + glossary prose)  
 **Note:** TeamCompass MVP does not yet ship an analytics pipeline. Metrics below define what to measure when instrumentation is added, plus qualitative proxies available today from `rooms.json` and meeting outcomes.
 
 ---
@@ -72,6 +72,7 @@
 | `artifact_switch_rate` | Artifact exploration | Rooms with ≥2 artifact or product switches / artifacts rooms | Inform onboarding use; no hard target |
 | `raise_hand_rate` | Discuss raise-hand usage | Retros with ≥1 raise-hand op in Discuss / retros reaching Discuss | Inform facilitation quality; no hard target yet |
 | `guide_open_rate` | Definitions opens | Sessions that open `/guide` or mobile Guide / total sessions | Inform onboarding clarity; no hard target yet |
+| `guide_search_use_rate` | Definitions search use | `/guide` sessions with ≥1 non-empty search or kind filter / guide opens | Inform findability; no hard target yet |
 
 ---
 

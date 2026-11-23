@@ -13,7 +13,8 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **Developer credit footer** on web (all pages) and mobile (home + create): “Developed, managed, and maintained by Rifqi Tjahyono” with LinkedIn, personal-website, [GitHub](https://github.com/RifqiMT/pm-collaboration), and [article](https://rifqi-tjahyono.com/%f0%9f%93%9d-sticky-note-chaos-to-team-clarity-reflect-together-review-progress-and-decide-what-comes-next-%f0%9f%a4%9d%f0%9f%a7%ad/) icon links.  
 - **Start from an example** loads a demo session: 10 notes in every column of every retrospective shape, a sprint review with evidence on every checklist item, and a 10-bet roadmap across all four quadrants.  
 - **Raise hand** in Discuss: ordered speaking queue; named notes highlight; anonymous authorship stays protected; queue clears on phase change (web + mobile).
-- **Definitions**: plain-English variables, metrics, and formulas for retrospective, planning, refinement, sprint review, roadmap, product direction, and requirements (`GLOSSARY` — 44 entries / 7 groups; artifact terms under `requirements`). Web `/guide`; mobile Guide screen; linked from home, room chrome, and roadmap scoring help.
+- **Definitions browser (web):** `/guide` uses client `GuideBrowser` with kind filters (variable / metric / formula), text search, live match counts, ritual jump chips, and empty-state reset. Entry prose renders through `glossaryParagraphs` as full-width paragraphs; formula / example / “Where you see it” share that width.  
+- **Definitions:** plain-English variables, metrics, and formulas for retrospective, planning, refinement, sprint review, roadmap, product direction, and requirements (`GLOSSARY` — **44** entries / **7** groups; kinds **30 / 9 / 5**; artifact terms under `requirements`). Web `/guide`; mobile Guide screen (structured Formula / Example / Where); linked from home, room chrome, and roadmap scoring help.
 - **62 retrospective shapes** across eight shelves (Classic 13 · Film 10 · Series 9 · Anime 5 · Games 9 · Sport 14 · Music 1 · Food 1). Newer themes include TACO, 4Ps, Marie Kondo, KALM, ALC, Digimon, Star Trek, F1, MotoGP, World Cup, Super Mario, Mario Kart, Pac-Man, Pizza, Cricket, Basketball, Field Hockey, Tennis, Volleyball, Table Tennis, Baseball, Rugby, Golf, Olympics, eSports, DOTA, Resident Evil, and Assassin's Creed. Demo seed writes ten theme-specific notes per column.
 - **Shape picker** on create: searchable shelves, column-count filters (3 / 4 / 5), A–Z lists, and live column titles/hints before create (web + mobile).
 - **Health Check** icebreaker: six statements rated from strongly disagree to strongly agree (1–7). The room sees the spread of answers and averages, not who chose each point. Web and mobile.
@@ -37,7 +38,8 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - Room store backends: `file` (default) · `supabase` · `redis`.  
 - Store vitest coverage for backend selection and file create/join/op durability.  
 - Core tests for `retro.raiseHand` / `raisedHands` presentation.  
-- `packages/core/src/glossary.ts` + `glossary.test.ts` (unique ids; RICE example matches scorer).  
+- `packages/core/src/glossary.ts` (`GLOSSARY`, `glossaryParagraphs`) + `glossary.test.ts` (unique ids; paragraph splits; no em/en dashes; RICE example matches scorer).  
+- Web `guide-browser.tsx` client Definitions browser; `guide/page.tsx` shell; shared `identity.initials`.  
 - `RETRO_TEMPLATE_GROUPS`, `searchRetroTemplates`, `retroColumnCounts`, and template coverage tests for all 62 shapes.  
 - Shape-finder UI styles (`.shape-finder*`) and glyph coverage for new templates.  
 - `IcebreakerMode` extended with `scale`, `map`, and `order`; `HEALTH_CHECK` helpers + `health-check.test.ts`; `countries.ts` (175 countries); `parsePeopleOrder` / `formatPeopleOrder`; health peer anonymization; CSV transforms for health / travel / lineup / show-and-tell.  
@@ -59,7 +61,8 @@ Version labels follow package versions where applicable (`@cadence/core` / `@cad
 - **2026-11-20 refresh:** documented Lineup; icebreaker count **21**; removed stale next-round / focus-card host claims.  
 - **2026-11-20 evening refresh:** planning + refinement checklists; glossary then 31/5; retro PPT deck; epic-06.  
 - **2026-11-20 night refresh:** sixth ritual **product direction** (`DIRECTION_FRAMEWORKS`, readback/statement, FR-DIR1–4, epic-07); glossary **33/6**; FR-R1 / VARIABLES / DESIGN / ARCHITECTURE / GUARDRAILS aligned to six kinds.  
-- **2026-11-22 refresh:** aligned docs to **8** room kinds (`prd` \| `artifacts`); glossary **44/7**; VARIABLES ChecklistKind + ArtifactState §13d; DESIGN artifact reader + seven guide groups; ARCHITECTURE/INDEX source map; FR-PRD / FR-ART / epic-08/09; documented `review.setSection` and artifact ops; clarified vestigial `icebreakerRound` / always-false `RetroCardView.hidden`.
+- **2026-11-22 refresh:** aligned docs to **8** room kinds (`prd` \| `artifacts`); glossary **44/7**; VARIABLES ChecklistKind + ArtifactState §13d; DESIGN artifact reader + seven guide groups; ARCHITECTURE/INDEX source map; FR-PRD / FR-ART / epic-08/09; documented `review.setSection` and artifact ops; clarified vestigial `icebreakerRound` / always-false `RetroCardView.hidden`.  
+- **2026-11-23 refresh:** Definitions `GuideBrowser` (search + kind filter) + `glossaryParagraphs`; expanded glossary prose; mobile Guide layout polish; PRD decision-pill on-states (`baseline`/`thin`/`open`); unified `.sr`/`.visually-hidden`; shared `initials` helper across web boards; suite stamps + FR-P6 / US-5.6 / DESIGN / VARIABLES / TRACEABILITY aligned.
 
 ---
 

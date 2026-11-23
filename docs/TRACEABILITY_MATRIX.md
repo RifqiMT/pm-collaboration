@@ -2,7 +2,7 @@
 
 **Document type:** Requirements ↔ Stories ↔ Implementation ↔ Verification  
 **Product:** TeamCompass (`@cadence/*`)  
-**Last updated:** 2026-11-22 (product requirements + artifact examples)  
+**Last updated:** 2026-11-23 (Definitions browser + glossary prose)  
 
 ---
 
@@ -127,7 +127,7 @@
 | FR-P3 | Shared core | US-5.3 | `packages/core` | `npm test -w @cadence/core` | Implemented |
 | FR-P4 | HTTP API surface | US-5.1 | `app/api/rooms/**` | Manual / integration gap | Implemented (API tests thin) |
 | FR-P5 | Polling sync | US-5.4 | `use-room.ts` | Manual | Implemented |
-| FR-P6 | Definitions glossary | US-5.6 | `glossary.ts`, `guide/page.tsx`, mobile `Guide` | `glossary.test.ts` | Implemented |
+| FR-P6 | Definitions glossary | US-5.6 | `glossary.ts` (`glossaryParagraphs`), `guide-browser.tsx`, `guide/page.tsx`, mobile `Guide` | `glossary.test.ts` | Implemented |
 | NFR-1 | Vitest domain coverage | US-5.3 | `*.test.ts` | CI/`npm test` | Implemented |
 | NFR-2 | Body size cap | — | `http.ts` | Manual | Implemented |
 | NFR-3 | Durable shared store | — | `store.ts`, `persistence.ts` | File / Supabase / Redis selection + `store.test.ts` | Implemented |

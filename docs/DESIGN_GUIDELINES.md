@@ -2,7 +2,7 @@
 
 **Brand:** TeamCompass  
 **Surfaces:** Web (`globals.css`) · Mobile (`apps/mobile/src/ui.js`)  
-**Last updated:** 2026-11-22 (product requirements + artifact examples)  
+**Last updated:** 2026-11-23 (Definitions browser + glossary prose)  
 
 ---
 
@@ -220,15 +220,26 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 ### 5.6e Definitions (`/guide`)
 
 - Quiet `.guide-link` in wordmark rows (home, room) and roadmap scoring help  
-- Guide page: legend for Variable / Metric / Formula kinds, jump nav by **seven** glossary groups (`retro` … `requirements`; artifact terms under requirements), entry cards with plain / formula / example / where  
-- Kind chips use semantic tones without competing with ritual boards  
-- Mobile Guide mirrors the same content hierarchy without the web jump chrome  
+- Web UI lives in client `GuideBrowser` (`guide-browser.tsx`); the route shell stays in `guide/page.tsx`  
+- Hero: title **Words the board uses**, kind legend as **toggle filters** (variable / metric / formula — **30 / 9 / 5**), search field, live “N of 44” count, jump nav for **seven** glossary groups (`retro` … `requirements`; artifact terms under requirements)  
+- Empty state when search/filter yields nothing, with reset  
+- Definitions read as a **vertical list of full-width entries** (not a multi-column card grid)  
+- Each entry uses `glossaryParagraphs(plain)` so blank-line breaks become paragraphs; sentences wrap the full card width  
+- Kind accent rail + pill; formula / example / “Where you see it” sit under the prose at the same width  
+- Mobile Guide mirrors hierarchy (Formula / Example / Where blocks) without web search/jump chrome  
 
 ### 5.6f Summary exports (retro)
 
 - Group `.summary-downloads` with copy + CSV/PPT actions (`.summary-download-btn`)  
 - PPT is primary for facilitator share-out; CSV remains available as ghost/secondary  
 - Keep export chrome in Summary only—do not promote downloads into earlier phases  
+
+### 5.6g Product direction
+
+- Masthead shows progress meter + live readback (sentence or grouped rows)  
+- Framework chips split Vision vs Strategy; calm selection, not competing hero chrome  
+- Part rail advances through framework sections; how-to panel stays optional/collapsible  
+- Prompt fields use `SharedField`; keep ink/paper tokens—avoid decorative strategy “canvas” kits  
 
 ### 5.6h Product requirements
 
@@ -243,14 +254,7 @@ Use `--pair-a*` / `--pair-b*` so sides stay distinguishable without relying on t
 - Left rail: numbered “How to read it”, on-this-page TOC, previous/next artifact
 - Document stage: numbered sections, pill field labels, long pieces span full width; Given/When/Then blocks split for scanning
 - Platform and artifact are shared choices. The example text is read-only
-- Responsive: controls and stage stack; pieces become a single column under 720px
-
-### 5.6g Product direction
-
-- Masthead shows progress meter + live readback (sentence or grouped rows)  
-- Framework chips split Vision vs Strategy; calm selection, not competing hero chrome  
-- Part rail advances through framework sections; how-to panel stays optional/collapsible  
-- Prompt fields use `SharedField`; keep ink/paper tokens—avoid decorative strategy “canvas” kits  
+- Responsive: controls and stage stack; pieces become a single column under 720px  
 
 ### 5.7 Roadmap chart
 
@@ -286,7 +290,7 @@ Avoid decorative perpetual animations, glow stacks, and emoji as structure.
 
 - Skip link to `#main`  
 - `:focus-visible` sea outline  
-- `.sr` screen-reader utility  
+- `.sr` / `.visually-hidden` screen-reader utility (aliases)  
 - Roadmap list as accessible companion to the chart  
 - Do not convey critical state by color alone (labels on tones, decisions, insights)  
 
@@ -295,7 +299,7 @@ Avoid decorative perpetual animations, glow stacks, and emoji as structure.
 ## 9. Content tone
 
 - Direct, calm, facilitator-friendly  
-- Prefer facilitation labels (Release / Forecast / Selectable) in UI; document stored ids (`ship` / `commit` / `ready`) in engineering docs  
+- Prefer facilitation labels (Release / Forecast / Selectable / Ready for the backlog) in UI; document stored ids in engineering docs: review `ship`/`iterate`/`hold`, planning `commit`/`reshape`/`defer`, refinement `ready`/`split`/`park`, requirements `baseline`/`thin`/`open`  
 
 - Error copy is human (`CadenceError` messages) — keep that voice in UI  
 
@@ -326,10 +330,11 @@ Site-wide attribution sits at the bottom of the shell (web) and at the end of ho
 - Product direction: `apps/web/src/components/direction-board.tsx`, mobile direction screen in `App.js`  
 - Artifact examples: `apps/web/src/components/artifact-board.tsx`, `packages/core/src/artifacts.ts`, mobile artifacts screen  
 
-- Definitions page: `apps/web/src/app/guide/page.tsx`  
+- Definitions: `apps/web/src/app/guide/page.tsx` + `apps/web/src/components/guide-browser.tsx`  
 - Font & metadata: `apps/web/src/app/layout.tsx`  
 - Developer credit: `apps/web/src/components/credit-footer.tsx`, mobile `CreditFooter` in `apps/mobile/App.js`  
+- Shared initials: `apps/web/src/components/identity.ts` (`initials`) — used by icebreaker, travel map, lineup  
 - Mobile tokens: `apps/mobile/src/ui.js`  
 - Glyphs: `apps/web/src/components/retro-glyphs.tsx`  
-- Glossary source: `packages/core/src/glossary.ts`  
+- Glossary source: `packages/core/src/glossary.ts` (`GLOSSARY`, `glossaryParagraphs`)  
 - Travel catalog: `packages/core/src/countries.ts`

@@ -8,7 +8,7 @@ export {
 } from "./types";
 
 export type * from "./glossary";
-export { GLOSSARY } from "./glossary";
+export { GLOSSARY, glossaryParagraphs } from "./glossary";
 
 export type * from "./content";
 export {

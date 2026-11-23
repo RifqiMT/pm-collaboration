@@ -43,7 +43,7 @@
 | Private draft | Hidden others’ notes until Discuss |
 | Fair voting | Fixed budget; desired-state votes |
 | Phase clarity | UI locks edits by phase |
-| Plain definitions | `/guide` or mobile Definitions for board words |
+| Plain definitions | `/guide` (search + kind filter) or mobile Definitions for board words |
 | Mobile parity | Expo client against same API |
 
 ## Success looks like

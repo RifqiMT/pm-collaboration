@@ -45,13 +45,16 @@
 
 **Acceptance criteria**
 
-- [ ] Web `/guide` renders all `GLOSSARY` groups from `@cadence/core`  
-- [ ] Mobile Guide screen uses the same `GLOSSARY` data  
+- [ ] Web `/guide` renders all `GLOSSARY` groups from `@cadence/core` via `GuideBrowser`  
+- [ ] Web supports kind filter (variable / metric / formula) and text search across name, plain, formula, example, where, and group title  
+- [ ] Filtered jump counts and empty state with reset when nothing matches  
+- [ ] Entry plain text renders through `glossaryParagraphs` as full-width paragraphs  
+- [ ] Mobile Guide screen uses the same `GLOSSARY` data (Formula / Example / Where blocks)  
 - [ ] Entries show kind (variable / metric / formula), plain text, optional formula/example, and where  
 - [ ] Roadmap board can deep-link to `#guide-roadmap`  
-- [ ] `glossary.test.ts` guards unique ids and RICE example = 320  
+- [ ] `glossary.test.ts` guards unique ids, paragraph splits, no em/en dashes, and RICE example = 320  
 
-**PRD:** FR-P6 · **Code:** `glossary.ts`, `guide/page.tsx`, mobile `Guide`
+**PRD:** FR-P6 · **Code:** `glossary.ts` (`glossaryParagraphs`), `guide-browser.tsx`, `guide/page.tsx`, mobile `Guide`
 
 ---
 

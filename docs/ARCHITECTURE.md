@@ -1,6 +1,6 @@
 # TeamCompass — Architecture
 
-**Last updated:** 2026-11-22 (product requirements + artifact examples)  
+**Last updated:** 2026-11-23 (Definitions browser + glossary prose)  
 
 ---
 
@@ -34,7 +34,7 @@ TeamCompass is a **monorepo** with a shared domain library and two clients that 
 
 | Path | Package | Responsibility |
 | --- | --- | --- |
-| `packages/core` | `@cadence/core` | Types, ops, privacy, scoring, content (62 templates + 21 icebreakers + checklist rituals incl. `prd` + `DIRECTION_FRAMEWORKS`), `artifacts.ts` (8×3 examples), `countries.ts`, glossary (**44/7**), CSV export, **retro deck**, validation |
+| `packages/core` | `@cadence/core` | Types, ops, privacy, scoring, content (62 templates + 21 icebreakers + checklist rituals incl. `prd` + `DIRECTION_FRAMEWORKS`), `artifacts.ts` (8×3 examples), `countries.ts`, glossary (**44/7** + `glossaryParagraphs`), CSV export, **retro deck**, validation |
 | `apps/web` | `@cadence/web` | Next.js App Router UI, API routes, JSON persistence, HTTP helpers, **PPT render** (`lib/retro-pptx.ts` + `pptxgenjs`) |
 | `apps/mobile` | `@cadence/mobile` | Expo RN client (not in root workspaces; depends via `file:../../packages/core`) |
 
@@ -125,9 +125,9 @@ Details: [API.md](./API.md).
 | `/` | `HomeScreen` |
 | `/new` | `NewRoomForm` (shape finder for retros) |
 | `/r/[code]` | `RoomApp` → `RetroBoard` / `ReviewBoard` (planning · refinement · review · prd) / `RoadmapBoard` / `DirectionBoard` / `ArtifactBoard` |
-| `/guide` | Definitions from `GLOSSARY` (`guide/page.tsx`) |
+| `/guide` | Definitions from `GLOSSARY` via `GuideBrowser` (`guide/page.tsx` + `guide-browser.tsx`; search + kind filter; `glossaryParagraphs`) |
 
-Supporting modules: `use-room.ts`, `identity.ts`, `shared-field.tsx`, icebreaker surfaces, `lib/retro-pptx.ts`, `direction-board.tsx`, `artifact-board.tsx` (`.artifact-*`), `retro-ui.ts`, glyphs, `credit-footer.tsx`. Core helpers: `content.ts` (checklists + icebreakers + direction), `artifacts.ts`, `countries.ts`, `retro-deck.ts`.
+Supporting modules: `use-room.ts`, `identity.ts` (`initials`), `shared-field.tsx`, icebreaker surfaces, `lib/retro-pptx.ts`, `direction-board.tsx`, `artifact-board.tsx` (`.artifact-*`), `guide-browser.tsx`, `retro-ui.ts`, glyphs, `credit-footer.tsx`. Core helpers: `content.ts` (checklists + icebreakers + direction), `artifacts.ts`, `countries.ts`, `glossary.ts` (`glossaryParagraphs`), `retro-deck.ts`.
 
 ---
 

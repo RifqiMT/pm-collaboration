@@ -1,6 +1,6 @@
 # TeamCompass — Product Documentation
 
-**Status:** Current as of repository state 2026-11-22 (product requirements + artifact examples)  
+**Status:** Current as of repository state 2026-11-23 (Definitions browser + glossary prose)  
 **Brand:** TeamCompass (UI, metadata, marketing copy)  
 **Engineering namespace:** `@cadence/core`, `@cadence/web`, `@cadence/mobile`  
 **Canonical path:** `docs/product.md` (use this casing in links for case-sensitive hosts).
@@ -170,14 +170,14 @@ Each example names the personas and maps stakeholders with RACI: one person is R
 
 ### 3.8 Definitions (cross-cutting)
 
-Plain-English **variables**, **metrics**, and **formulas** for the rituals, shared from `@cadence/core` `GLOSSARY` (**44** entries across **7** groups: retro, planning, refinement, review, roadmap, product direction, and product requirements).
+Plain-English **variables**, **metrics**, and **formulas** for the rituals, shared from `@cadence/core` `GLOSSARY` (**44** entries across **7** groups: retro, review, roadmap, planning, refinement, direction, requirements). Artifact-example terms live under **requirements**. Copy is expanded into short paragraphs; web splits blanks via `glossaryParagraphs`.
 
 | Surface | Entry point |
 | --- | --- |
-| Web | `/guide` — linked from home, room chrome, and roadmap scoring model |
-| Mobile | Home → **Definitions** → `Guide` screen (same `GLOSSARY` copy) |
+| Web | `/guide` — `GuideBrowser` with kind filters, search, jump nav; linked from home, room chrome, and roadmap scoring |
+| Mobile | Home → **Definitions** → `Guide` screen (same `GLOSSARY` copy; Formula / Example / Where blocks) |
 
-Kinds: Variable (something the team enters) · Metric (a number the board calculates) · Formula (the math behind a metric). Engineering catalog remains [VARIABLES.md](./VARIABLES.md).
+Kinds: Variable (**30** — something the team enters) · Metric (**9** — a number the board calculates) · Formula (**5** — the math behind a metric). Engineering catalog remains [VARIABLES.md](./VARIABLES.md).
 
 ### 3.9 Platforms
 
@@ -185,7 +185,7 @@ Kinds: Variable (something the team enters) · Metric (a number the board calcul
 | --- | --- |
 | Web (`apps/web`) | Full UI, App Router pages (`/`, `/new`, `/r/[code]`, `/guide`), room API, persistence (`file` / `supabase` / `redis`) |
 | Mobile (`apps/mobile`) | Expo client: home / guide / create / room (2s poll; raise hand; no timer or vote-budget chrome) |
-| Core (`packages/core`) | Types, ops, privacy, scoring, content (21 icebreakers + checklist rituals incl. prd + direction frameworks), `artifacts.ts` (8×3), **countries**, demo seed, CSV export, **retro deck**, **glossary** (44/7) |
+| Core (`packages/core`) | Types, ops, privacy, scoring, content (21 icebreakers + checklist rituals incl. prd + direction frameworks), `artifacts.ts` (8×3), **countries**, demo seed, CSV export, **retro deck**, **glossary** (44/7 + `glossaryParagraphs`) |
 | Credit | Site-wide developer credit footer on web; home/create on mobile (`credit-footer`) |
 
 ---

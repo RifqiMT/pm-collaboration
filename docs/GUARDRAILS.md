@@ -2,7 +2,7 @@
 
 **Purpose:** Technical and business limitations that constrain product development.  
 **Audience:** Engineers, PMs, designers, security reviewers  
-**Last updated:** 2026-11-22 (product requirements + artifact examples)  
+**Last updated:** 2026-11-23 (Definitions browser + glossary prose)  
 
 Violating a hard guardrail without an approved architecture change is a product defect, not a stretch goal.
 
@@ -82,7 +82,8 @@ Violating a hard guardrail without an approved architecture change is a product 
 | **G-FAC-3 Summary is terminal collection** | No timer/stopwatch on Summary | Keep Summary for export/review, not timed work |
 | **G-FAC-4 One ritual per room** | `kind` fixed at create (`retro` \| `planning` \| `refinement` \| `review` \| `roadmap` \| `direction` \| `prd` \| `artifacts`) | No multi-ritual mashup room without redesign |
 | **G-FAC-8 Direction field scope** | `direction.setAnswer` only for fields on the **current** framework | Do not invent free-form fields; keep answers when switching frameworks |
-| **G-FAC-5 Definitions single source** | `GLOSSARY` in `@cadence/core` | Do not fork plain-English copy into web-only or mobile-only strings |
+| **G-FAC-5 Definitions single source** | `GLOSSARY` in `@cadence/core` | Do not fork plain-English copy into web-only or mobile-only strings; web may add search/filter chrome only |
+| **G-FAC-5b Glossary prose shape** | Entries are paragraph prose; `glossaryParagraphs` splits on blank lines | Do not turn Definitions into bullet lists or a narrow clipped measure; avoid em/en dashes in glossary copy |
 | **G-FAC-6 Checklist decision scope** | `review.setDecision` must match `checklistDecisions(kind)` | Do not accept Release on planning or Forecast on review |
 | **G-FAC-7 PPT is web-first** | Deck render uses `pptxgenjs` in the browser | Do not claim mobile PPT parity until a shared render path exists |
 | **G-FAC-9 Artifacts are read-only prose** | Room stores only `artifact` + `product` selection | Do not persist edited example text on the room document; change catalogs in `artifacts.ts` |

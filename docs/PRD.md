@@ -7,7 +7,7 @@
 | Status | Living — aligned to shipped code 0.1.0 / mobile 1.0.0 |
 | Owner | Product team |
 | Engineering namespace | `@cadence/*` |
-| Last updated | 2026-11-22 (product requirements + artifact examples) |
+| Last updated | 2026-11-23 (Definitions browser + glossary prose) |
 
 ---
 
@@ -164,7 +164,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 | FR-P3 | Shared core package for ops, privacy, scoring | Must |
 | FR-P4 | HTTP API: create, get, join, ops | Must |
 | FR-P5 | Clients poll for freshness | Must |
-| FR-P6 | Shared plain-English Definitions (`GLOSSARY`) on web `/guide` and mobile Guide | Should |
+| FR-P6 | Shared plain-English Definitions (`GLOSSARY`) on web `/guide` (`GuideBrowser`: search + kind filter) and mobile Guide | Should |
 
 ---
 
@@ -193,7 +193,7 @@ TeamCompass solves this with one code-joined room per ritual, shared rules on we
 7. Retro CSV export includes notes, votes, actions, icebreaker answers, and section timings.  
 7b. Retro PPT export builds a deck (`retrospectiveDeck`) with icebreaker, durations, discuss order, overview, categories, top votes, and actions.  
 8. Mobile can complete create → join → mutate against a LAN-hosted web API.  
-9. Definitions on web `/guide` and mobile Guide render the same `GLOSSARY` entries from `@cadence/core`.  
+9. Definitions on web `/guide` and mobile Guide render the same `GLOSSARY` entries from `@cadence/core`. Web search/kind filters hide unmatched entries; `glossaryParagraphs` keeps prose readable as full-width paragraphs.  
 
 Traceability to stories and code: [TRACEABILITY_MATRIX.md](./TRACEABILITY_MATRIX.md).
 

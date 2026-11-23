@@ -48,6 +48,7 @@
 | Timing | Per-section countdown + stopwatch (retro + checklist sections) |
 | Trustworthy privacy | Server-side brainstorm filtering; Health Check peer anonymization |
 | Closure | Actions + CSV/PPT; planning / refinement / review calls |
+| Shared vocabulary | Points people to `/guide` (search + kind filter) or mobile Definitions |
 
 ## Success looks like
 

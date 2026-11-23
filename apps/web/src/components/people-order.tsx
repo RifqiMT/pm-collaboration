@@ -2,6 +2,7 @@
 
 import { LIMITS, parsePeopleOrder, type IcebreakerAnswer, type Op, type ParticipantView } from "@cadence/core";
 import { useEffect, useState } from "react";
+import { initials } from "./identity";
 
 export function PeopleOrder({
   host,
@@ -293,13 +294,6 @@ function startingOrder(body: string | undefined, participantIds: string[]): stri
     .filter((id) => participantIds.includes(id));
   const rest = participantIds.filter((id) => !previous.includes(id));
   return [...previous, ...rest];
-}
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 }
 
 function GripIcon() {

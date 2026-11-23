@@ -46,7 +46,7 @@
 | Honest math | Core scoring + HIGH_COMPLEXITY 3.5 + median |
 | Outcome first | Outcome/assumption fields on each initiative |
 | Insights | Thin confidence / narrow reach warnings |
-| Shared language | Definitions page for RICE/ICE/complexity words |
+| Shared language | Definitions (`/guide` search or mobile Guide) for RICE/ICE/complexity and requirements words |
 
 ## Success looks like
 

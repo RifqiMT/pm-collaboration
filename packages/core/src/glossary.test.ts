@@ -1,19 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { GLOSSARY } from "./glossary";
+import { GLOSSARY, glossaryParagraphs } from "./glossary";
 import { scoreInitiative } from "./scoring";
 
 const entries = GLOSSARY.flatMap((group) => group.entries);
 
 describe("glossary", () => {
   it("defines variables, metrics, and formulas in plain English", () => {
+    expect(GLOSSARY.length).toBeGreaterThanOrEqual(7);
+    expect(entries.length).toBeGreaterThanOrEqual(38);
     expect(entries.some((entry) => entry.kind === "variable")).toBe(true);
     expect(entries.some((entry) => entry.kind === "metric")).toBe(true);
     expect(entries.filter((entry) => entry.kind === "formula").length).toBeGreaterThanOrEqual(4);
     const ids = entries.map((entry) => entry.id);
     expect(new Set(ids).size).toBe(ids.length);
+    for (const group of GLOSSARY) {
+      expect(group.intro.length).toBeGreaterThan(20);
+      expect(group.entries.length).toBeGreaterThan(0);
+      expect(group.intro, group.id).not.toMatch(/[—–]/);
+    }
     for (const entry of entries) {
       expect(entry.name.length).toBeGreaterThan(2);
       expect(entry.plain.length).toBeGreaterThan(40);
+      expect(glossaryParagraphs(entry.plain).length, entry.id).toBeGreaterThan(0);
       expect(entry.where.length).toBeGreaterThan(8);
       const text = [entry.name, entry.plain, entry.formula ?? "", entry.example ?? "", entry.where].join("\n");
       expect(text, entry.id).not.toMatch(/[—–]/);
